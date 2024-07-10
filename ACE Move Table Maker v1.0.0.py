@@ -2388,5 +2388,5 @@ Root.bind(ShortcutOpen, CallOpen)
 # Main Loop
 #------------------------------------------------------------
 DisableEverything()
-DebugMakeTable()
+#DebugMakeTable()
 Root.mainloop()
