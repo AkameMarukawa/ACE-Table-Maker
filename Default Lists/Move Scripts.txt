@@ -1,0 +1,173 @@
+Script 00
+This script is the default Damaging Move script.
+It does not include any other additional effects.
+
+Script 01
+This script has the effect of putting the target to Sleep.
+
+Script 02
+This script has the effect of Poisoning the target.
+
+Script 03
+This script has the effect of healing the user's HP
+by a percentage of the damage that the Move inflicted.
+If no damage was dealt, no HP will be healed.
+
+Script 04
+This script has the effect of Burning the target.
+
+Script 05
+This script has the effect of Freezing the target.
+
+Script 06
+This script has the effect of Paralysing the target.
+
+Script 07
+This script has the effect of causing the user to faint
+after inflicting damage onto the target.
+
+Script 08
+This script removes the given Type from the target.
+If the target does not have that Type, it will not be removed.
+
+Script 09
+This script is for the Move Mirror Move.
+
+Script 0A
+This script raises the target's Attack Stat Stages by the given amount.
+
+Script 0B
+This script raises the target's Defence Stat Stages by the given amount.
+
+Script 0C
+This script raises the target's Speed Stat Stages by the given amount.
+
+Script 0D
+This script raises the target's Sp. Attack Stat Stages by the given amount.
+
+Script 0E
+This script raises the target's Sp. Defence Stat Stages by the given amount.
+
+Script 0F
+This script raises the target's Accuracy Stat Stages by the given amount.
+
+Script 10
+This script raises the target's Evasion Stat Stages by the given amount.
+
+Script 11
+This script applies the Gravity Effect to the whole field.
+
+Script 12
+This script lowers the target's Attack Stat Stages by the given amount.
+
+Script 13
+This script lowers the target's Defence Stat Stages by the given amount.
+
+Script 14
+This script lowers the target's Speed Stat Stages by the given amount.
+
+Script 15
+This script lowers the target's Sp. Attack Stat Stages by the given amount.
+
+Script 16
+This script lowers the target's Sp. Defence Stat Stages by the given amount.
+
+Script 17
+This script lowers the target's Accuracy Stat Stages by the given amount.
+
+Script 18
+This script lowers the target's Evasion Stat Stages by the given amount.
+
+Script 19
+This script resets all Pokemon's Stat Stages back to zero.
+
+Script 1A
+This script applies the Bide Effect to the target.
+
+Script 1B
+This script applies the Thrash Flag to the user.
+The Thrash Flag locks the Pokemon into using the same Move.
+At the end of the given number of turns, the user becomes Confused.
+
+Script 1C
+This script forces the target to switch out if they are able to do so.
+Stat Stages and other effects may be passed along.
+
+Script 1D
+This script is for a Multi-Hit Move.
+Additional effects for Multi-Hit Moves are determined
+by the SetMultiHitEffect command and are tied to the
+Move itself.
+
+Script 1E
+This script is for the Move Conversion.
+
+Script 1F
+This script has the effect of making the target Flinch.
+
+Script 20
+This script has the effect of healing the target's HP
+by the given percentage of the damage inflicted.
+This script also has the effect of Burning the target.
+
+Script 21
+This script has the effect of Badly Poisoning the target.
+
+Script 22
+This script is for the Move Pay Day.
+
+Script 23
+This script has the effect of setting up Light Screen.
+
+Script 24
+This script has the effect of giving the target a random Major Status.
+The possible Major Statuses are given as the argument.
+Each one has an equal chance of being selected.
+The Effect Chance is the chance of picking any of them at all.
+Ex: 30% to Burn, Poison or Paralyse -> 10% for each
+
+Script 25
+This script has the effect of fully healing the target's HP.
+However, they will be inflicted with the given Major Status.
+No HP will be healed if the target is immune to the Major Status.
+
+Script 26
+This script is for the Move Shift Gear.
+This Move raises Speed by two Stat Stages and Attack by one.
+
+Script 27
+This script causes the target's next Move to become the given Type.
+
+Script 28
+This script has the effect of lowering the Attack, Sp. Attack
+and Speed Stat Stages of the target by one, but only if they
+are inflicted with the given Major Status.
+
+Script 29
+This script is for the Move Teleport.
+
+Script 2A
+This script has the effect of setting the Wrap Flag on the target.
+The Wrap Effect causes the Pokemon to take damage at the end of the
+turn and to be unable to switch out.
+
+Script 2B
+This script has the effect of setting the Ion Deluge Flag for the entire field.
+
+Script 2C
+This script has the effect of setting the given Terrain Flag
+for the entire field for five turns.
+
+Script 2D
+This script has the effect of raising the target's Speed by two Stat Stages.
+It also has the effect of lowering the target's weight by 100 kg/220 lbs.
+
+Script 2E
+This script has the effect of setting the Mist Flag for the target's entire side.
+
+Script 2F
+This script has the effect of setting the Focus Energy Flag on the target.
+
+Script 30
+This script has the effect of causing the target to take recoil damage equal
+to the given percentage of the damage this attack dealt.

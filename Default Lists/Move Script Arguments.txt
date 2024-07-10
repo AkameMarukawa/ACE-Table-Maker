@@ -1,0 +1,63 @@
+Script 00
+This script takes no arguments.
+
+Script 01
+This script takes no arguments.
+
+Script 02
+This script takes no arguments.
+
+Script 03
+This the percent of the damage dealt
+that should be recovered as HP.
+Ranges from 0 to 100.
+
+Script 04
+This script takes no arguments.
+
+Script 05
+This script takes no arguments.
+
+Script 06
+This script takes no arguments.
+
+Script 07
+This script takes no arguments.
+
+Script 08
+This is the index number of the Type to remove from the target.
+00 = Normal\t01 = Fighting\t02 = Flying\t03 = Poison\t04 = Rock
+05 = Ground\t06 = Bug\t07 = Ghost\t08 = Steel\t09 = Fairy
+0A = Fire\t0B = Water\t0C = Grass\t0D = Electric\t0E = Psychic
+0F = Ice\t10 = Dark\t11 = Dragon
+
+Script 09
+This script takes no arguments.
+
+Script 0A
+This is the number of Stat Stages to raise by.
+Ranges from 0 to 6.
+
+Script 0B
+This is the number of Stat Stages to raise by.
+Ranges from 0 to 6.
+
+Script 0C
+This is the number of Stat Stages to raise by.
+Ranges from 0 to 6.
+
+Script 0D
+This is the number of Stat Stages to raise by.
+Ranges from 0 to 6.
+
+Script 0E
+This is the number of Stat Stages to raise by.
+Ranges from 0 to 6.
+
+Script 0F
+This is the number of Stat Stages to raise by.
+Ranges from 0 to 6.
+
+Script 10
+This is the number of Stat Stages to raise by.
+Ranges from 0 to 6.
