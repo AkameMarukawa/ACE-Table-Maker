@@ -23,21 +23,22 @@ Move Name
 (Script Arg) 0
 (Description) This is the Move Description
 ```
+Once a table is open, you can edit and save the human-readable version. When you are done, you can compile it into a hex binary file, which can then be copied to your ROM.
 
-**Creating Files**
+# Creating Files
 When you hit "New Table", you will be able to create a new human-readable table saved as a text file. This will overwrite any table already present in the editor. In addition, you may give it a list of Move Names saved as a text file to use when creating the table. This file should have each Move Name on a separate line. Move Names can be up to 12 characters long.
 
 If the table you create is shorter than the list of Moves you chose, then the program will stop reading the Move List early. If the table you create is longer, then the extra Moves will be given a default name. If you choose not to load a Move Names file, then all entries will have a default Move Name.
 
 Tables may consist of up to 999 Moves. This should be enough for most people.
 
-**Opening Files**
+# Opening Files
 You can open a human-readable table in the format above, saved as a plain text file. In addition, you may also open a compiled table which was saved as a .bin file. However, Move Names and Descriptions will not be loaded as they are not part of the Attack Data Table (see **Compiling**).
 
-**Saving**
+# Saving
 When you hit the "Save Table" button, all changes that you've made in the editor will be committed to the open file. **Your changes will not be written until you do this!** The "Save Table As" button will allow you to save the current table as a new file. You can then choose to continue editing this new file, or stay editing the old one.
 
-**Compiling**
+# Compiling
 There are three options when compiling a table. Tables compile to a .bin file which can be opened in a Hex Editor and pasted into the ROM.
 
 The Attack Data Table consists of one entry per Move and contains all of the information in the editor except for the Move Name and Move Description. Each entry is a fixed length and contains no pointers, so you do not need to provide an address ahead of time. You will only need to repoint the table if you add new Moves to it, otherwise the compiled table can be copied over the old one in a Hex Editor.
