@@ -94,10 +94,10 @@ try:
                       "Grass":"0C", "Electric":"0D", "Psychic":"0E",
                       "Ice":"0F", "Dragon":"10", "Dark":"11"}
 
-    RangeConversion = {"User":"10", "Target":"00", "My Side":"40",
-                       "Foe Side":"08", "All But User":"20",
-                       "Random":"04", "Last Attacker":"01", "Everyone":"30",
-                       "Target Or Partner":"02", "User Or Partner":"80"}
+    RangeConversion = {"User":"11", "Target":"1E", "User Or Partner":"13",
+                       "Target Or Partner":"1C", "My Side":"23",
+                       "Foe Side":"2C", "All But User":"2E", "Everyone":"2F",
+                       "Random":"80", "Last Attacker":"40"}
 
     KindConversion = {"Physical":"00", "Special":"01", "Status":"02"}
 
@@ -107,7 +107,7 @@ try:
                               "You get the point by now",
                               "The end"],
                 "Heading 2": ["This is another example of some text",
-                              "But this one is shorte than the other one."]}
+                              "But this one is shorter than the other one."]}
 
     DefaultLists = os.path.join(os.getcwd(), "Default Lists")
 
@@ -572,7 +572,7 @@ try:
 
     MainLabel = ttk.Label(LabelFrame, text = "ACE Move Table Maker", font = ("Arial", int(1.5 * SmallSize), "bold"))
     CurrentLabel = ttk.Label(MenuFrame, text = "{}".format(CurrentOpenFile))
-    CopyrightLabel = ttk.Label(LabelFrame, text = "Program by AkameTheBulbasaur, v1.0.0", font = ("Arial", SmallSize - 2))
+    CopyrightLabel = ttk.Label(LabelFrame, text = "Program by AkameTheBulbasaur, v1.0.1", font = ("Arial", SmallSize - 2))
 
     # Make Help Menu
     def ShowHelpMenu():
