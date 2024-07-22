@@ -1,63 +1,1314 @@
 Script 00
-This script takes no arguments.
+This Move Script takes no arguments.
 
 Script 01
-This script takes no arguments.
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 7.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
 
 Script 02
-This script takes no arguments.
+This Move Script takes no arguments.
 
 Script 03
-This the percent of the damage dealt
-that should be recovered as HP.
-Ranges from 0 to 100.
+The script argument is a percentage.
+Valid values range from 1 to 100.
+Higher values will be rounded back down to 100.
 
 Script 04
-This script takes no arguments.
+This Move Script takes no arguments.
 
 Script 05
-This script takes no arguments.
+This Move Script takes no arguments.
 
 Script 06
-This script takes no arguments.
+This Move Script takes no arguments.
 
 Script 07
-This script takes no arguments.
+This Move Script takes no arguments.
 
 Script 08
-This is the index number of the Type to remove from the target.
-00 = Normal\t01 = Fighting\t02 = Flying\t03 = Poison\t04 = Rock
-05 = Ground\t06 = Bug\t07 = Ghost\t08 = Steel\t09 = Fairy
-0A = Fire\t0B = Water\t0C = Grass\t0D = Electric\t0E = Psychic
-0F = Ice\t10 = Dark\t11 = Dragon
+The script argument is the Type to use.
+Normal = 0 | Fighting = 1 | Flying = 2 | Poison = 3
+Ground = 4 | Rock = 5 | Bug = 6 | Ghost = 7 | Steel = 8
+Fairy = 9 | Fire = 10 | Water = 11 | Grass = 12
+Electric = 13 | Psychic = 14 | Ice = 15 | Dragon = 16
+Dark = 17
 
 Script 09
-This script takes no arguments.
+This Move Script takes no arguments.
 
 Script 0A
-This is the number of Stat Stages to raise by.
-Ranges from 0 to 6.
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
 
 Script 0B
-This is the number of Stat Stages to raise by.
-Ranges from 0 to 6.
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
 
 Script 0C
-This is the number of Stat Stages to raise by.
-Ranges from 0 to 6.
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
 
 Script 0D
-This is the number of Stat Stages to raise by.
-Ranges from 0 to 6.
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
 
 Script 0E
-This is the number of Stat Stages to raise by.
-Ranges from 0 to 6.
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
 
 Script 0F
-This is the number of Stat Stages to raise by.
-Ranges from 0 to 6.
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
 
 Script 10
-This is the number of Stat Stages to raise by.
-Ranges from 0 to 6.
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
+
+Script 11
+This Move Script takes no arguments.
+
+Script 12
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
+
+Script 13
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
+
+Script 14
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
+
+Script 15
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
+
+Script 16
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
+
+Script 17
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
+
+Script 18
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
+
+Script 19
+This Move Script takes no arguments.
+
+Script 1A
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 1B
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 2 to 5.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 2 and 3
+
+Script 1C
+The script argument controls whether or not the Move will
+pass along Stat Stages and other Flags.
+If this is set to 0, nothing will be passed.
+
+Script 1D
+The script argument is the number of times the Move will
+hit.
+Add one and only one of the following values to the
+number of turns to apply its function\n
+Random (Bullet Seed Distribution) = 16
+Random (Tail Slap Distribution) = 32
+Population Bomb = 48
+
+Script 1E
+This Move Script takes no arguments.
+
+Script 1F
+This Move Script takes no arguments.
+
+Script 20
+The script argument is a percentage.
+Valid values range from 1 to 100.
+Higher values will be rounded back down to 100.
+
+Script 21
+This Move Script takes no arguments.
+
+Script 22
+The script argument is the formula to be used to
+determine the amount of money to win.\n
+Pay Day = 0 | Happy Hour = 1
+
+Script 23
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 24
+The script argument is the Status Condition to use.
+Add multiple values together to use more than one at a time.
+Confusion and Infatuation may be applied at the same time as
+a Major Status, but only one Major Status will be chosen if
+multiple are set.\n
+Confusion = 1 | Infatuation = 2 | Sleep = 4 | Poison = 8
+Burn = 16 | Freeze = 32 | Paralysis = 64 | Bad Poison = 128
+
+Script 25
+The script argument is the Status Condition to use.
+Add multiple values together to use more than one at a time.
+Confusion and Infatuation may be applied at the same time as
+a Major Status, but only one Major Status will be chosen if
+multiple are set.\n
+Confusion = 1 | Infatuation = 2 | Sleep = 4 | Poison = 8
+Burn = 16 | Freeze = 32 | Paralysis = 64 | Bad Poison = 128
+
+Script 26
+This Move Script takes no arguments.
+
+Script 27
+The script argument is the Type to use.
+Normal = 0 | Fighting = 1 | Flying = 2 | Poison = 3
+Ground = 4 | Rock = 5 | Bug = 6 | Ghost = 7 | Steel = 8
+Fairy = 9 | Fire = 10 | Water = 11 | Grass = 12
+Electric = 13 | Psychic = 14 | Ice = 15 | Dragon = 16
+Dark = 17
+
+Script 28
+The script argument is the Status Condition to use.
+Add multiple values together to use more than one at a time.
+Confusion and Infatuation may be applied at the same time as
+a Major Status, but only one Major Status will be chosen if
+multiple are set.\n
+Confusion = 1 | Infatuation = 2 | Sleep = 4 | Poison = 8
+Burn = 16 | Freeze = 32 | Paralysis = 64 | Bad Poison = 128
+
+Script 29
+This Move Script takes no arguments.
+
+Script 2A
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 2B
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 2C
+The script argument is the type of Terrain to set.\n
+Grassy = 1 | Electric = 2 | Misty = 4 | Psychic = 8
+
+Script 2D
+The script argument is the amount to decrease the
+target's weight by, in kilogrammes.
+Valid values range between 1 and 255.
+
+Script 2E
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 2F
+This Move Script takes no arguments.
+
+Script 30
+The script argument is a percentage.
+Valid values range from 1 to 100.
+Higher values will be rounded back down to 100.
+
+Script 31
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 32
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 33
+The script argument is a percentage.
+Valid values range from 1 to 100.
+Higher values will be rounded back down to 100.
+
+Script 34
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 35
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 36
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 37
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 38
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 39
+This Move Script takes no arguments.
+
+Script 3A
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 3B
+The script argument is the Type to use.
+Normal = 0 | Fighting = 1 | Flying = 2 | Poison = 3
+Ground = 4 | Rock = 5 | Bug = 6 | Ghost = 7 | Steel = 8
+Fairy = 9 | Fire = 10 | Water = 11 | Grass = 12
+Electric = 13 | Psychic = 14 | Ice = 15 | Dragon = 16
+Dark = 17
+
+Script 3C
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 3D
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 3E
+The script argument is the Type to use.
+Normal = 0 | Fighting = 1 | Flying = 2 | Poison = 3
+Ground = 4 | Rock = 5 | Bug = 6 | Ghost = 7 | Steel = 8
+Fairy = 9 | Fire = 10 | Water = 11 | Grass = 12
+Electric = 13 | Psychic = 14 | Ice = 15 | Dragon = 16
+Dark = 17
+
+Script 3F
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 40
+This Move Script takes no arguments.
+
+Script 41
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 42
+The script argument determines whether the user will
+activate the effect of the Berry that was removed.
+A value of zero means that effect will be activated,
+and a value of one means that it will simply be
+removed.
+
+Script 43
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
+
+Script 44
+This Move Script takes no arguments.
+
+Script 45
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 46
+This Move Script takes no arguments.
+
+Script 47
+This Move Script takes no arguments.
+
+Script 48
+This Move Script takes no arguments.
+
+Script 49
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 4A
+The script argument is the index number of the Ability
+to use.
+
+Script 4B
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 4C
+The script argument is the Status Condition to use.
+Add multiple values together to use more than one at a time.
+Confusion and Infatuation may be applied at the same time as
+a Major Status, but only one Major Status will be chosen if
+multiple are set.\n
+Confusion = 1 | Infatuation = 2 | Sleep = 4 | Poison = 8
+Burn = 16 | Freeze = 32 | Paralysis = 64 | Bad Poison = 128
+
+Script 4D
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 4E
+This Move Script takes no arguments.
+
+Script 4F
+This Move Script takes no arguments.
+
+Script 50
+This Move Script takes no arguments.
+
+Script 51
+This Move Script takes no arguments.
+
+Script 52
+This Move Script takes no arguments.
+
+Script 53
+This Move Script takes no arguments.
+
+Script 54
+This Move Script takes no arguments.
+
+Script 55
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 56
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 57
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 58
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 59
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 5A
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 5B
+This Move Script takes no arguments.
+
+Script 5C
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 5D
+This Move Script takes no arguments.
+
+Script 5E
+This Move Script takes no arguments.
+
+Script 5F
+This Move Script takes no arguments.
+
+Script 60
+This Move Script takes no arguments.
+
+Script 61
+This Move Script takes no arguments.
+
+Script 62
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 63
+The script argument is a percentage.
+Valid values range from 1 to 100.
+Higher values will be rounded back down to 100.
+
+Script 64
+The script argument is the amount of Power Points to
+remove from the target's last-used Move.
+Valid values range from 1 to 126.
+A value of 127 will remove all of the Power Points from
+the Move.
+Adding 128 to any value will remove a random number of
+Power Points between 1 and the value set.
+If the value set is higher than the Power Points of the
+Move, all of them will be removed.
+
+Script 65
+The script argument is the Type to use.
+Normal = 0 | Fighting = 1 | Flying = 2 | Poison = 3
+Ground = 4 | Rock = 5 | Bug = 6 | Ghost = 7 | Steel = 8
+Fairy = 9 | Fire = 10 | Water = 11 | Grass = 12
+Electric = 13 | Psychic = 14 | Ice = 15 | Dragon = 16
+Dark = 17
+
+Script 66
+This Move Script takes no arguments.
+
+Script 67
+This Move Script takes no arguments.
+
+Script 68
+This Move Script takes no arguments.
+
+Script 69
+The script argument determines whether the target's
+Held Item will be taken or given.
+A value of 0 will remove their Held Item (Thief)
+A value of 1 will give the target the user's
+Held Item (Bestow).
+
+Script 6A
+This Move Script takes no arguments.
+
+Script 6B
+This Move Script takes no arguments.
+
+Script 6C
+The script argument is the amount of Stat Stages the stat
+should be raised or lowered by.
+Valid values range between 1 and 6.
+Other values will be treated as a value of 6.
+
+Script 6D
+This Move Script takes no arguments.
+
+Script 6E
+This Move Script takes no arguments.
+
+Script 6F
+This Move Script takes no arguments.
+
+Script 70
+The script argument is the Entry Hazard to create.\n
+Spikes = 0 | Toxic Spikes = 1 | Stealth Rock = 2
+Sticky Web = 3 | Steelsurge = 4
+
+Script 71
+This Move Script takes no arguments.
+
+Script 72
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 73
+The script argument is the Weather to use.
+Add multiple values together to use more than one at a time.
+Multiple Weathers can be checked for, but only one can be
+set at a time.\n
+Clear = 0 | Rain = 1 | Sandstorm = 2 | Sunshine = 3
+Hail = 4 | Fog = 16 | Snow = 32
+
+Script 74
+This Move Script takes no arguments.
+
+Script 75
+This Move Script takes no arguments.
+
+Script 76
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 77
+This Move Script takes no arguments.
+
+Script 78
+This Move Script takes no arguments.
+
+Script 79
+This Move Script takes no arguments.
+
+Script 7A
+This Move Script takes no arguments.
+
+Script 7B
+This Move Script takes no arguments.
+
+Script 7C
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 7D
+The script argument determines whether the target
+should also be thawed out in addition to the user.
+If this value is 0, they will not be thawed out, and if
+this value is 1 then they will.
+
+Script 7E
+This Move Script takes no arguments.
+
+Script 7F
+The script argument is the Type to use.
+Normal = 0 | Fighting = 1 | Flying = 2 | Poison = 3
+Ground = 4 | Rock = 5 | Bug = 6 | Ghost = 7 | Steel = 8
+Fairy = 9 | Fire = 10 | Water = 11 | Grass = 12
+Electric = 13 | Psychic = 14 | Ice = 15 | Dragon = 16
+Dark = 17
+
+Script 80
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 81
+This Move Script takes no arguments.
+
+Script 82
+This Move Script takes no arguments.
+
+Script 83
+This Move Script takes no arguments.
+
+Script 84
+This Move Script takes no arguments.
+
+Script 85
+The script argument is the Stat Stage to raise and the Type
+of Pokemon to use. Choose one Type and one Stat Stage and
+add their values together to the get the one to use.\n
+Normal = 0 | Fighting = 1 | Flying = 2 | Poison = 3
+Ground = 4 | Rock = 5 | Bug = 6 | Ghost = 7 | Steel = 8
+Fairy = 9 | Fire = 10 | Water = 11 | Grass = 12
+Electric = 13 | Psychic = 14 | Ice = 15 | Dragon = 16
+Dark = 17\n
+Attack = 32 | Defence = 48 | Speed = 64 | Sp. Attack = 80
+Sp. Defence = 96 | Accuracy = 112 | Evasion = 128
+
+Script 86
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 87
+This Move Script takes no arguments.
+
+Script 88
+This Move Script takes no arguments.
+
+Script 89
+This Move Script takes no arguments.
+
+Script 8A
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 8B
+The script argument determines which preset string will
+be loaded and displayed.\n
+Celebrate = 0 | Hold Hands = 1
+
+Script 8C
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 8D
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 8E
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 8F
+This Move Script takes no arguments.
+
+Script 90
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 91
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 92
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 93
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 94
+This Move Script takes no arguments.
+
+Script 95
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 96
+This Move Script takes no arguments.
+
+Script 97
+The script argument determines which Stat Stage should
+be lowered and which Status the target needs to have.
+Add the Stat Stage value to the Major Status value to
+get the correct number to use.\n
+Confusion = 1 | Infatuation = 2 | Sleep = 3
+Poison = 4 | Burn = 5 | Freeze = 6 | Paralysis = 7
+Bad Poison = 8\n
+Attack = 16 | Defence = 32 | Speed = 48
+Sp. Attack = 64 | Sp. Defence = 80 | Accuracy = 96
+Evasion = 112
+
+Script 98
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 99
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script 9A
+This Move Script takes no arguments.
+
+Script 9B
+This Move Script takes no arguments.
+
+Script 9C
+This Move Script takes no arguments.
+
+Script 9D
+The script argument determines which formula to use to
+calculate the amount of HP to heal.\n
+Heal 1/2 maximum = 0
+Heal more in Sunshine = 1
+Heal more in Rain = 2
+Heal more in Sandstorm = 3
+Heal more in Hail = 4
+Swallow = 5
+Heal more in Grassy Terrain = 6
+Heal 1/4 of maximum = 7
+
+Script 9E
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script 9F
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 7.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script A0
+This Move Script takes no arguments.
+
+Script A1
+This Move Script takes no arguments.
+
+Script A2
+This Move Script takes no arguments.
+
+Script A3
+This Move Script takes no arguments.
+
+Script A4
+This Move Script takes no arguments.
+
+Script A5
+This Move Script takes no arguments.
+
+Script A6
+This Move Script takes no arguments.
+
+Script A7
+The script argument determines which conditions should
+be applied to the new Pokemon replacing the user.\n
+Heal HP only = 0
+Heal HP and Power Points = 1
+Heal HP, Power Points and Status Conditions = 2
+
+Script A8
+This Move Script takes no arguments.
+
+Script A9
+This Move Script takes no arguments.
+
+Script AA
+The script argument is a percentage.
+Valid values range from 1 to 100.
+Higher values will be rounded back down to 100.
+
+Script AB
+The script argument is the Status Condition to use.
+Add multiple values together to use more than one at a time.
+Confusion and Infatuation may be applied at the same time as
+a Major Status, but only one Major Status will be chosen if
+multiple are set.\n
+Confusion = 1 | Infatuation = 2 | Sleep = 4 | Poison = 8
+Burn = 16 | Freeze = 32 | Paralysis = 64 | Bad Poison = 128
+
+Script AC
+The script argument determines which Target Redirection
+Flag should be set.\n
+Follow Me = 0 | Spotlight = 1 | Rage Powder = 2
+
+Script AD
+This Move Script takes no arguments.
+
+Script AE
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script AF
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script B0
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script B1
+This Move Script takes no arguments.
+
+Script B2
+The script argument determines whether the target's Ability
+should be copied to both the user and their partner, or just
+the user.\n
+User only = 0\n
+User + Partner = 1
+
+Script B3
+This Move Script takes no arguments.
+
+Script B4
+This Move Script takes no arguments.
+
+Script B5
+This Move Script takes no arguments.
+
+Script B6
+This Move Script takes no arguments.
+
+Script B7
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script B8
+This Move Script takes no arguments.
+
+Script B9
+This Move Script takes no arguments.
+
+Script BA
+This Move Script takes no arguments.
+
+Script BB
+This Move Script takes no arguments.
+
+Script BC
+This Move Script takes no arguments.
+
+Script BD
+This Move Script takes no arguments.
+
+Script BE
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script BF
+This Move Script takes no arguments.
+
+Script C0
+This Move Script takes no arguments.
+
+Script C1
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script C2
+This Move Script takes no arguments.
+
+Script C3
+This Move Script takes no arguments.
+
+Script C4
+This Move Script takes no arguments.
+
+Script C5
+This Move Script takes no arguments.
+
+Script C6
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script C7
+This Move Script takes no arguments.
+
+Script C8
+This Move Script takes no arguments.
+
+Script C9
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script CA
+This Move Script takes no arguments.
+
+Script CB
+This Move Script takes no arguments.
+
+Script CC
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script CD
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script CE
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script CF
+The script argument is the Weather to use.
+Add multiple values together to use more than one at a time.
+Multiple Weathers can be checked for, but only one can be
+set at a time.\n
+Clear = 0 | Rain = 1 | Sandstorm = 2 | Sunshine = 3
+Hail = 4 | Fog = 16 | Snow = 32
+
+Script D0
+This Move Script takes no arguments.
+
+Script D1
+This Move Script takes no arguments.
+
+Script D2
+The script argument is the number of turns the Flag should
+remain set.
+The number of turns can range from 1 to 15.
+A value of 0 means the Flag will stay set indefinitely.
+Add 16 to the value to cause the number of turns to be
+chosen randomly, with the value determining the upper limit.
+Ex: 0x13 (19) = random number between 1 and 3
+
+Script D3
+The script argument is the Status Condition to use.
+Add multiple values together to use more than one at a time.
+Confusion and Infatuation may be applied at the same time as
+a Major Status, but only one Major Status will be chosen if
+multiple are set.\n
+Confusion = 1 | Infatuation = 2 | Sleep = 4 | Poison = 8
+Burn = 16 | Freeze = 32 | Paralysis = 64 | Bad Poison = 128
+
+Script D4
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script D5
+This Move Script takes no arguments.
+
+Script D6
+This Move Script takes no arguments.
+
+Script D7
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script D8
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script D9
+This Move Script takes no arguments.
+
+Script DA
+This Move Script takes no arguments.
+
+Script DB
+This Move Script takes no arguments.
+
+Script DC
+The script argument determines which Pokemon should be
+revived.\n
+Random = 0 | Choose The Pokemon = 1 | Revive all Pokemon = 2
+
+Script DD
+This Move Script takes no arguments.
+
+Script DE
+The script argument is the Status Condition to use.
+Add multiple values together to use more than one at a time.
+Confusion and Infatuation may be applied at the same time as
+a Major Status, but only one Major Status will be chosen if
+multiple are set.\n
+Confusion = 1 | Infatuation = 2 | Sleep = 4 | Poison = 8
+Burn = 16 | Freeze = 32 | Paralysis = 64 | Bad Poison = 128
+
+Script DF
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script E0
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script E1
+This Move Script takes no arguments.
+
+Script E2
+The script argument is the Weather to use.
+Add multiple values together to use more than one at a time.
+Multiple Weathers can be checked for, but only one can be
+set at a time.\n
+Clear = 0 | Rain = 1 | Sandstorm = 2 | Sunshine = 3
+Hail = 4 | Fog = 16 | Snow = 32
+
+Script E3
+This Move Script takes no arguments.
+
+Script E4
+This Move Script takes no arguments.
+
+Script E5
+The script argument is the stats to use.
+Add multiple values together to use more than one at a time.\n
+Attack = 1 | Defence = 2 | Speed = 4 | Sp. Attack = 8
+Sp. Defence = 16 | Accuracy = 32 | Evasion = 64
+
+Script E6
+This Move Script takes no arguments.
+
+Script E7
+This Move Script takes no arguments.
+
+Script E8
+This Move Script takes no arguments.
+
+Script E9
+This Move Script takes no arguments.
+
+Script EA
+This Move Script takes no arguments.
+
+Script EB
+This Move Script takes no arguments.
+
+Script EC
+This Move Script takes no arguments.
+
+Script ED
+This Move Script takes no arguments.
+
+Script EE
+This Move Script takes no arguments.
+
+Script EF
+This Move Script takes no arguments.
+
+Script F0
+This Move Script takes no arguments.
+
+Script F1
+This Move Script takes no arguments.
+
+Script F2
+This Move Script takes no arguments.
+
+Script F3
+This Move Script takes no arguments.
+
+Script F4
+This Move Script takes no arguments.
+
+Script F5
+This Move Script takes no arguments.
+
+Script F6
+This Move Script takes no arguments.
+
+Script F7
+This Move Script takes no arguments.
+
+Script F8
+This Move Script takes no arguments.
+
+Script F9
+This Move Script takes no arguments.
+
+Script FA
+This Move Script takes no arguments.
+
+Script FB
+This Move Script takes no arguments.
+
+Script FC
+This Move Script takes no arguments.
+
+Script FD
+This Move Script takes no arguments.
+
+Script FE
+This Move Script takes no arguments.
+
+Script FF
+This Move Script takes no arguments.
