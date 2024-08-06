@@ -214,7 +214,7 @@ try:
 
     MainLabel = ttk.Label(LabelFrame, text = "ACE Move Table Maker", font = ("Arial", int(1.5 * SmallSize), "bold"))
     CurrentLabel = ttk.Label(MenuFrame, text = "{}".format(CurrentOpenFile))
-    CopyrightLabel = ttk.Label(LabelFrame, text = "Program by AkameTheBulbasaur, v2.0.0", font = ("Arial", SmallSize - 2))
+    CopyrightLabel = ttk.Label(LabelFrame, text = "Program by AkameTheBulbasaur, v2.0.1", font = ("Arial", SmallSize - 2))
 
     # Move Label
     MoveNumberLabel = ttk.Label(MenuFrame, text = "Move {} of {}".format(CurrentMoveNumber.get() + 1, len(Table)))
