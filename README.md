@@ -48,3 +48,8 @@ The Move Name and Move Description Tables are tables of pointers which point to 
 You will be given, with the Move Name and Description Tables, the option to "future-proof" it. What this means is that each entry will be a fixed length (13 bytes for the Move Name table and 77 bytes for the Move Description table). Not all of the bytes in that entry will necessarily be filled out when compiling, so it uses up more space. However, if you decide to change the length of a Move Name or Description later, you will not need to repoint the table since the space will already have been allocated when you compiled it the first time. If you future-proof the table the first time you compile it, you will need to select this option each time you compile it afterwards for it to be the same length. Adding additional Moves will still require repointing as usual.
 
 Future-proofing the table is recommended unless you are seriously low on free space, since it makes making changes later on less of a hassle. Likely you will need to repoint the table once, though, since the default tables will be shorter than the future-proofed table. After this, unless Moves are added, no further repointing is needed.
+
+# Converting
+You can convert a table that is in the old FireRed format to the new ACE format. This entails changing the Move Scripts to their ACE equivalents and setting the Script Arguments accordingly, changing the Move Ranges to the correct values, and adding in Damage Formulae and their arguments properly.
+
+This process will be a perfect conversion if the input table is an unedited Fire Red table. However, if edits were made, the conversion may not be completely perfect. Still, it should save a good amount of time over having to do the whole entire thing yourself.
