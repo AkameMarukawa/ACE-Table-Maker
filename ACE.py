@@ -190,8 +190,6 @@ try:
                     "Kind": "Status", \
                     "Script Argument": 0}
 
-    
-
     #------------------------------------------------------------
     # Top of the screen stuff
     #------------------------------------------------------------
@@ -2195,7 +2193,7 @@ try:
         Root.destroy()
 
     def CallSave(self):
-        SaveFile()
+        SaveFile(Table, CurrentOpenFile)
 
     def CallSaveAs(self):
         SaveFileAs()
