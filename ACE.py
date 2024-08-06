@@ -2227,7 +2227,7 @@ try:
     # Main Loop
     #------------------------------------------------------------
     DisableEverything()
-    DebugMakeTable()
+    #DebugMakeTable()
     Root.mainloop()
 
 except Exception as e:
