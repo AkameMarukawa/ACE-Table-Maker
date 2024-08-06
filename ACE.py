@@ -1,11 +1,14 @@
 import os
 import sys
 import platform
+import shutil
+import MakeBoxes as mb
+import Dictionaries as d
+import TableFunctions as tf
+import MakeScriptHelperBoxes as mshb
+import MakeFormulaHelperBoxes as mfhb
 import tkinter as tk
-import tkinter.ttk as ttk
-import tkinter.scrolledtext as stxt
-from tkinter import *
-from tkinter import messagebox
+from tkinter import ttk
 from tkinter import filedialog as fd
 from tkinter import simpledialog as sd
 from subprocess import call, Popen
@@ -52,6 +55,29 @@ try:
 
         return B
 
+    # Create File Bytes for reading Binary File
+    def CreateFileBytes(BinFile, N):
+        ByteList = []
+        Byte = BinFile.read(1)
+        while Byte:
+            Value = int(bin(ord(Byte)), 2)
+            Byte = hex(Value).upper()[2:]
+
+            if Value < 16:
+                Byte = "0" + Byte
+
+            ByteList.append(Byte)
+            Byte = BinFile.read(1)
+
+        FileBytes = ""
+        for i, Byte in enumerate(ByteList):
+            if (i+1) % N == 0:
+                FileBytes += Byte + "\n"
+            else:
+                FileBytes += Byte + " "
+
+        return FileBytes
+
     #------------------------------------------------------------
     # Global stuff
     #------------------------------------------------------------
@@ -60,82 +86,8 @@ try:
 
     CurrentOpenFile = ""
 
-    HexBytes = ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "0A", "0B", "0C", "0D", "0E", "0F", \
-                "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "1A", "1B", "1C", "1D", "1E", "1F", \
-                "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "2A", "2B", "2C", "2D", "2E", "2F", \
-                "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "3A", "3B", "3C", "3D", "3E", "3F", \
-                "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "4A", "4B", "4C", "4D", "4E", "4F", \
-                "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "5A", "5B", "5C", "5D", "5E", "5F", \
-                "60", "61", "62", "63", "64", "65", "66", "67", "68", "69", "6A", "6B", "6C", "6D", "6E", "6F", \
-                "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", "7A", "7B", "7C", "7D", "7E", "7F", \
-                "80", "81", "82", "83", "84", "85", "86", "87", "88", "89", "8A", "8B", "8C", "8D", "8E", "8F", \
-                "90", "91", "92", "93", "94", "95", "96", "97", "98", "99", "9A", "9B", "9C", "9D", "9E", "9F", \
-                "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "AA", "AB", "AC", "AD", "AE", "AF", \
-                "B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "BA", "BB", "BC", "BD", "BE", "BF", \
-                "C0", "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "CA", "CB", "CC", "CD", "CE", "CF", \
-                "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "DA", "DB", "DC", "DD", "DE", "DF", \
-                "E0", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9", "EA", "EB", "EC", "ED", "EE", "EF", \
-                "F0", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "FA", "FB", "FC", "FD", "FE", "FF"]
-
-    TextToBytes = {'A': 'BB', 'B': 'BC', 'C': 'BD', 'D': 'BE', 'E': 'BF', 'F': 'C0', 'G': 'C1', 'H': 'C2',
-                   'I': 'C3', 'J': 'C4', 'K': 'C5', 'L': 'C6', 'M': 'C7', 'N': 'C8', 'O': 'C9', 'P': 'CA',
-                   'Q': 'CB', 'R': 'CC', 'S': 'CD', 'T': 'CE', 'U': 'CF', 'V': 'D0', 'W': 'D1', 'X': 'D2',
-                   'Y': 'D3', 'Z': 'D4', 'a': 'D5', 'b': 'D6', 'c': 'D7', 'd': 'D8', 'e': 'D9', 'f': 'DA',
-                   'g': 'DB', 'h': 'DC', 'i': 'DD', 'j': 'DE', 'k': 'DF', 'l': 'E0', 'm': 'E1', 'n': 'E2',
-                   'o': 'E3', 'p': 'E4', 'q': 'E5', 'r': 'E6', 's': 'E7', 't': 'E8', 'u': 'E9', 'v': 'EA',
-                   'w': 'EB', 'x': 'EC', 'y': 'ED', 'z': 'EE', ' ': '00', '!': 'AB', '?': 'AC', '.': 'AD',
-                   "'": 'B4', ',': 'B8', ':': 'F0', '\n': 'FE', '0': 'A1', '1': 'A2', '2': 'A3', '3': 'A4',
-                   '4': 'A5', '5': 'A6', '6': 'A7', '7': 'A8', '8': 'A9', '9': 'AA'}
-
-    TypeConversion = {"Normal":"00", "Fighting":"01", "Flying":"02",
-                      "Poison":"03", "Ground":"04", "Rock":"05",
-                      "Bug":"06", "Ghost":"07", "Steel":"08",
-                      "Fairy":"09", "Fire":"0A", "Water":"0B",
-                      "Grass":"0C", "Electric":"0D", "Psychic":"0E",
-                      "Ice":"0F", "Dragon":"10", "Dark":"11"}
-
-    RangeConversion = {"User":"11", "Target":"1E", "User Or Partner":"13",
-                       "Target Or Partner":"1C", "My Side":"23",
-                       "Foe Side":"2C", "All But User":"2E", "Everyone":"2F",
-                       "Random":"80", "Last Attacker":"40"}
-
-    KindConversion = {"Physical":"00", "Special":"01", "Status":"02"}
-
-    TestMenuBox = {"Heading 1": ["This is the first sentence",
-                              "This is the second one",
-                              "This is the third",
-                              "You get the point by now",
-                              "The end"],
-                "Heading 2": ["This is another example of some text",
-                              "But this one is shorter than the other one."]}
-
-    DefaultLists = os.path.join(os.getcwd(), "Default Lists")
-
-    # Make the Move Script Dictionary
-    def MakeDictionary(File):
-        D = {}
-        
-        NewFile = open(os.path.join(DefaultLists, File), "r")
-        NewList = NewFile.read().split("\n\n")
-
-        for Entry in NewList:
-            Entry = Entry.split("\n")
-            Name = Entry[0]
-            Text = Entry[1:]
-
-            while len(Text) < 5:
-                Text.append("")
-
-            D[Name] = Text
-
-        return D
-        
-    MoveScriptText = MakeDictionary("Move Scripts.txt")
-    MoveScriptArgText = MakeDictionary("Move Script Arguments.txt")
-
     def DebugMakeTable():
         global Table, CurrentOpenFile
-
         Table = [["Move Name", "00", 0, "Normal", 0, 0, 0, "Target", 0, [0,0,0,0,0,0,0,0], "00", "Status", 0, ""]]
         CurrentOpenFile = os.path.realpath(os.path.join(os.getcwd(), "Test Table.txt"))
         CurrentLabel.configure(text = "Open File: Test Table.txt")
@@ -159,77 +111,70 @@ try:
         Root.iconbitmap('ACE.ico')
 
     # This is what the widgets look like when not disabled
+    s.configure("TRadiobutton", background = "black", foreground = "white", indicatorcolor = "grey")
     s.configure("TCombobox", background = "white", foreground = "black")
-    s.configure("TCheckbutton", background = "black", foreground = "white", indicatorcolor = "white", font = ('Menlo', SmallSize - 2))
+    s.configure("TMenuButton", background = "white", foreground = "black")
+    s.configure("TCheckbutton", background = "black", foreground = "white", indicatorcolor = "white")
     s.configure("TLabel", background = "black", foreground = "white", font = ('Courier', SmallSize, 'bold'))
-    s.configure("TButton", background = "black", foreground = "white", font = ('Arial', SmallSize))
+    s.configure("TFrame", background = "black", foreground = "white")
+    s.configure("TScale", background = "black", foreground = "white")
+    s.configure("TButton", background = "black", foreground = "white")
 
     # This is what the widgets look like when disabled or hovered over (active)
+    s.map("TRadiobutton", background = [("active", "black"), ("disabled", "black")], foreground = [("active", "white"), ("disabled", "grey")], indicatorcolor = [("selected", "yellow")])
     s.map("TCombobox", background = [("active", "black"), ("disabled", "black")], foreground = [("active", "white"), ("disabled", "grey")])
+    s.map("TMenuButton", background = [("active", "black"), ("disabled", "black")], foreground = [("active", "white"), ("disabled", "grey")])
     s.map("TCheckbutton", background = [("active", "black"), ("disabled", "black")], foreground = [("active", "white"), ("disabled", "grey")], indicatorcolor = [("selected", "blue")])
+    s.map("TScale", background = [("active", "black"), ("disabled", "black")], foreground = [("active", "white"), ("disabled", "grey")])
     s.map("TButton", background = [("active", "white"), ("disabled", "black")], foreground = [("active", "black"), ("disabled", "grey")])
 
     # -------------------------------------------------------
     # Make Frames
-    # -------------------------------------------------------
-    IconFrame = tk.Frame(Root, bg = "Black")
-    IconFrame.pack(fill = tk.X, padx = 10, pady = 10)
+    # -------------------------------------------------------    
+    TopLayerFrame = tk.Frame(Root, bg = "Black")
+    TopLayerFrame.pack(side = "top", padx = 10, pady = 10)
 
     ButtonFrame = tk.Frame(Root, bg = "Black")
-    ButtonFrame.pack(fill = tk.X, padx = 10, pady = 10)
+    ButtonFrame.pack(fill = "x", padx = 10, pady = 0)
 
     EditorFrame = tk.Frame(Root, bg = "Black")
-    EditorFrame.pack(side = tk.LEFT, padx = 10, pady = 10)
+    EditorFrame.pack(side = "left", padx = 10, pady = 10)
 
     #------------------------------------------------------------
     # Set Index and Tkinter Variables
     #------------------------------------------------------------
-    MoveNameIndex = 0
-    MoveScriptIndex = 1
-    BasePowerIndex = 2
-    TypeIndex = 3
-    AccuracyIndex = 4
-    PowerPointIndex = 5
-    EffectChanceIndex = 6
-    RangeIndex = 7
-    PriorityIndex = 8
-    MoveFlagIndex = 9
-    DamageFormulaIndex = 10
-    MoveKindIndex = 11
-    ScriptArgIndex = 12
-    DescriptionIndex = 13
+    MoveName = tk.StringVar()
+    MoveScript = tk.StringVar()
+    BasePower = tk.IntVar()
+    Type = tk.StringVar()
+    Accuracy = tk.IntVar()
+    PowerPoints = tk.IntVar()
+    EffectChance = tk.IntVar()
+    Range = tk.StringVar()
+    Priority = tk.IntVar()
 
-    MoveName = StringVar()
-    MoveScript = StringVar()
-    BasePower = IntVar()
-    Type = StringVar()
-    Accuracy = IntVar()
-    PowerPoints = IntVar()
-    EffectChance = IntVar()
-    Range = StringVar()
-    Priority = IntVar()
-
-    Parity = IntVar()
+    Parity = tk.IntVar()
     Parity.set(0)
 
-    A = IntVar()    # Ability Bypass
-    B = IntVar()    # Self Effect
-    C = IntVar()    # King's Rock
-    D = IntVar()    # Mirror Move
-    E = IntVar()    # Snatch
-    F = IntVar()    # Magic Coat
-    G = IntVar()    # Protect
-    H = IntVar()    # Direct Contact 
+    A = tk.IntVar()    # Ability Bypass
+    B = tk.IntVar()    # Self Effect
+    C = tk.IntVar()    # King's Rock
+    D = tk.IntVar()    # Mirror Move
+    E = tk.IntVar()    # Snatch
+    F = tk.IntVar()    # Magic Coat
+    G = tk.IntVar()    # Protect
+    H = tk.IntVar()    # Direct Contact 
 
-    DamageFormula = StringVar()
-    MoveKind = StringVar()
-    ScriptArgument = IntVar()
-    Description = StringVar()
+    DamageFormula = tk.StringVar()
+    DamageArgument = tk.StringVar()
+    MoveKind = tk.StringVar()
+    ScriptArgument = tk.IntVar()
+    Description = tk.StringVar()
 
-    CurrentMoveNumber = IntVar()
+    CurrentMoveNumber = tk.IntVar()
     CurrentMoveNumber.set(0)
 
-    CurrentMove = StringVar()
+    CurrentMove = tk.StringVar()
 
     MoveTemplate = {"Move Script": "0", "Base Power": 0, "Type": "Normal", \
                     "Accuracy": 0, "Power Points": 0, "Effect Chance": 0, \
@@ -245,338 +190,40 @@ try:
                     "Kind": "Status", \
                     "Script Argument": 0}
 
-    #------------------------------------------------------------
-    # Make Box Functions
-    #------------------------------------------------------------
-    def MakeInfoBox(Title, Header, Text):
-        Top = tk.Toplevel(Root)
-        Top.title(Title)
-        Top.configure(bg = "Black")
-
-        HeaderTextFrame = tk.Frame(Top, bg = "Black")
-        HeaderTextFrame.pack(fill = tk.X, pady = 10)
-
-        InfoTextFrame = tk.Frame(Top, bg = "Black")
-        InfoTextFrame.pack(fill = tk.X, pady = 10)
-        
-        OkayFrame = tk.Frame(Top, bg = "Black")
-        OkayFrame.pack(fill = tk.X, pady = 10)
-
-        ttk.Label(HeaderTextFrame, text = Header, font = ("Courier", int(SmallSize*1.5))).pack()
-
-        N = 0
-        for i, Line in enumerate(Text):
-            N = i+1
-            ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = W)
-
-        def QuitBox(Event = None):
-            Top.destroy()
-
-        OkayButton = ttk.Button(OkayFrame, text = "Okay", command = QuitBox)
-        OkayButton.pack()
-
-        Top.bind("<Return>", QuitBox)
-        Top.wait_window()
-
-    def MakeYesNoBox(Title, Header, Var, Text):
-        Top = tk.Toplevel(Root)
-        Top.title(Title)
-        Top.configure(bg = "Black")
-
-        HeaderTextFrame = tk.Frame(Top, bg = "Black")
-        HeaderTextFrame.pack(fill = tk.X, pady = 10)
-
-        InfoTextFrame = tk.Frame(Top, bg = "Black")
-        InfoTextFrame.pack(fill = tk.X, pady = 10)
-        
-        OkayFrame = tk.Frame(Top, bg = "Black")
-        OkayFrame.pack(fill = tk.X, pady = 10)
-
-        ttk.Label(HeaderTextFrame, text = Header, font = ("Arial", int(SmallSize*1.5))).pack()
-
-        N = 0
-        for i, Line in enumerate(Text):
-            N = i+1
-            ttk.Label(InfoTextFrame, text = Line, font = ("Arial", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = W)
-
-        def SetYes(Event = None):
-            Var.set(True)
-            Top.destroy()
-
-        def SetNo():
-            Var.set(False)
-            Top.destroy()
-
-        YesButton = ttk.Button(OkayFrame, text = "Yes", command = SetYes)
-        YesButton.pack()
-
-        NoButton = ttk.Button(OkayFrame, text = "No", command = SetNo)
-        NoButton.pack()
-
-        Top.bind("<Return>", SetYes)
-        Top.wait_window()
-
-    # The Type argument is the data type that the input needs to be
-    # The function will convert the input to the same type as the Type variable
-    # If the input cannot be converted, it will delete it and you must try again
-    # If you want only integers, put 1 (or another integer) as Type
-    # If you don't care, use "1" so convert it to a string
-    def MakeEntryBox(Title, Header, Var, Type, Text):
-        Top = tk.Toplevel(Root)
-        Top.title(Title)
-        Top.configure(bg = "Black")
-
-        HeaderTextFrame = tk.Frame(Top, bg = "Black")
-        HeaderTextFrame.pack(fill = tk.X, pady = 10)
-
-        InfoTextFrame = tk.Frame(Top, bg = "Black")
-        InfoTextFrame.pack(fill = tk.X, pady = 10)
-
-        PromptFrame = tk.Frame(Top, bg = "Black")
-        PromptFrame.pack(fill = tk.X, pady = 10)
-        
-        OkayFrame = tk.Frame(Top, bg = "Black")
-        OkayFrame.pack(fill = tk.X, pady = 10)
-
-        ttk.Label(HeaderTextFrame, text = Header, font = ("Arial", int(SmallSize*1.5))).pack()
-
-        N = 0
-        for i, Line in enumerate(Text):
-            N = i+1
-            ttk.Label(InfoTextFrame, text = Line, font = ("Arial", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = W)
-        
-        def ProcessEntry(Text):
-            try:
-                N = type(Type)(Text)
-                OkayButton.configure(state = "normal")
-                
-            except Exception as e:
-                print(e)
-                PromptEntry.delete(1.0, "end-1c")
-                PromptEntry.insert(1.0, Text[:-1])           
-        
-        PromptEntry = tk.Text(PromptFrame, width = 20, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
-        PromptEntry.bind("<KeyRelease>", (lambda event: ProcessEntry(PromptEntry.get(1.0, "end-1c"))))
-        PromptEntry.bind(Paste, lambda _: "break")
-        
-        PromptEntry.pack()
-
-        def SetValue(Event = None):
-            PromptNumber = PromptEntry.get(1.0, "end-1c")
-            Var.set(PromptNumber)
-            Top.destroy()
-
-        OkayButton = ttk.Button(OkayFrame, text = "Okay", command = SetValue)
-        OkayButton.configure(state = "disabled")
-        OkayButton.pack()
-
-        Top.bind("<Return>", SetValue)
-        Top.wait_window()
-
-    # Make an entry box but this takes an address
-    def MakeAddressEntryBox(Title, Header, Var, Text):
-        Top = tk.Toplevel(Root)
-        Top.title(Title)
-        Top.configure(bg = "Black")
-
-        HeaderTextFrame = tk.Frame(Top, bg = "Black")
-        HeaderTextFrame.pack(fill = tk.X, pady = 10)
-
-        InfoTextFrame = tk.Frame(Top, bg = "Black")
-        InfoTextFrame.pack(fill = tk.X, pady = 10)
-
-        PromptFrame = tk.Frame(Top, bg = "Black")
-        PromptFrame.pack(fill = tk.X, pady = 10)
-        
-        OkayFrame = tk.Frame(Top, bg = "Black")
-        OkayFrame.pack(fill = tk.X, pady = 10)
-
-        ttk.Label(HeaderTextFrame, text = Header, font = ("Arial", int(SmallSize*1.5))).pack()
-
-        N = 0
-        for i, Line in enumerate(Text):
-            N = i+1
-            ttk.Label(InfoTextFrame, text = Line, font = ("Arial", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = W)
-
-        def ProcessEntry(Text):
-            Text = Text.upper()
-            Hex = "1234567890ABCDEF"
-
-            if Text[-1] not in Hex or len(Text) > 8:
-                Text = Text[:-1]
-                PromptEntry.delete(1.0, "end-1c")
-                PromptEntry.insert(1.0, Text)
-                
-            else:
-                PromptEntry.delete(1.0, "end-1c")
-                PromptEntry.insert(1.0, Text)
-
-            if len(Text) != 8:
-                OkayButton.configure(state = "disabled")
-            else:
-                OkayButton.configure(state = "normal")
-        
-        PromptEntry = tk.Text(PromptFrame, width = 20, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
-        PromptEntry.bind("<KeyRelease>", (lambda event: ProcessEntry(PromptEntry.get(1.0, "end-1c"))))
-        PromptEntry.pack()
-
-        PromptEntry.delete(1.0, "end-1c")
-        PromptEntry.insert(1.0, "08")
-
-        def SetValue(Event = None):
-            PromptNumber = PromptEntry.get(1.0, "end-1c")
-            Var.set(PromptNumber)
-            Top.destroy()
-
-        OkayButton = ttk.Button(OkayFrame, text = "Okay", command = SetValue)
-        OkayButton.configure(state = "disabled")
-        OkayButton.pack()
-
-        Top.bind("<Return>", SetValue)
-        Top.wait_window()
-
-    # Text is a list with each entry being a line of text
-    # MenuText is a dictionary with keys being the combobox options
-    # and the paired values being a list of text to display
-    # Maximum of up to five lines
-    def MakeInfoBoxWithMenu(Title, Header, Text, MenuText):
-        Top = tk.Toplevel(Root)
-        Top.title(Title)
-        Top.configure(bg = "Black")
-
-        HeaderTextFrame = tk.Frame(Top, bg = "Black")
-        HeaderTextFrame.pack(fill = tk.X, pady = 10)
-
-        InfoTextFrame = tk.Frame(Top, bg = "Black")
-        InfoTextFrame.pack(fill = tk.X, pady = 10)
-
-        MenuTextFrame = tk.Frame(Top, bg = "Black")
-        MenuTextFrame.pack(fill = tk.X, pady = 10)
-
-        MenuFrame = tk.Frame(Top, bg = "Black")
-        MenuFrame.pack(fill = tk.X, pady = 10)
-        
-        OkayFrame = tk.Frame(Top, bg = "Black")
-        OkayFrame.pack(fill = tk.X, pady = 10)
-
-        ttk.Label(HeaderTextFrame, text = Header, font = ("Courier", int(SmallSize*1.5))).pack()
-
-        N = 0
-        for i, Line in enumerate(Text):
-            N = i+1
-            ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = W)
-
-        DoLine = ttk.Label(MenuTextFrame, text = "-----", font = ("Courier", SmallSize))
-        DoLine.pack()
-
-        Values = []
-        for Key in MenuText:
-            Values.append(Key)
-
-        Option = StringVar()
-        Option.set("-")
-        
-        def ChangeText(self):
-            List = MenuText[Option.get()]
-
-            for Widget in MenuTextFrame.winfo_children():
-                Widget.destroy()
-
-            ttk.Label(MenuTextFrame, text = "-----\n", font = ("Courier", SmallSize)).pack()
-
-            for Line in List:
-                ttk.Label(MenuTextFrame, text = Line, font = ("Courier", SmallSize)).pack()
-
-        MenuDropDown = ttk.Combobox(MenuFrame, textvariable = Option, width = 20, values = Values, font = ("Courier", SmallSize))      
-        MenuDropDown.bind("<<ComboboxSelected>>", ChangeText)
-        MenuDropDown.pack()
-
-        def QuitBox(Event = None):
-            Top.destroy()
-
-        OkayButton = ttk.Button(OkayFrame, text = "Done", command = QuitBox)
-        OkayButton.pack()
-
-        Top.bind("<Return>", QuitBox)
-        Top.wait_window()
-
-    # This makes a menu with a dropdown but this one saves to a variable
-    def MakeMultiChoiceBox(Title, Header, Var, Text, MenuText):
-        Top = tk.Toplevel(Root)
-        Top.title(Title)
-        Top.configure(bg = "Black")
-
-        HeaderTextFrame = tk.Frame(Top, bg = "Black")
-        HeaderTextFrame.pack(fill = tk.X, pady = 10)
-
-        InfoTextFrame = tk.Frame(Top, bg = "Black")
-        InfoTextFrame.pack(fill = tk.X, pady = 10)
-
-        MenuTextFrame = tk.Frame(Top, bg = "Black")
-        MenuTextFrame.pack(fill = tk.X, pady = 10)
-
-        MenuFrame = tk.Frame(Top, bg = "Black")
-        MenuFrame.pack(fill = tk.X, pady = 10)
-        
-        OkayFrame = tk.Frame(Top, bg = "Black")
-        OkayFrame.pack(fill = tk.X, pady = 10)
-
-        ttk.Label(HeaderTextFrame, text = Header, font = ("Courier", int(SmallSize*1.5))).pack()
-
-        N = 0
-        for i, Line in enumerate(Text):
-            N = i+1
-            ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = W)
-
-        DoLine = ttk.Label(MenuTextFrame, text = "-----", font = ("Courier", SmallSize))
-        DoLine.pack()
-
-        Values = []
-        for Key in MenuText:
-            Values.append(Key)
-
-        Option = StringVar()
-        Option.set("-")
-        
-        def ChangeText(self):
-            List = MenuText[Option.get()]
-
-            for Widget in MenuTextFrame.winfo_children():
-                Widget.destroy()
-
-            ttk.Label(MenuTextFrame, text = "-----\n", font = ("Courier", SmallSize)).pack()
-
-            for Line in List:
-                ttk.Label(MenuTextFrame, text = Line, font = ("Courier", SmallSize)).pack()
-
-            Var.set(Option.get())
-
-        MenuDropDown = ttk.Combobox(MenuFrame, textvariable = Option, width = 20, values = Values, font = ("Courier", SmallSize))      
-        MenuDropDown.bind("<<ComboboxSelected>>", ChangeText)
-        MenuDropDown.pack()
-
-        def QuitBox(Event = None):
-            Top.destroy()
-
-        OkayButton = ttk.Button(OkayFrame, text = "Okay", command = QuitBox)
-        OkayButton.pack()
-
-        Top.bind("<Return>", QuitBox)
-        Top.wait_window()
+    
 
     #------------------------------------------------------------
     # Top of the screen stuff
     #------------------------------------------------------------
+    BulbasaurFrame = tk.Frame(TopLayerFrame, bg = "Black")
+    IconFrame = tk.Frame(TopLayerFrame, bg = "Black")
+    TablePicFrame = tk.Frame(TopLayerFrame, bg = "Black")
+
+    BulbasaurPic = tk.PhotoImage(file = "Bulbasaur.png")
+    BulbasaurPic = BulbasaurPic.zoom(6)
+    BulbasaurPic = BulbasaurPic.subsample(5)
+    BulbasaurLabel = ttk.Label(BulbasaurFrame, image = BulbasaurPic)
+    BulbasaurLabel.image = BulbasaurPic
+
+    TablePic = tk.PhotoImage(file = "Table.png")
+    TablePic = TablePic.subsample(2)
+    TableLabel = ttk.Label(TablePicFrame, image = TablePic)
+    TableLabel.image = TablePic
+    
     LabelFrame = tk.Frame(IconFrame, bg = "Black")
     MenuFrame = tk.Frame(IconFrame, bg = "Black")
+    MoveFinderFrame = tk.Frame(MenuFrame, bg = "Black")
 
     MainLabel = ttk.Label(LabelFrame, text = "ACE Move Table Maker", font = ("Arial", int(1.5 * SmallSize), "bold"))
     CurrentLabel = ttk.Label(MenuFrame, text = "{}".format(CurrentOpenFile))
-    CopyrightLabel = ttk.Label(LabelFrame, text = "Program by AkameTheBulbasaur, v1.0.1", font = ("Arial", SmallSize - 2))
+    CopyrightLabel = ttk.Label(LabelFrame, text = "Program by AkameTheBulbasaur, v2.0.0", font = ("Arial", SmallSize - 2))
+
+    # Move Label
+    MoveNumberLabel = ttk.Label(MenuFrame, text = "Move {} of {}".format(CurrentMoveNumber.get() + 1, len(Table)))
 
     # Make Help Menu
     def ShowHelpMenu():
-        MakeInfoBox("Help", "Shortcuts",
+        mb.MakeInfoBox(Root, "Help", "Shortcuts",
                     ["Cmd/Ctrl N: Make new table file",
                      "Cmd/Ctrl O: Open saved table file",
                      "Cmd/Ctrl S: Save current table file",
@@ -586,14 +233,14 @@ try:
                      "Cmd/Ctrl H: Open shortcut menu",
                      "Cmd/Ctrl Q: Quit program"])
 
-    ShowHelp = IntVar()
+    ShowHelp = tk.IntVar()
     ShowHelp.set(0)
 
     def DisplayHelp():
         ShowHelp.set(0)
         ShowHelpMenu()
 
-    ShowHelpButton = ttk.Checkbutton(MenuFrame, text = "?", variable = ShowHelp, command = DisplayHelp)
+    ShowHelpButton = ttk.Checkbutton(MoveFinderFrame, text = "?", variable = ShowHelp, command = DisplayHelp)
 
     # Jump to Move
     def JumpToMove(self):
@@ -603,7 +250,7 @@ try:
         CurrentMoveNumber.set(MoveNumber)
         Refresh()
 
-    MoveFinder = ttk.Combobox(MenuFrame, textvariable = CurrentMove, width = 18, values = MoveNameList, font = ("Courier", SmallSize))
+    MoveFinder = ttk.Combobox(MoveFinderFrame, textvariable = CurrentMove, width = 18, values = MoveNameList, font = ("Courier", SmallSize))
     MoveFinder.bind("<<ComboboxSelected>>", JumpToMove)
 
     #------------------------------------------------------------
@@ -617,7 +264,7 @@ try:
             i = CurrentMoveNumber.get()
             
             Name = Name[0:12]
-            Table[i][MoveNameIndex] = Name
+            Table[i][tf.MoveNameIndex] = Name
             
             Refresh()
 
@@ -625,12 +272,12 @@ try:
     MoveNameEntry = tk.Text(MoveNameFrame, width = 12, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
     MoveNameEntry.bind("<KeyRelease>", (lambda event: EditName(MoveNameEntry.get(1.0, "end-1c"))))
 
-    NameHelp = IntVar()
+    NameHelp = tk.IntVar()
     NameHelp.set(0)
 
     def MoveNameHelp():
         NameHelp.set(0)
-        MakeInfoBox("Help", "Move Name", \
+        mb.MakeInfoBox(Root, "Help", "Move Name", \
                     ["This is the name of the Move.",
                      "This does not appear in the compiled Attack Data Table.",
                      "Instead, Move Names are compiled to a separate Move Name Table."])
@@ -642,44 +289,50 @@ try:
     #------------------------------------------------------------
     MoveScriptFrame = tk.Frame(EditorFrame, bg = "Black")
 
-    def EditMoveScript(self):
+    def EditMoveScript():
         global Table
         i = CurrentMoveNumber.get()
 
-        Table[i][MoveScriptIndex] = MoveScript.get()
+        Table[i][tf.MoveScriptIndex] = MoveScript.get()
 
         Refresh()
 
-    def ProcessMoveScript(self):
+    def ProcessMoveScript():
         Input = MoveScript.get().upper()
         Hex = "0123456789ABCDEF"
         
         for Letter in Hex:
             if Input == Letter:
                 MoveScript.set("0" + Letter)
-                EditMoveScript(self)
+                EditMoveScript()
 
-        if Input in HexBytes:
+        if Input in tf.HexBytes:
             MoveScript.set(Input)
-            EditMoveScript(self)
+            EditMoveScript()
 
     MoveScriptLabel = ttk.Label(MoveScriptFrame, text = "Move Script:")
-    MoveScriptEntry = ttk.Combobox(MoveScriptFrame, textvariable = MoveScript, width = 2, values = HexBytes, font = ("Courier", SmallSize))
-    MoveScriptEntry.bind("<<ComboboxSelected>>", EditMoveScript)
-    MoveScriptEntry.bind("<Return>", ProcessMoveScript)
+    MoveScriptEntry = ttk.Combobox(MoveScriptFrame, textvariable = MoveScript, width = 2, values = tf.HexBytes, font = ("Courier", SmallSize))
+    MoveScriptEntry.bind("<<ComboboxSelected>>", lambda e: EditMoveScript())
+    MoveScriptEntry.bind("<Return>", lambda e: ProcessMoveScript())
 
-    ScriptHelp = IntVar()
+    ScriptHelp = tk.IntVar()
     ScriptHelp.set(0)
 
     def MoveScriptHelp():
         ScriptHelp.set(0)
 
-        MakeInfoBoxWithMenu("Help", "Move Scripts",
+        NewValue = tk.StringVar()
+        NewValue.set("None")
+        mb.MakeInfoBoxMenuSearch(Root, "Help", "Move Scripts",
                             ["The Move Script is a Battle Script that is specifically",
                              "executed by a Move when it is selected in battle.",
                              "Select a script from the dropdown menu to see what it does.",
                              "Note: these are the defaults for ACE, your scripts may vary."],
-                            MoveScriptText)
+                            d.MoveScriptText, NewValue, "Script {}".format(MoveScript.get()))
+
+        if NewValue.get() != "None":
+            MoveScript.set(NewValue.get().replace("Script", "").strip())
+            EditMoveScript()
 
     MoveScriptHelpButton = ttk.Checkbutton(MoveScriptFrame, text = "?", variable = ScriptHelp, command = MoveScriptHelp)
 
@@ -705,7 +358,7 @@ try:
             if Power < 0:
                 Power = 0
 
-            Table[i][BasePowerIndex] = Power
+            Table[i][tf.BasePowerIndex] = Power
             
             Refresh()
 
@@ -713,12 +366,12 @@ try:
     BasePowerEntry = tk.Text(BasePowerFrame, width = 3, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
     BasePowerEntry.bind("<KeyRelease>", (lambda event: EditBasePower(BasePowerEntry.get(1.0, "end-1c"))))
 
-    PowerHelp = IntVar()
+    PowerHelp = tk.IntVar()
     PowerHelp.set(0)
 
     def BasePowerHelp():
         PowerHelp.set(0)
-        MakeInfoBox("Help", "Base Power",
+        mb.MakeInfoBox(Root, "Help", "Base Power",
                     ["The Base Power of a Move generally indicates its strength.",
                      "This value can range from 0 to 255.",
                      "Setting this value to zero means the Move is Non-Damaging."])
@@ -738,7 +391,7 @@ try:
         global Table
         i = CurrentMoveNumber.get()
 
-        Table[i][TypeIndex] = Type.get()
+        Table[i][tf.TypeIndex] = Type.get()
 
         Refresh()
         
@@ -746,12 +399,12 @@ try:
     TypeEntry = ttk.Combobox(TypeFrame, textvariable = Type, width = 8, values = Types, font = ("Courier", SmallSize))
     TypeEntry.bind("<<ComboboxSelected>>", EditType)
 
-    TypeHelp = IntVar()
+    TypeHelp = tk.IntVar()
     TypeHelp.set(0)
 
     def MoveTypeHelp():
         TypeHelp.set(0)
-        MakeInfoBox("Help", "Move Type",
+        mb.MakeInfoBox(Root, "Help", "Move Type",
                     ["This is the base Type of the Move."
                      "The actual Type when used in Battle may be different,"
                      "but will, by default, be the one given here."])
@@ -780,7 +433,7 @@ try:
             if Accuracy < 0:
                 Accuracy = 0
 
-            Table[i][AccuracyIndex] = Accuracy
+            Table[i][tf.AccuracyIndex] = Accuracy
             
             Refresh()
         
@@ -788,12 +441,12 @@ try:
     AccuracyEntry = tk.Text(AccuracyFrame, width = 3, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
     AccuracyEntry.bind("<KeyRelease>", (lambda event: EditAccuracy(AccuracyEntry.get(1.0, "end-1c"))))
 
-    AccHelp = IntVar()
+    AccHelp = tk.IntVar()
     AccHelp.set(0)
 
     def AccuracyHelp():
         AccHelp.set(0)
-        MakeInfoBox("Help", "Accuracy",
+        mb.MakeInfoBox(Root, "Help", "Accuracy",
                     ["This is the base Accuracy of the Move.",
                      "This value can range from 0 to 100.",
                      "A higher Accuracy means the Move will hit more often.",
@@ -823,7 +476,7 @@ try:
             if PowerPoints < 0:
                 PowerPoints = 0
 
-            Table[i][PowerPointIndex] = PowerPoints
+            Table[i][tf.PowerPointIndex] = PowerPoints
             
             Refresh()
         
@@ -831,12 +484,12 @@ try:
     PowerPointEntry = tk.Text(PowerPointFrame, width = 2, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
     PowerPointEntry.bind("<KeyRelease>", (lambda event: EditPowerPoints(PowerPointEntry.get(1.0, "end-1c"))))
 
-    PPHelp = IntVar()
+    PPHelp = tk.IntVar()
     PPHelp.set(0)
 
     def PowerPointHelp():
         PPHelp.set(0)
-        MakeInfoBox("Help", "Power Points",
+        mb.MakeInfoBox(Root, "Help", "Power Points",
                     ["This is the default amount of Power Points that the Move can have.",
                      "This value can range from 0 to 99.",
                      "More Power Points means the Move can be used more.",
@@ -866,7 +519,7 @@ try:
             if Chance < 0:
                 Chance = 0
 
-            Table[i][EffectChanceIndex] = Chance
+            Table[i][tf.EffectChanceIndex] = Chance
             
             Refresh()
         
@@ -874,12 +527,12 @@ try:
     EffectChanceEntry = tk.Text(EffectChanceFrame, width = 3, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
     EffectChanceEntry.bind("<KeyRelease>", (lambda event: EditEffectChance(EffectChanceEntry.get(1.0, "end-1c"))))
 
-    ChanceHelp = IntVar()
+    ChanceHelp = tk.IntVar()
     ChanceHelp.set(0)
 
     def EffectChanceHelp():
         ChanceHelp.set(0)
-        MakeInfoBox("Help", "Effect Chance",
+        mb.MakeInfoBox(Root, "Help", "Effect Chance",
                     ["This is the chance of the Move Script's effect activating (if it has one).",
                      "This values ranges from 0 to 100.",
                      "A higher value means the effect will occur more often.",
@@ -898,7 +551,7 @@ try:
         global Table
         i = CurrentMoveNumber.get()
 
-        Table[i][RangeIndex] = Range.get()
+        Table[i][tf.RangeIndex] = Range.get()
 
         Refresh()
         
@@ -906,12 +559,12 @@ try:
     RangeEntry = ttk.Combobox(RangeFrame, textvariable = Range, width = 13, values = RangeList, font = ("Courier", SmallSize))
     RangeEntry.bind("<<ComboboxSelected>>", EditRange)
 
-    RHelp = IntVar()
+    RHelp = tk.IntVar()
     RHelp.set(0)
 
     def RangeHelp():
         RHelp.set(0)
-        MakeInfoBox("Help", "Range",
+        mb.MakeInfoBox(Root, "Help", "Range",
                     ["This is the range of Pokemon who can be targeted by the Move.",
                      "This only has an effect in a Double Battle.",
                      "If the Move targets one Pokemon, the Move Script runs once.",
@@ -956,7 +609,7 @@ try:
             if Parity.get() == 1: # Negative Priority
                 Priority = -Priority
 
-            Table[i][PriorityIndex] = Priority
+            Table[i][tf.PriorityIndex] = Priority
             
             Refresh()
         
@@ -964,19 +617,19 @@ try:
     PriorityEntry = tk.Text(PriorityFrame, width = 3, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
     PriorityEntry.bind("<KeyRelease>", (lambda event: EditPriority(PriorityEntry.get(1.0, "end-1c"))))
 
-    PriHelp = IntVar()
+    PriHelp = tk.IntVar()
     PriHelp.set(0)
 
     def PriorityHelp():
         PriHelp.set(0)
-        MakeInfoBox("Help", "Priority",
+        mb.MakeInfoBox(Root, "Help", "Priority",
                     ["Moves with higher Priority will go before those which have a lower Priority.",
                      "This values ranges from -127 to 127.",
                      "The default is zero, with higher values moving first and negative values moving later."])
 
     PriorityHelpButton = ttk.Checkbutton(PriorityFrame, text = "?", variable = PriHelp, command = PriorityHelp)
 
-    X = IntVar()
+    X = tk.IntVar()
     X.set(0)
 
     def EditParity():
@@ -987,12 +640,12 @@ try:
         if Parity.get() == 0: # +
             ParityButton.configure(text = "-")
             Parity.set(1)
-            Table[i][PriorityIndex] = -Table[i][PriorityIndex]
+            Table[i][tf.PriorityIndex] = -Table[i][tf.PriorityIndex]
             
         else:
             ParityButton.configure(text = "+")
             Parity.set(0)
-            Table[i][PriorityIndex] = -Table[i][PriorityIndex]
+            Table[i][tf.PriorityIndex] = -Table[i][tf.PriorityIndex]
 
         Refresh()
 
@@ -1010,7 +663,7 @@ try:
         global Table
         i = CurrentMoveNumber.get()
 
-        Table[i][MoveFlagIndex][X] = CheckVar.get()
+        Table[i][tf.MoveFlagIndex][X] = CheckVar.get()
 
         Refresh()
 
@@ -1023,12 +676,12 @@ try:
     SetProtectFlag = ttk.Checkbutton(MoveFlagFrame, text = "Protect", variable = G, command = lambda: SetMoveFlag(G, 6))
     SetDirectContactFlag = ttk.Checkbutton(MoveFlagFrame, text = "Direct Contact", variable = H, command = lambda: SetMoveFlag(H, 7))
 
-    FlagHelp = IntVar()
+    FlagHelp = tk.IntVar()
     FlagHelp.set(0)
 
     def MoveFlagHelp():
         FlagHelp.set(0)
-        MakeInfoBox("Help", "Move Flags",
+        mb.MakeInfoBox(Root, "Help", "Move Flags",
                     ["When these are set, the Move has different effects.",
                      "Bypass Ability: The Move will ignore Ignorable Abilities",
                      "Self Effect: The additional effects will always apply to the user",
@@ -1042,51 +695,113 @@ try:
     MoveFlagHelpButton = ttk.Checkbutton(MoveFlagLabelFrame, text = "?", variable = FlagHelp, command = MoveFlagHelp)
 
     #------------------------------------------------------------
-    # Edit Damage Formula
+    # Edit Damage Formula + Argument
     #------------------------------------------------------------
     DamageFormulaFrame = tk.Frame(EditorFrame, bg = "Black")
+    DamageArgumentFrame = tk.Frame(EditorFrame, bg = "Black")
 
-    def EditDamageFormula(self):
+    def EditDamageFormula():
         global Table
         i = CurrentMoveNumber.get()
 
-        Table[i][DamageFormulaIndex] = DamageFormula.get()
+        if DamageArgument.get() == "":
+            DamageArgument.set("00")
+
+        if DamageFormula.get() == "":
+            DamageFormula.set("00")
+
+        DamageValue = hex((int(DamageArgument.get(), 16) << 4) + (int(DamageFormula.get(), 16) & 15)).upper()[2:]
+
+        if int(DamageValue, 16) < 16:
+            DamageValue = "0" + DamageValue
+
+        Table[i][tf.DamageFormulaIndex] = DamageValue
 
         Refresh()
 
-    def ProcessDamageFormula(self):
+    def ProcessDamageFormula():
         Input = DamageFormula.get().upper()
         Hex = "0123456789ABCDEF"
         
         for Letter in Hex:
             if Input == Letter:
                 DamageFormula.set("0" + Letter)
-                EditDamageFormula(self)
+                EditDamageFormula()
 
-        if Input in HexBytes:
+        if Input in tf.HexBytes:
             DamageFormula.set(Input)
-            EditDamageFormula(self)    
+            EditDamageFormula()
+
+    def ProcessDamageArgument():
+        Input = DamageArgument.get().upper()
+        Hex = "0123456789ABCDEF"
+        
+        for Letter in Hex:
+            if Input == Letter:
+                DamageArgument.set("0" + Letter)
+                EditDamageFormula()
+
+        if Input in tf.HexBytes:
+            DamageArgument.set(Input)
+            EditDamageFormula()
         
     DamageFormulaLabel = ttk.Label(DamageFormulaFrame, text = "Damage Formula:")
-    DamageFormulaEntry = ttk.Combobox(DamageFormulaFrame, textvariable = DamageFormula, width = 2, values = HexBytes, font = ("Courier", SmallSize))
-    DamageFormulaEntry.bind("<<ComboboxSelected>>", EditDamageFormula)
-    DamageFormulaEntry.bind("<Return>", ProcessDamageFormula)
+    DamageFormulaEntry = ttk.Combobox(DamageFormulaFrame, textvariable = DamageFormula, width = 2, values = tf.HexHalfBytes, font = ("Courier", SmallSize))
+    DamageFormulaEntry.bind("<<ComboboxSelected>>", lambda e: EditDamageFormula())
+    DamageFormulaEntry.bind("<Return>", lambda e: ProcessDamageFormula())
 
-    FormulaHelp = IntVar()
+    DamageArgumentLabel = ttk.Label(DamageArgumentFrame, text = "Formula Argument:")
+    DamageArgumentEntry = ttk.Combobox(DamageArgumentFrame, textvariable = DamageArgument, width = 2, values = tf.HexHalfBytes, font = ("Courier", SmallSize))
+    DamageArgumentEntry.bind("<<ComboboxSelected>>", lambda e: EditDamageFormula())
+    DamageArgumentEntry.bind("<Return>", lambda e: ProcessDamageArgument())
+
+    FormulaHelp = tk.IntVar()
     FormulaHelp.set(0)
 
     def DamageFormulaHelp():
         FormulaHelp.set(0)
 
-        MakeInfoBoxWithMenu("Help", "Damage Formula",
+        NewValue = tk.StringVar()
+        NewValue.set("-")
+        mb.MakeInfoBoxWithMenu(Root, "Help", "Damage Formula",
                             ["The damage formula is used to determine the Base Power",
                              "the of the Move.",
                              "If this is set to anything other than zero, then the",
                              "game will run an additional routine to find the true",
                              "Base Power, which may use the Base Power given here."],
-                            {"Test":["Test Test Test"]})
+                            d.DamageFormulaText, NewValue, "Formula {}".format(DamageFormula.get()))
+        
+        if NewValue.get() != "-":
+            DamageFormula.set(NewValue.get().replace("Formula", "").strip())
+            EditDamageFormula()
 
     DamageFormulaHelpButton = ttk.Checkbutton(DamageFormulaFrame, text = "?", variable = FormulaHelp, command = DamageFormulaHelp)
+
+    FormulaArgHelp = tk.IntVar()
+    FormulaArgHelp.set(0)
+
+    def DamageFormulaArgHelp():
+        FormulaArgHelp.set(0)
+
+        Text = ""
+        FormulaOption = d.FormulaArgumentHelpers[DamageFormula.get()][0]
+        FormulaOptionArgs = d.FormulaArgumentHelpers[DamageFormula.get()][1]
+
+        NewValue = tk.StringVar()
+        NewValue.set("None")
+        mfhb.MakeFormulaArgHelperBox(Root, "Help", "Damage Formula Argument",
+                              ["The Damage Formula Argument is used for customising Damage Formulae.",
+                               "This value can range from 0 to 255.",
+                               "The helper below is for the currently selected Damage Formula."],
+                              FormulaOption,
+                              FormulaOptionArgs,
+                              NewValue)
+
+        if NewValue.get() != "None":
+            DamageArgument.set(NewValue.get())
+            EditDamageFormula()
+        
+    DamageArgumentHelpButton = ttk.Checkbutton(DamageArgumentFrame, text = "?", variable = FormulaArgHelp, command = DamageFormulaArgHelp)
 
     #------------------------------------------------------------
     # Edit Move Kind
@@ -1099,7 +814,7 @@ try:
         global Table
         i = CurrentMoveNumber.get()
 
-        Table[i][MoveKindIndex] = MoveKind.get()
+        Table[i][tf.MoveKindIndex] = MoveKind.get()
 
         Refresh()
         
@@ -1107,12 +822,12 @@ try:
     MoveKindEntry = ttk.Combobox(MoveKindFrame, textvariable = MoveKind, width = 10, values = Kinds, font = ("Courier", SmallSize))
     MoveKindEntry.bind("<<ComboboxSelected>>", EditMoveKind)
 
-    KindHelp = IntVar()
+    KindHelp = tk.IntVar()
     KindHelp.set(0)
 
     def MoveKindHelp():
         KindHelp.set(0)
-        MakeInfoBox("Help", "Move Kind",
+        mb.MakeInfoBox(Root, "Help", "Move Kind",
                     ["The Move Kind determines whether the Move is Physical, Special or Status.",
                      "Physical: Uses Attack/Defence when calculating Damage",
                      "Special: Uses Sp. Attack/Sp. Defence when calculating Damage",
@@ -1142,31 +857,36 @@ try:
             if Argument < 0:
                 Argument = 0
 
-            Table[i][ScriptArgIndex] = Argument
+            Table[i][tf.ScriptArgIndex] = Argument
 
             Refresh()
         
     ScriptArgLabel = ttk.Label(ScriptArgFrame, text = "Script Argument:")
     ScriptArgEntry = tk.Text(ScriptArgFrame, width = 3, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
-    ScriptArgEntry.bind("<KeyRelease>", (lambda event: EditScriptArg(ScriptArgEntry.get(1.0, "end-1c"))))
+    ScriptArgEntry.bind("<KeyRelease>", lambda e: EditScriptArg(ScriptArgEntry.get(1.0, "end-1c")))
 
-    ArgHelp = IntVar()
+    ArgHelp = tk.IntVar()
     ArgHelp.set(0)
 
     def ScriptArgHelp():
         ArgHelp.set(0)
 
         Text = ""
-        for Line in MoveScriptArgText["Script {}".format(MoveScript.get())]:
-            Text += Line + "\n"
-        
-        MakeInfoBox("Help", "Script Argument",
-                    ["The Script Argument is used for customising Move Scripts.",
-                     "This value can range from 0 to 255.",
-                     "What this values means exactly varies from script to script.",
-                     "\n",
-                     "Script {}".format(MoveScript.get()),
-                     "{}".format(Text)])
+        ScriptOption = d.ScriptArgumentHelpers[MoveScript.get()][0]
+        ScriptOptionArgs = d.ScriptArgumentHelpers[MoveScript.get()][1]
+
+        NewValue = tk.StringVar()
+        NewValue.set("None")
+        mshb.MakeScriptArgHelperBox(Root, "Help", "Script Argument",
+                              ["The Script Argument is used for customising Move Scripts.",
+                               "This value can range from 0 to 255.",
+                               "The helper below is for the currently selected Move Script."],
+                              ScriptOption,
+                              ScriptOptionArgs,
+                              NewValue)
+
+        if NewValue.get() != "None":
+            EditScriptArg(NewValue.get())
 
     ScriptArgHelpButton = ttk.Checkbutton(ScriptArgFrame, text = "?", variable = ArgHelp, command = ScriptArgHelp)
 
@@ -1176,30 +896,30 @@ try:
     TableHexFrame = tk.Frame(EditorFrame, bg = "Black")
     TableHexLabel = ttk.Label(TableHexFrame, text = "Hex Viewer")
 
-    HexByteSize = 20
+    tf.HexBytesize = 20
     HexByteHSpace = 5
     HexByteVSpace = 5
 
     HexViewFrame = tk.Frame(EditorFrame, bg = "Black")
-    MoveScriptByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
-    BasePowerByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
-    TypeByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
-    AccuracyByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
-    PowerPointByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
-    EffectChanceByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
-    RangeByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
-    PriorityByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
-    MoveFlagsByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
-    DamageFormulaByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
-    MoveKindByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
-    ScriptArgByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", HexByteSize))
+    MoveScriptByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
+    BasePowerByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
+    TypeByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
+    AccuracyByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
+    PowerPointByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
+    EffectChanceByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
+    RangeByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
+    PriorityByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
+    MoveFlagsByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
+    DamageFormulaByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
+    MoveKindByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
+    ScriptArgByte = ttk.Label(HexViewFrame, text = "00", font = ("Monaco", tf.HexBytesize))
 
-    HexHelp = IntVar()
+    HexHelp = tk.IntVar()
     HexHelp.set(0)
 
     def HexViewerHelp():
         HexHelp.set(0)
-        MakeInfoBox("Help", "Hex Viewer",
+        mb.MakeInfoBox(Root, "Help", "Hex Viewer",
                     ["This area shows what the compiled entry looks like in hexadecimal.",
                      "If a byte cannot be properly loaded/compiled, it will show up red."])
 
@@ -1265,19 +985,19 @@ try:
 
             NewText = "{}\n{}\n{}\n{}".format(Line1, Line2, Line3, Line4)
                          
-            Table[CurrentMoveNumber.get()][DescriptionIndex] = NewText
+            Table[CurrentMoveNumber.get()][tf.DescriptionIndex] = NewText
             Refresh()
 
     TextBoxFrame = tk.Frame(EditorFrame, bg = "Black")
     DescriptionBox = tk.Text(TextBoxFrame, width = 19, height = 4, bg = "White", fg = "Black", font = ("Courier", SmallSize))
     DescriptionBox.bind("<KeyRelease>", (lambda event: ProcessText(DescriptionBox.get(1.0, "end-1c"))))
 
-    DHelp = IntVar()
+    DHelp = tk.IntVar()
     DHelp.set(0)
 
     def DescriptionHelp():
         DHelp.set(0)
-        MakeInfoBox("Help", "Move Description",
+        mb.MakeInfoBox(Root, "Help", "Move Description",
                     ["This is the description of the Move seen in the Move Viewer in game.",
                      "This can be up to four lines long, with 19 characters per line.",
                      "The Move Description is compiled into a separate table."])
@@ -1301,7 +1021,7 @@ try:
             BasePowerByte.configure(text = "00", foreground = "Red")
 
         try:
-            TypeByte.configure(text = TypeConversion[Type.get()], foreground = "White")
+            TypeByte.configure(text = tf.TypeConversion[Type.get()], foreground = "White")
         except Exception as e:
             print(e)
             TypeByte.configure(text = "00", foreground = "Red")
@@ -1325,7 +1045,7 @@ try:
             EffectChanceByte.configure(text = "00", foreground = "Red")
 
         try:
-            RangeByte.configure(text = RangeConversion[Range.get()], foreground = "White")
+            RangeByte.configure(text = tf.RangeConversion[Range.get()], foreground = "White")
         except Exception as e:
             print(e)
             RangeByte.configure(text = "00", foreground = "Red")
@@ -1357,13 +1077,14 @@ try:
             MoveFlagsByte.configure(text = "00", foreground = "Red")
             
         try:
-            DamageFormulaByte.configure(text = DamageFormula.get(), foreground = "White")
+            DamageValue = DamageArgument.get()[1] + DamageFormula.get()[1]
+            DamageFormulaByte.configure(text = DamageValue, foreground = "White")
         except Exception as e:
             print(e)
             DamageFormulaByte.configure(text = "00", foreground = "Red")
             
         try:
-            MoveKindByte.configure(text = KindConversion[MoveKind.get()], foreground = "White")
+            MoveKindByte.configure(text = tf.KindConversion[MoveKind.get()], foreground = "White")
         except Exception as e:
             print(e)
             MoveKindByte.configure(text = "00", foreground = "Red")
@@ -1377,38 +1098,51 @@ try:
     def SetVariables():
         L = Table[CurrentMoveNumber.get()]
 
-        MoveName.set(L[MoveNameIndex])
-        MoveScript.set(L[MoveScriptIndex])
-        BasePower.set(L[BasePowerIndex])
-        Type.set(L[TypeIndex])
-        Accuracy.set(L[AccuracyIndex])
-        PowerPoints.set(L[PowerPointIndex])
-        EffectChance.set(L[EffectChanceIndex])
-        Range.set(L[RangeIndex])
-
-        if L[PriorityIndex] < 0:
-            Priority.set(abs(L[PriorityIndex]))
+        MoveName.set(L[tf.MoveNameIndex])
+        MoveScript.set(L[tf.MoveScriptIndex])
+        BasePower.set(L[tf.BasePowerIndex])
+        Type.set(L[tf.TypeIndex])
+        Accuracy.set(L[tf.AccuracyIndex])
+        PowerPoints.set(L[tf.PowerPointIndex])
+        EffectChance.set(L[tf.EffectChanceIndex])
+        Range.set(L[tf.RangeIndex])
+        
+        if L[tf.PriorityIndex] < 0:
+            Priority.set(abs(L[tf.PriorityIndex]))
             Parity.set(1)
             ParityButton.configure(text = "-")
         else:
-            Priority.set(L[PriorityIndex])
+            Priority.set(L[tf.PriorityIndex])
             Parity.set(0)
             ParityButton.configure(text = "+")
 
-        A.set(L[MoveFlagIndex][0])
-        B.set(L[MoveFlagIndex][1])
-        C.set(L[MoveFlagIndex][2])
-        D.set(L[MoveFlagIndex][3])
-        E.set(L[MoveFlagIndex][4])
-        F.set(L[MoveFlagIndex][5])
-        G.set(L[MoveFlagIndex][6])
-        H.set(L[MoveFlagIndex][7])
-        
-        DamageFormula.set(L[DamageFormulaIndex])
-        MoveKind.set(L[MoveKindIndex])
-        ScriptArgument.set(L[ScriptArgIndex])
+        A.set(L[tf.MoveFlagIndex][0])
+        B.set(L[tf.MoveFlagIndex][1])
+        C.set(L[tf.MoveFlagIndex][2])
+        D.set(L[tf.MoveFlagIndex][3])
+        E.set(L[tf.MoveFlagIndex][4])
+        F.set(L[tf.MoveFlagIndex][5])
+        G.set(L[tf.MoveFlagIndex][6])
+        H.set(L[tf.MoveFlagIndex][7])
 
-        Description.set(L[DescriptionIndex])
+        DamageValue = L[tf.DamageFormulaIndex]
+        Formula = int(DamageValue, 16) & 15
+        Argument = (int(DamageValue, 16) & 240) >> 4
+
+        if Formula < 16:
+            DamageFormula.set("0" + hex(Formula).upper()[2:])
+        else:
+            DamageFormula.set(hex(Formula).upper()[2:])
+
+        if Argument < 16:
+            DamageArgument.set("0" + hex(Argument).upper()[2:])
+        else:
+            DamageArgument.set(hex(Argument).upper()[2:])
+        
+        MoveKind.set(L[tf.MoveKindIndex])
+        ScriptArgument.set(L[tf.ScriptArgIndex])
+
+        Description.set(L[tf.DescriptionIndex])
         
     def Refresh(Desc = False):
         global MoveNameList
@@ -1448,7 +1182,7 @@ try:
             else:
                 N = str(N)
                 
-            MoveNameList.append("{} - {}".format(N, Entry[MoveNameIndex]))
+            MoveNameList.append("{} - {}".format(N, Entry[tf.MoveNameIndex]))
 
         ScriptArgEntry.delete(1.0, "end")
         ScriptArgEntry.insert(1.0, ScriptArgument.get())
@@ -1469,8 +1203,8 @@ try:
     def CreateNewFile():
         global Table, InitialFolder
 
-        Sure = BooleanVar()
-        MakeYesNoBox("Warning", "Create a New Table File?", Sure,
+        Sure = tk.BooleanVar()
+        mb.MakeYesNoBox(Root, "Warning", "Create a New Table File?", Sure,
                     ["Are you sure you want to make a new table?",
                      "This will overwrite the current one.",
                      "Make sure you have saved it if you would like to keep it."])
@@ -1489,20 +1223,20 @@ try:
             
             Length = ""
 
-            TestLength = IntVar()
+            TestLength = tk.IntVar()
             while type(Length) != int:
                 TestLength.set(0)
-                MakeEntryBox("Enter A Number", "Number of Moves", TestLength, 1,
+                mb.MakeEntryBox(Root, "Enter A Number", "Number of Moves", TestLength, 1,
                              ["Enter the number of Moves to add to the table."])
 
                 if TestLength.get() < 0:
-                    MakeInfoBox("Error!", "Invalid input!",
+                    mb.MakeInfoBox(Root, "Error!", "Invalid input!",
                                 ["This input is invalid!",
                                  "The number of Moves must be a positive number."])
                     Length = ""
 
                 elif TestLength.get() == 0:
-                    MakeInfoBox("Error!", "Invalid input!",
+                    mb.MakeInfoBox(Root, "Error!", "Invalid input!",
                                 ["This input is invalid!",
                                  "The number of Moves cannot be zero."])
                     Length = ""
@@ -1513,8 +1247,8 @@ try:
             if Length > 999:
                 Length = 999
 
-            OpenNames = BooleanVar()
-            MakeYesNoBox("Open File", "Open Name File?", OpenNames,
+            OpenNames = tk.BooleanVar()
+            mb.MakeYesNoBox(Root, "Open File", "Open Name File?", OpenNames,
                          ["Would you like to load the names",
                           "of the Moves in the table from a file?"])
                          
@@ -1537,155 +1271,45 @@ try:
                     NamesList[i] = Name[0:12] # Names can only be 12 characters, so we should truncate
 
             for i, Name in enumerate(Table):
-                Table[i][MoveNameIndex] = NamesList[i]
+                Table[i][tf.MoveNameIndex] = NamesList[i]
                 
             if len(NamesList) != Length:
-                MakeInfoBox("Warning!", "Warning!",
+                mb.MakeInfoBox(Root, "Warning!", "Warning!",
                             ["The length of the name list is different than the length of the table.",
                              "The current number of Moves is {}.".format(len(Table))])
 
-            MakeInfoBox("Success!", "The table was created!",
+            mb.MakeInfoBox(Root, "Success!", "The table was created!",
                     ["The table was created successfully.",
                      "It has {} Moves in total.".format(len(Table))])
 
             CurrentMoveNumber.set(0)
             EnableEverything()
-            Refresh(True)  
+            Refresh(True)
 
     NewFileButton = ttk.Button(ButtonFrame, text = "New Table", command = CreateNewFile)
-
-    # Format description when opening file
-    def FormatDescription(RawText):
-        RawText = RawText.replace("|", "\n")
-
-        try:
-            Line1 = RawText.split("\n")[0].strip()
-        except Exception as e:
-            print(e)
-            Line1 = ""
-
-        try:
-            Line2 = RawText.split("\n")[1].strip()
-        except Exception as e:
-            print(e)
-            Line2 = ""
-
-        try:
-            Line3 = RawText.split("\n")[2].strip()
-        except Exception as e:
-            print(e)
-            Line3 = ""
-
-        try:
-            Line4 = RawText.split("\n")[3].strip()
-        except Exception as e:
-            print(e)
-            Line4 = ""
-
-        NewText = "{}\n{}\n{}\n{}".format(Line1, Line2, Line3, Line4)
-        return NewText
-
-    # Function to get list of strings from the compiled table of pointers + strings
-    # Basically just removes the pointers and just gives the strings as bytes
-    def GrabStringsFromTable(File):
-        File = open(File, "rb")
-
-        ByteList = []
-        Byte = File.read(1)
-        while Byte != b"":
-            Value = int(bin(ord(Byte)), 2)
-            Byte = hex(Value).upper()[2:]
-
-            if Value < 16:
-                Byte = "0" + Byte
-
-            ByteList.append(Byte)
-            Byte = File.read(1)
-
-        FileBytes = ""
-        for i, Byte in enumerate(ByteList):
-            if (i+1) % 4 == 0:
-                FileBytes += Byte + "\n"
-            else:
-                FileBytes += Byte + " "
-
-        Strings = []
-        String = ""
-        for Line in FileBytes.strip().split("\n"):
-            if not Line.startswith("08"): # Strings in AGB never have 08 in them
-                for Byte in Line.split():
-                    if Byte == "FF": # Terminator
-                        Strings.append(String.strip())
-                        String = ""
-                    else:
-                        String += Byte + " "
-
-        return Strings
-
-    def ParsePointerTable(FileName, Table, Type):
-        try:
-            Strings = GrabStringsFromTable(FileName)
-
-            Error = ""
-            if Type == "Name":
-                Index = MoveNameIndex
-            else:
-                Index = DescriptionIndex
-                        
-            for i, String in enumerate(Strings):
-                Text = ""
-
-                try:
-                    for Byte in String.split():
-                        Keys = list(TextToBytes.keys())
-                        Values = list(TextToBytes.values())
-                        
-                        Text += Keys[Values.index(Byte)]
-                        
-                except:
-                    if Type == "Name":
-                        Text = "Move Name"
-                    else:
-                        Text = ""
-
-                    Error += "0"
-
-                Table[i][Index] = Text.strip()
-
-            if Error != "":
-                MakeInfoBox("Error!", "There was a problem!",
-                            ["There was an error loading {} {}s.".format(Error.count("0"), Type.lower()),
-                             "They were replaced with a default value."])
-        
-            return Table
-
-        except Exception as e:
-            print(e)
-            MakeInfoBox("Error!", "There was a problem!",
-                        ["The Move {} Table given was invalid.".format(Type),
-                         "No {}s were loaded.".format(Type.lower())])
-
-            return Table
-
+    
     # Open a table from a text file
     def OpenFile():
         global CurrentOpenFile, InitialFolder
         MenuText = {"Human-Readable": ["This type of table is a plain text file."],
                     "Compiled":["This type of table is a hex binary file."]}
 
-        Option = StringVar()
-        MakeMultiChoiceBox("Pick A Choice", "Which type of table?", Option,
+        Option = tk.StringVar()
+        Option.set("Human-Readable")
+        mb.MakeMultiChoiceBox(Root, "Pick A Choice", "Which type of table?", Option,
                            ["You may open a human-readable or a compiled table."
-                            "Please select one."], MenuText)
+                            "Please select one."], MenuText, "Human-Readable")
 
         if Option.get() == "Compiled":
             FileType = [("binary hex file", "*.bin")]
-        else:
+        elif Option.get() == "Human-Readable":
             FileType = [("text files", "*.txt")]
+        else:
+            return
 
         NewFile = fd.askopenfilename(title = "Open Table", initialdir = InitialFolder, filetypes = FileType)
         
-        if NewFile is not None:
+        if NewFile != "":
             if Option.get() == "Compiled": # Make new file
                 FileName = NewFile.replace(".bin", " Opened.txt")
                 open(FileName, "w").close()
@@ -1705,144 +1329,12 @@ try:
             Error = ""
 
             if Option.get() == "Compiled": # Load from bytes, this is easier
-                ByteList = []
-                Byte = NewFile.read(1)
-                while Byte:
-                    Value = int(bin(ord(Byte)), 2)
-                    Byte = hex(Value).upper()[2:]
+                FileBytes = CreateFileBytes(NewFile, 12)
 
-                    if Value < 16:
-                        Byte = "0" + Byte
+                Table, Error = tf.MakeTableFromCompiled(FileBytes, Error)
 
-                    ByteList.append(Byte)
-                    Byte = NewFile.read(1)
-
-                FileBytes = ""
-                for i, Byte in enumerate(ByteList):
-                    if (i+1) % 12 == 0:
-                        FileBytes += Byte + "\n"
-                    else:
-                        FileBytes += Byte + " "
-
-                for Line in FileBytes.strip().split("\n"):
-                    TableLine = []
-                    Line = Line.strip()
-
-                    Entry = Line.split()
-
-                    TableLine.append("Move Name")
-
-                    try:
-                        TableLine.append(Entry[0])  # Move Script
-                    except Exception as e:
-                        print(e)
-                        TableLine.append("00")
-                        Error += "0"
-
-                    try:
-                        TableLine.append(int(Entry[1], 16)) # Base Power
-                    except Exception as e:
-                        print(e)
-                        TableLine.append(0)
-                        Error += "1"
-
-                    try:
-                        TableLine.append(list(TypeConversion.keys())[list(TypeConversion.values()).index(Entry[2])])
-                    except Exception as e:
-                        print(e)
-                        TableLine.append("Normal")
-                        Error += "2"
-
-                    try:
-                        A = int(Entry[3], 16)
-                        if A > 100:
-                            A = 100
-                        TableLine.append(A) # Accuracy
-                    except Exception as e:
-                        print(e)
-                        TableLine.append(0)
-                        Error += "3"
-
-                    try:
-                        A = int(Entry[4], 16)
-                        if A > 99:
-                            A = 99
-                        TableLine.append(A) # Power Points
-                    except Exception as e:
-                        print(e)
-                        TableLine.append(0)
-                        Error += "4"
-
-                    try:
-                        A = int(Entry[5], 16)
-                        if A > 100:
-                            A = 100
-                        TableLine.append(A) # Effect Chance
-                    except:
-                        TableLine.append(0)
-                        Error += "5"
-
-                    try:
-                        TableLine.append(list(RangeConversion.keys())[list(RangeConversion.values()).index(Entry[6])])
-                    except Exception as e:
-                        print(e)
-                        TableLine.append("Target")
-                        Error += "6"
-
-                    try:
-                        P = int(Entry[7], 16)
-                        if P > 127:
-                            P = 256 - P
-                            P = -P
-                            
-                        TableLine.append(P) # Priority
-                    except Exception as e:
-                        print(e)
-                        TableLine.append(0)
-                        Error += "7"
-
-                    try:
-                        MoveFlags = [0,0,0,0,0,0,0,0]
-                        F = int(Entry[8], 16)
-
-                        for i in range(8):
-                            if F & 128 // 2**i != 0: # Flag is set
-                                MoveFlags[i] = 1
-
-                        TableLine.append(MoveFlags)
-                    except Exception as e:
-                        print(e)
-                        TableLine.append([0,0,0,0,0,0,0,0])
-                        Error += "8"
-
-                    try:
-                        TableLine.append(Entry[9]) # Damage Formula
-                    except Exception as e:
-                        print(e)
-                        TableLine.append("00")
-                        Error += "9"
-
-                    try:
-                        TableLine.append(list(KindConversion.keys())[list(KindConversion.values()).index(Entry[10])])
-                    except Exception as e:
-                        print(e)
-                        TableLine.append("Status")
-                        Error += "A"
-
-                    try:
-                        TableLine.append(int(Entry[11], 16))
-                    except Exception as e:
-                        print(e)
-                        TableLine.append(0)
-                        Error += "B"
-
-                    # Blank Move Description
-                    TableLine.append('')
-                        
-                    Table.append(TableLine)
-
-                Sure = BooleanVar()
-                MakeYesNoBox("Open Table", "Open compiled Move Name Table?", Sure,
+                Sure = tk.BooleanVar()
+                mb.MakeYesNoBox(Root, "Open Table", "Open compiled Move Name Table?", Sure,
                              ["Would you like to load the Move Names from",
                               "a COMPILED Move Name Table?"])
 
@@ -1851,10 +1343,10 @@ try:
 
                     if NameFile is not None:
                         InitialFolder = os.path.dirname(os.path.realpath(NameFile))
-                        Table = ParsePointerTable(NameFile, Table, "Name")
+                        Table = tf.ParsePointerTable(NameFile, Table, "Name")
 
-                Sure = BooleanVar()
-                MakeYesNoBox("Open Table", "Open compiled Move Description Table?", Sure,
+                Sure = tk.BooleanVar()
+                mb.MakeYesNoBox(Root, "Open Table", "Open compiled Move Description Table?", Sure,
                              ["Would you like to load the Move Description from",
                               "a COMPILED Move Description Table?"])
 
@@ -1863,288 +1355,73 @@ try:
 
                     if DescFile is not None:
                         InitialFolder = os.path.dirname(os.path.realpath(DescFile))
-                        Table = ParsePointerTable(DescFile, Table, "Description")
+                        Table = tf.ParsePointerTable(DescFile, Table, "Description")
 
-            else: # Parse from text, this is harder
+            else: # Parse from text, only needs one file
                 FileStuff = NewFile.read().split("\n\n")
+                Table, Error = tf.MakeTableFromText(FileStuff, Error)
 
-                for Entry in FileStuff:
-                    TableLine = []
-                    Entry = Entry.split("\n")
+            # Post-process the table and load any error messages encountered
+            Table = tf.ProcessTable(Root, Table)
+            tf.LoadTableErrors(Root, Table, Error)
 
-                    for i, Line in enumerate(Entry):
-                        if i == MoveNameIndex:
-                            try:
-                                TableLine.append(Line.split("-")[0].strip()[0:12]) # Truncate at 12
-                            except Exception as e:
-                                print(e)
-                                TableLine.append("Move Name")
-                                Error += "X"
-
-                        elif i == MoveScriptIndex:
-                            try:
-                                TableLine.append(Line.split(")")[1].replace(",", "").strip()[2:])
-                            except Exception as e:
-                                print(e)
-                                TableLine.append("00")
-                                Error += "0"
-
-                        elif i == BasePowerIndex:
-                            try:
-                                TableLine.append(int(Line.split(")")[1].replace(",", "").strip()))
-                            except Exception as e:
-                                print(e)
-                                TableLine.append(0)
-                                Error += "1"
-
-                        elif i == TypeIndex:
-                            try:
-                                TableLine.append(Line.split(")")[1].replace(",", "").strip())
-                            except Exception as e:
-                                print(e)
-                                TableLine.append("Normal")
-                                Error += 2
-
-                        elif i == AccuracyIndex:
-                            try:
-                                TableLine.append(int(Line.split(")")[1].replace(",", "").strip()))
-                            except Exception as e:
-                                print(e)
-                                TableLine.append(0)
-                                Error += "3"
-
-                        elif i == PowerPointIndex:
-                            try:
-                                TableLine.append(int(Line.split(")")[1].replace(",", "").strip()))
-                            except Exception as e:
-                                print(e)
-                                TableLine.append(0)
-                                Error += "4"
-
-                        elif i == EffectChanceIndex:
-                            try:
-                                TableLine.append(int(Line.split(")")[1].replace(",", "").strip()))
-                            except Exception as e:
-                                print(e)
-                                TableLine.append(0)
-                                Error += "5"
-                            
-                        elif i == RangeIndex:
-                            try:
-                                Range = Line.split(")")[1].replace(",", "").strip()
-
-                                C = {"MySide":"My Side", "FoeSide":"Foe Side",
-                                     "AllButUser":"All But User", "UserOrPartner":"User Or Partner",
-                                     "TargetOrPartner":"Target Or Partner", "LastHitMe":"Last Attacker"}
-
-                                for Key in C:
-                                    if Range == Key:
-                                        Range = C[Key]
-                                        break
-                                
-                                TableLine.append(Range)
-                            except Exception as e:
-                                print(e)
-                                TableLine.append("Target")
-                                Error += "6"
-
-                        elif i == PriorityIndex:
-                            try:
-                                P = int(Line.split(")")[1].replace(",", "").strip())
-
-                                if P > 127:
-                                    P = 256 - P
-                                    P = -P
-
-                                TableLine.append(P)
-                            except Exception as e:
-                                print(e)
-                                TableLine.append(0)
-                                Error += "7"
-
-                        elif i == MoveFlagIndex:
-                            try:
-                                F = Line.split(")")[1].replace(",", "").strip()
-                                MoveFlags = [0,0,0,0,0,0,0,0]
-
-                                for i, Flag in enumerate(F.split("+")):
-                                    Flag = Flag.strip()[2:]
-
-                                    if int(Flag, 16) & 128 // 2**i:
-                                        MoveFlags[i] = 1
-
-                                TableLine.append(MoveFlags)
-                            except Exception as e:
-                                print(e)
-                                TableLine.append([0,0,0,0,0,0,0,0])
-                                Error += "8"
-
-                        elif i == DamageFormulaIndex:
-                            try:
-                                TableLine.append(Line.split(")")[1].replace(",", "").strip()[2:])
-                            except Exception as e:
-                                print(e)
-                                TableLine.append("00")
-                                Error += "9"
-
-                        elif i == MoveKindIndex:
-                            try:
-                                TableLine.append(Line.split(")")[1].replace(",", "").strip())
-                            except Exception as e:
-                                print(e)
-                                TableLine.append("Status")
-                                Error += "A"
-
-                        elif i == ScriptArgIndex:
-                            try:
-                                TableLine.append(int(Line.split(")")[1].replace(",", "").strip()))
-                            except Exception as e:
-                                print(e)
-                                TableLine.append(0)
-                                Error += "B"
-
-                        elif i == DescriptionIndex: # Includes a Move Description Line
-                            try:
-                                Text = Line.split(")")[1].replace(",","").strip()
-                                if Text != "":
-                                    TableLine.append(FormatDescription(Text))
-                                else:
-                                    TableLine.append('')
-                            except Exception as e:
-                                print(e)
-                                TableLine.append('')
-                                Error += "C"
-
-                    if len(TableLine) < 14:
-                        TableLine = ["Move Name", "00", 0, "Normal", 0, 0, 0, "Target", 0, [0,0,0,0,0,0,0,0], "00", "Status", 0, ""]
-                        Error += "D"
-                        
-                    Table.append(TableLine)
-
-        for i, Entry in enumerate(Table): # Get rid of blank line entries
-            if Entry == ['', '', '', '', '', '', '', '', '', '', '', '', '', '']:
-                Table.pop(i)
-
-        if len(Table) == 0:
-            Table = [["Move Name", "00", 0, "Normal", 0, 0, 0, "Target", 0, [0,0,0,0,0,0,0,0], "00", "Status", 0, ""]]
-
-            MakeInfoBox("Error!", "There was a problem.",
-                        ["There was a problem loading the table.",
-                         "A blank one was provided instead.",
-                         "It has {} Moves in total.".format(len(Table))])
+            # Refresh the screen
+            CurrentMoveNumber.set(0)
+            EnableEverything()
+            Refresh(True) 
+            EnableEverything()
             
-        else:            
-            if Error == "":
-                MakeInfoBox("Success!", "The table was created!",
-                            ["The table was created successfully.",
-                             "It has {} Moves in total.".format(len(Table))])
-            else:
-                ErrorLines = ["There was a problem loading the table!",
-                              "Default values were provided for bad data.",
-                              "The table has {} Moves in total.".format(len(Table)),
-                              "\n",
-                              "The following errors occurred."]
-                
-                if "0" in Error:
-                    ErrorLines.append("Error loading {} Move Script values".format(Error.count("0")))
+        else:
+            return
 
-                if "1" in Error:
-                    ErrorLines.append("Error loading {} Base Power values".format(Error.count("1")))
-
-                if "2" in Error:
-                    ErrorLines.append("Error loading {} Type values".format(Error.count("2")))
-
-                if "3" in Error:
-                    ErrorLines.append("Error loading {} Accuracy values".format(Error.count("3")))
-
-                if "4" in Error:
-                    ErrorLines.append("Error loading {} Power Point values".format(Error.count("4")))
-
-                if "5" in Error:
-                    ErrorLines.append("Error loading {} Effect Chance values".format(Error.count("5")))
-
-                if "6" in Error:
-                    ErrorLines.append("Error loading {} Range values".format(Error.count("6")))
-
-                if "7" in Error:
-                    ErrorLines.append("Error loading {} Priority values".format(Error.count("7")))
-
-                if "8" in Error:
-                    ErrorLines.append("Error loading {} Move Flag values".format(Error.count("8")))
-
-                if "9" in Error:
-                    ErrorLines.append("Error loading {} Damage Formula values".format(Error.count("9")))
-
-                if "A" in Error:
-                    ErrorLines.append("Error loading {} Move Kind values".format(Error.count("A")))
-
-                if "B" in Error:
-                    ErrorLines.append("Error loading {} Script Argument values".format(Error.count("B")))
-
-                if "C" in Error:
-                    ErrorLines.append("Error loading {} Move Description values".format(Error.count("C")))
-
-                if "X" in Error:
-                    ErrorLines.append("Error loading {} Move Name values".format(Error.count("X")))
-
-                if "D" in Error:
-                    ErrorLines.append("{} lines could not be loaded and were set to default values.".format(Error.count("D")))
-
-                MakeInfoBox("Error!", "There was a problem.", ErrorLines)
-        
-        CurrentMoveNumber.set(0)
-        EnableEverything()
-        Refresh(True) 
-        EnableEverything()
-
-    OpenFileButton = ttk.Button(ButtonFrame, text = "Open", command = OpenFile)
+    OpenFileButton = ttk.Button(ButtonFrame, text = "Open Table", command = OpenFile)
 
     # Write current table to the currently opened file
-    def SaveFile():
+    def SaveFile(Table, FileName, Silent = False):
         TableText = ""
 
         for Entry in Table:
             for i, Item in enumerate(Entry):
-                if i == MoveNameIndex:
+                if i == tf.MoveNameIndex:
                     TableText += "{}\n".format(Item)
                     continue
 
-                if i == MoveScriptIndex:
+                if i == tf.MoveScriptIndex:
                     TableText += "(Move Script) 0x{}\n".format(Item)
                     continue
                             
-                if i == BasePowerIndex:
+                if i == tf.BasePowerIndex:
                     TableText += "(Base Power) {}\n".format(Item)
                     continue
                 
-                if i == TypeIndex:
+                if i == tf.TypeIndex:
                     TableText += "(Type) {}\n".format(Item)
                     continue
                             
-                if i == AccuracyIndex:
+                if i == tf.AccuracyIndex:
                     TableText += "(Accuracy) {}\n".format(Item)
                     continue
                             
-                if i == PowerPointIndex:
+                if i == tf.PowerPointIndex:
                     TableText += "(Power Points) {}\n".format(Item)
                     continue
                             
-                if i == EffectChanceIndex:
+                if i == tf.EffectChanceIndex:
                     TableText += "(Effect Chance) {}\n".format(Item)
                     continue
                             
-                if i == RangeIndex:
+                if i == tf.RangeIndex:
                     TableText += "(Range) {}\n".format(Item)
                     continue
                             
-                if i == PriorityIndex:
+                if i == tf.PriorityIndex:
                     if int(Item) < 0: # Negative value, subtract from 256 first
                         Item = 256 + int(Item)
                                 
                     TableText += "(Priority) {}\n".format(Item)
                     continue
                             
-                if i == MoveFlagIndex:
+                if i == tf.MoveFlagIndex:
                     FlagValue = ""
                             
                     for i, Flag in enumerate(Item):
@@ -2155,36 +1432,37 @@ try:
                     TableText += "(Move Flags) {}\n".format(FlagValue)
                     continue
                             
-                if i == DamageFormulaIndex:
+                if i == tf.DamageFormulaIndex:
                     TableText += "(Damage Formula) 0x{}\n".format(Item)
                     continue
                             
-                if i == MoveKindIndex:
+                if i == tf.MoveKindIndex:
                     TableText += "(Kind) {}\n".format(Item)
                     continue
                             
-                if i == ScriptArgIndex:
+                if i == tf.ScriptArgIndex:
                     TableText += "(Script Arg) {}\n".format(Item)
                     continue
 
-                if i == DescriptionIndex:
+                if i == tf.DescriptionIndex:
                     Item = Item.strip().replace("\n", " | ")
                     TableText += "(Description) {}\n\n".format(Item.strip())
 
-        NewFile = open(CurrentOpenFile, "w")
+        NewFile = open(FileName, "w")
         NewFile.write(TableText.strip())
         NewFile.close()
 
-        MakeInfoBox("Complete", "Table Saved!",
-                    ["The current table was successfully saved!"])
+        if not Silent:
+            mb.MakeInfoBox(Root, "Complete", "Table Saved!",
+                        ["The current table was successfully saved!"])
 
-    SaveButton = ttk.Button(ButtonFrame, text = "Save Table", command = SaveFile)
+    SaveButton = ttk.Button(ButtonFrame, text = "Save Table", command = lambda: SaveFile(Table, CurrentOpenFile))
 
     # Save the current table to a new file
     def SaveFileAs():
         global CurrentOpenFile, InitialFolder
-        Edit = BooleanVar()
-        MakeYesNoBox("New File", "Save A Copy", Edit,
+        Edit = tk.BooleanVar()
+        mb.MakeYesNoBox(Root, "New File", "Save A Copy", Edit,
                     ["Would you like to switch to editing the new file",
                      "after you save a copy of this one?"])
         
@@ -2209,10 +1487,9 @@ try:
     SaveAsButton = ttk.Button(ButtonFrame, text = "Save Table As", command = SaveFileAs)
 
     # Compile to bytes
-    def CompileTable():
+    def CompileTable(Table):
         global InitialFolder
-        Option = StringVar()
-        Option.set("None")
+        Option = tk.StringVar()
 
         MenuText = {"Attack Data Table": ["This is the main Attack Data Table.",
                                           "This can be completely compiled without needing an address."],
@@ -2220,8 +1497,8 @@ try:
                                         "This requires an address beforehand."],
                     "Move Description Table": ["This is the table of pointers for Move Descriptions",
                                         "This requires an address beforehand."]}
-        
-        MakeMultiChoiceBox("Pick A Choice", "Which table should be compiled?", Option,
+
+        mb.MakeMultiChoiceBox(Root, "Pick A Choice", "Which table should be compiled?", Option,
                            ["There are three possible tables which could be compiled."
                             "Please select one."], MenuText)
 
@@ -2237,33 +1514,33 @@ try:
 
                 ByteList = []
                 for Entry in Table:
-                    ByteList.append(int(Entry[MoveScriptIndex], 16))
-                    ByteList.append(Entry[BasePowerIndex])
-                    ByteList.append(int(TypeConversion[Entry[TypeIndex]], 16))
-                    ByteList.append(Entry[AccuracyIndex])
-                    ByteList.append(Entry[PowerPointIndex])
-                    ByteList.append(Entry[EffectChanceIndex])
-                    ByteList.append(int(RangeConversion[Entry[RangeIndex]], 16))
+                    ByteList.append(int(Entry[tf.MoveScriptIndex], 16))
+                    ByteList.append(Entry[tf.BasePowerIndex])
+                    ByteList.append(int(tf.TypeConversion[Entry[tf.TypeIndex]], 16))
+                    ByteList.append(Entry[tf.AccuracyIndex])
+                    ByteList.append(Entry[tf.PowerPointIndex])
+                    ByteList.append(Entry[tf.EffectChanceIndex])
+                    ByteList.append(int(tf.RangeConversion[Entry[tf.RangeIndex]], 16))
 
-                    if Entry[PriorityIndex] < 0:
-                        P = 256 + Entry[PriorityIndex]
+                    if Entry[tf.PriorityIndex] < 0:
+                        P = 256 + Entry[tf.PriorityIndex]
                     else:
-                        P = Entry[PriorityIndex]
+                        P = Entry[tf.PriorityIndex]
                         
                     ByteList.append(P)
 
                     FlagLine = 0
-                    for i, Flag in enumerate(Entry[MoveFlagIndex]):
+                    for i, Flag in enumerate(Entry[tf.MoveFlagIndex]):
                         FlagLine += (128 // 2**i) * Flag
 
                     ByteList.append(FlagLine)
-                    ByteList.append(int(Entry[DamageFormulaIndex]))
-                    ByteList.append(int(KindConversion[Entry[MoveKindIndex]], 16))
-                    ByteList.append(Entry[ScriptArgIndex])
+                    ByteList.append(int(Entry[tf.DamageFormulaIndex], 16))
+                    ByteList.append(int(tf.KindConversion[Entry[tf.MoveKindIndex]], 16))
+                    ByteList.append(Entry[tf.ScriptArgIndex])
 
                 NewFile.write(bytes(ByteList))
                 NewFile.close()
-                MakeInfoBox("Success", "Compilation complete!",
+                mb.MakeInfoBox(Root, "Success", "Compilation complete!",
                             ["The table was compiled to a file successfully!"])
 
         else:
@@ -2277,15 +1554,15 @@ try:
             NewFile = fd.asksaveasfile(initialdir = InitialFolder, initialfile = FileName, defaultextension = ".bin")
 
             if NewFile is not None:
-                Address = StringVar()
-                MakeAddressEntryBox("Enter Address", "Enter the starting address", Address,
+                Address = tk.StringVar()
+                mb.MakeAddressEntryBox(Root, "Enter Address", "Enter the starting address", Address,
                                     ["Enter the starting address for the table in the following form:",
                                      "08AABBCC",
                                      "Where AABBCC is a placeholder for the offset of your table.",
                                      "Use placeholder 0's (i.e. 0x12345 -> 08012345)"])
 
-                Extend = BooleanVar()
-                MakeYesNoBox("Question", "Future-proof the table?", Extend,
+                Extend = tk.BooleanVar()
+                mb.MakeYesNoBox(Root, "Question", "Future-proof the table?", Extend,
                              ["Would you like to future proof the table?",
                               "This makes each string of text the maximum length",
                               "it can be, with extra bytes being written as 00.",
@@ -2293,7 +1570,7 @@ try:
                               "repointing the table later if you change string lengths."])
 
             if NewFile is not None:
-                FileName = os.path.realpath(NewFile.name)
+                FileName = NewFile.name
                 InitialFolder = os.path.dirname(FileName)
                 NewFile.close()
 
@@ -2307,9 +1584,9 @@ try:
                 
                 for N, Entry in enumerate(Table):
                     if Option.get() == "Move Name Table":
-                        Text = Entry[MoveNameIndex]
+                        Text = Entry[tf.MoveNameIndex]
                     else:
-                        Text = Entry[DescriptionIndex]
+                        Text = Entry[tf.DescriptionIndex]
 
                     if Extend.get():
                         Array = [0] * SplitPoint
@@ -2325,7 +1602,7 @@ try:
 
                     for i, Letter in enumerate(Text):
                         try:
-                            Array[i] = int(TextToBytes[Letter], 16)
+                            Array[i] = int(tf.TextToBytes[Letter], 16)
                         except:
                             pass
 
@@ -2344,13 +1621,183 @@ try:
                 NewFile.write(bytes(PointerByteList))
                 NewFile.write(bytes(TextByteList))
                 NewFile.close()
-                MakeInfoBox("Success", "Compilation complete!",
+                mb.MakeInfoBox(Root, "Success", "Compilation complete!",
                             ["The table was compiled to a file successfully!"])
 
-    CompileButton = ttk.Button(ButtonFrame, text = "Compile Table", command = CompileTable)
+    CompileButton = ttk.Button(ButtonFrame, text = "Compile Table", command = lambda: CompileTable(Table))
 
     ButtonHSpacing = 30
     ButtonVSpacing = 5
+
+    # Convert an old form table to a new form table
+    def ConvertTable():
+        global InitialFolder
+        Sure = tk.BooleanVar()
+        mb.MakeYesNoBox(Root,  "Convert Table?", "Convert an old table?", Sure,
+                    ["Convert a compiled gen 3 table to the ACE format?",
+                     "This changes Move Scripts and Move Ranges and attempts",
+                     "to assign the correct Damage Formula and Script Argument",
+                     "values to what they should be by default in the ACE engine.",
+                     "This assumes that scripts are unedited from the default.",
+                     "Results may not be entirely correct or incomplete."])
+
+        if not Sure.get():
+            return
+        else:
+            OldTable = fd.askopenfilename(title = "Open Table", initialdir = InitialFolder, filetypes = [("binary hex file", "*.bin")])
+            if OldTable == "": # Cancelled opening file
+                return
+
+            OldFile = open(OldTable, "rb")
+            InitialFolder = os.path.dirname(os.path.realpath(OldFile.name))
+
+            FileName = os.path.basename(OldFile.name.replace(".bin", "")) # Base name of the file w/o extension
+            DirName = os.path.dirname(OldFile.name) # Path of the directory the file is in
+
+            CurrentFolderName = os.path.basename(os.path.dirname(os.path.realpath(OldFile.name))) # Base name of the directory file is in
+            NewFolderName = "Converted - {}".format(FileName) # Base name of directory to create
+
+            if CurrentFolderName != NewFolderName: # The correct folder is not the current one
+                NewFolder = os.path.join(DirName, NewFolderName) # Path of new subfolder to use
+
+                if not os.path.exists(NewFolder): # if the folder doesn't exist, create it
+                    os.makedirs(NewFolder)
+
+                MovedFile = os.path.join(NewFolder, os.path.basename(OldTable)) # path of the new location of the file
+                shutil.move(OldTable, OldCompiled)
+
+                mb.MakeInfoBox(Root, "Announcement!", "Old Table Moved",
+                               ["The old table file that you just opened was",
+                                "moved to the same folder as the new table.",
+                                "{}".format(NewFolder)])
+
+                CurrentFolder = NewFolder
+
+            else:
+                CurrentFolder = InitialFolder
+
+            NewCompiled = os.path.join(CurrentFolder, "Converted {}.bin".format(FileName))
+            NewText = os.path.join(CurrentFolder, "Converted {}.txt".format(FileName))
+
+            # Convert Compiled Old to Compiled New
+            FileBytes = CreateFileBytes(OldFile, 12)
+
+            NewTableString = ""
+            for Line in FileBytes.split("\n"):
+                Entry = Line.split()
+                Script = ""
+                
+                for i, Byte in enumerate(Entry):
+                    Byte = Byte.strip()
+
+                    match i:
+                        case 0: # Move Script
+                            if Byte in d.OldToNewScripts:
+                                NewTableString += d.OldToNewScripts[Byte] + " "
+                            else:
+                                NewTableString += Byte + " "
+
+                            Script = Byte
+                        
+                        case 6: # Move Range
+                            if Byte in d.OldToNewRanges:
+                                NewTableString += d.OldToNewRanges[Byte] + " "
+                            else:
+                                NewTableString += Byte + " "
+                        
+                        case 8: # Move Flags
+                            if Script in d.SelfEffectFlagList:
+                                NewTableString += hex(int(Byte, 16) + 64).upper()[2:] + " "
+                            else:
+                                NewTableString += Byte + " "
+
+                        case 9: # Damage Formula
+                            if Script in d.OldToNewDamageFormula:
+                                NewTableString += d.OldToNewDamageFormula[Script] + " "
+                            else:
+                                NewTableString += Byte + " "
+
+                        case 11: # Script Argument
+                            if Script in d.OldToNewArguments:
+                                NewTableString += d.OldToNewArguments[Script] + " "
+                            else:
+                                NewTableString += Byte + " "
+
+                        case _:
+                            NewTableString += Byte + " "
+
+            NewTableString = NewTableString.strip()
+
+            NewFile = open(NewCompiled, "wb")
+            BytesToWrite = [int(i, 16) for i in NewTableString.split(" ")]
+            NewFile.write(bytes(BytesToWrite))
+            NewFile.close()
+
+            # Save the human-readable version
+            CompiledFile = open(NewCompiled, "rb")
+            FileBytes = CreateFileBytes(CompiledFile, 12)
+            
+            Error = ""
+            NewTable, Error = tf.MakeTableFromCompiled(FileBytes, Error)
+
+            Names = tk.BooleanVar()
+            mb.MakeYesNoBox(Root, "Open Name File?", "Conversion Success!", Names,
+                            ["The table was converted successfully!",
+                             "Would you like to open a HUMAN-READABLE name file",
+                             "for the new table?"])
+
+            if Names.get():
+                Length = len(NewTable)
+                         
+                NamesList = ("Move Name\n"*Length).split("\n")[0:-1]
+                NamesFile = fd.askopenfilename(title = "Open Table", initialdir = InitialFolder, filetypes = [("text files", "*.txt")])
+                NamesFile = open(NamesFile, "r")
+
+                InitialFolder = os.path.dirname(os.path.realpath(NamesFile.name))
+                
+                for i, Name in enumerate(NamesFile.read().splitlines()):
+                    if i >= len(NewTable):
+                        NamesList.append("Move Name")
+                    
+                    NamesList[i] = Name[0:12] # Names can only be 12 characters, so we should truncate
+
+                for i, Name in enumerate(NewTable):
+                    NewTable[i][tf.MoveNameIndex] = NamesList[i]
+                    
+                if len(NamesList) != Length:
+                    mb.MakeInfoBox(Root, "Warning!", "Warning!",
+                                ["The length of the name list is different than the length of the table.",
+                                 "The current number of Moves is {}.".format(len(NewTable))])
+
+            SaveFile(NewTable, NewText, True)
+
+            OpenNew = tk.BooleanVar()
+            mb.MakeYesNoBox(Root, "Open File", "Open newly converted table?", OpenNew,
+                            ["Conversion success!",
+                             "Would you like to open the newly converted table",
+                             "in the editor?"])
+
+            if OpenNew.get():
+                global Table, CurrentOpenFile
+                NewFile = open(NewText, "r")
+                CurrentOpenFile = os.path.realpath(NewText)
+                InitialFolder = os.path.dirname(CurrentOpenFile)
+                CurrentLabel.configure(text = "Open File: {}".format(os.path.basename(NewText)))
+
+                Table = []
+                Error = ""
+                FileStuff = NewFile.read().split("\n\n")
+                Table, Error = tf.MakeTableFromText(FileStuff, Error)
+                
+                Table = tf.ProcessTable(Root, Table)
+                tf.LoadTableErrors(Root, Table, Error)
+                
+                CurrentMoveNumber.set(0)
+                EnableEverything()
+                Refresh(True) 
+                EnableEverything()
+              
+    ConvertButton = ttk.Button(ButtonFrame, text = "Convert Table", command = ConvertTable)
 
     #------------------------------------------------------------
     # Make the second layer of buttons
@@ -2397,14 +1844,14 @@ try:
     def AddMoves():
         Length = ""
 
-        TestLength = IntVar()
+        TestLength = tk.IntVar()
         while type(Length) != int:
             TestLength.set(0)
-            MakeEntryBox("Enter A Number", "Number of Moves", TestLength, 1,
+            mb.MakeEntryBox(Root, "Enter A Number", "Number of Moves", TestLength, 1,
                          ["Enter the number of Moves to add to the table."])
 
             if TestLength.get() < 0:
-                MakeInfoBox("Error!", "Invalid input!",
+                mb.MakeInfoBox(Root, "Error!", "Invalid input!",
                             ["This input is invalid!",
                              "The number of Moves must be a positive number."])
                 Length = ""
@@ -2421,7 +1868,7 @@ try:
         ForwardButton.configure(state = "disabled")
 
         if Length != 0:
-            MakeInfoBox("Success!", "A new Move was added!",
+            mb.MakeInfoBox(Root, "Success!", "A new Move was added!",
                         ["The table was modified successfully.",
                          "There are now {} Moves in total.".format(len(Table))])
 
@@ -2433,16 +1880,16 @@ try:
     def DeleteMove():
         global Table
 
-        Sure = BooleanVar()
+        Sure = tk.BooleanVar()
         Sure.set(False)
-        MakeYesNoBox("Warning!", "Warning!", Sure,
+        mb.MakeYesNoBox(Root, "Warning!", "Warning!", Sure,
                      ["You are about to remove the current Move from the table.",
                       "This action cannot be undone.",
                       "Would you still like to proceed?"])
 
         if Sure.get():
             if len(Table) == 1: # Only one Move left
-                MakeInfoBox("Error", "Warning!",
+                mb.MakeInfoBox(Root, "Error", "Warning!",
                             ["This is the only Move left in the table!",
                              "It cannot be fully deleted.",
                              "It will instead be replaced with an empty Move."])
@@ -2460,9 +1907,6 @@ try:
                 Refresh(True)
 
     DeleteMoveButton = ttk.Button(ButtonFrame, text = "Delete Move", command = DeleteMove)
-
-    # Move Label
-    MoveNumberLabel = ttk.Label(ButtonFrame, text = "Move {} of {}".format(CurrentMoveNumber.get() + 1, len(Table)))
 
     #------------------------------------------------------------
     # Disable/Enable
@@ -2488,6 +1932,7 @@ try:
         SetDirectContactFlag.configure(state = "disabled")
             
         DamageFormulaEntry.configure(state = "disabled")
+        DamageArgumentEntry.configure(state = "disabled")
         MoveKindEntry.configure(state = "disabled")
         ScriptArgEntry.configure(state = "disabled")
 
@@ -2504,6 +1949,7 @@ try:
         PriorityHelpButton.configure(state = "disabled")
         MoveFlagHelpButton.configure(state = "disabled")
         DamageFormulaHelpButton.configure(state = "disabled")
+        DamageArgumentHelpButton.configure(state = "disabled")
         MoveKindHelpButton.configure(state = "disabled")
         ScriptArgHelpButton.configure(state = "disabled")
         HexHelpButton.configure(state = "disabled")
@@ -2542,6 +1988,7 @@ try:
         SetDirectContactFlag.configure(state = "normal")
         
         DamageFormulaEntry.configure(state = "normal")
+        DamageArgumentEntry.configure(state = "normal")
         MoveKindEntry.configure(state = "normal")
         ScriptArgEntry.configure(state = "normal")
 
@@ -2558,6 +2005,7 @@ try:
         PriorityHelpButton.configure(state = "normal")
         MoveFlagHelpButton.configure(state = "normal")
         DamageFormulaHelpButton.configure(state = "normal")
+        DamageArgumentHelpButton.configure(state = "normal")
         MoveKindHelpButton.configure(state = "normal")
         ScriptArgHelpButton.configure(state = "normal")
         HexHelpButton.configure(state = "normal")
@@ -2578,127 +2026,142 @@ try:
     # Place everything
     #------------------------------------------------------------
     # Icon Frame
+    BulbasaurFrame.pack(side = "left", padx = 50)
+    BulbasaurLabel.pack()
+    
+    IconFrame.pack(side = "left", padx = 10)
     LabelFrame.pack(pady = 10)
     MainLabel.pack()
     CopyrightLabel.pack()
 
+    TablePicFrame.pack(side = "left", padx = 30)
+    TableLabel.pack()
+
     MenuFrame.pack()
-    CurrentLabel.pack(side = tk.LEFT, padx = 20)
-    ShowHelpButton.pack(side = tk.LEFT, padx = (20,0))
-    MoveFinder.pack(side = tk.LEFT, padx = (0,20))
+    CurrentLabel.pack(pady = 5)
+    MoveFinderFrame.pack()
+    ShowHelpButton.pack(side = "left", pady = 5)
+    MoveFinder.pack(side = "left", pady = 5)
+    MoveNumberLabel.pack(pady = 5)
 
     # Button Frame
-    NewFileButton.grid(row = 0, column = 0, padx = ButtonHSpacing, pady = ButtonVSpacing, sticky = W)
-    OpenFileButton.grid(row = 0, column = 1, padx = ButtonHSpacing, pady = ButtonVSpacing, sticky = W)
-    SaveButton.grid(row = 0, column = 2, padx = ButtonHSpacing, pady = ButtonVSpacing, sticky = W)
-    SaveAsButton.grid(row = 0, column = 3, padx = ButtonHSpacing, pady = ButtonVSpacing, sticky = W)
-    CompileButton.grid(row = 0, column = 4, padx = ButtonHSpacing, pady = ButtonVSpacing, sticky = W)
+    NewFileButton.grid(row = 0, column = 0, padx = ButtonHSpacing, pady = ButtonVSpacing, sticky = "w")
+    OpenFileButton.grid(row = 0, column = 1, padx = ButtonHSpacing, pady = ButtonVSpacing, sticky = "w")
+    ConvertButton.grid(row = 0, column = 2, padx = ButtonHSpacing, pady = ButtonVSpacing, sticky = "w")
+    SaveButton.grid(row = 0, column = 3, padx = ButtonHSpacing, pady = ButtonVSpacing, sticky = "w")
+    SaveAsButton.grid(row = 0, column = 4, padx = ButtonHSpacing, pady = ButtonVSpacing, sticky = "w")
 
-    AddMoveButton.grid(row = 1, column = 0, padx = ButtonHSpacing, sticky = W)
-    BackButton.grid(row = 1, column = 1, padx = ButtonHSpacing, sticky = W)
-    MoveNumberLabel.grid(row = 1, column = 2, padx = ButtonHSpacing, sticky = W)
-    ForwardButton.grid(row = 1, column = 3, padx = ButtonHSpacing, sticky = W)
-    DeleteMoveButton.grid(row = 1, column = 4, padx = ButtonHSpacing, sticky = W)
+    AddMoveButton.grid(row = 1, column = 0, padx = ButtonHSpacing, sticky = "w")
+    BackButton.grid(row = 1, column = 1, padx = ButtonHSpacing, sticky = "w")
+    CompileButton.grid(row = 1, column = 2, padx = ButtonHSpacing, sticky = "w")
+    ForwardButton.grid(row = 1, column = 3, padx = ButtonHSpacing, sticky = "w")
+    DeleteMoveButton.grid(row = 1, column = 4, padx = ButtonHSpacing, sticky = "w")
 
     # Editor Frame
-    MoveNameFrame.grid(row = 0, column = 0, padx = 15, pady = 5, sticky = W)
-    MoveNameHelpButton.pack(side = tk.LEFT)
-    MoveNameLabel.pack(side = tk.LEFT, padx = (0,5))
-    MoveNameEntry.pack(side = tk.LEFT)
+    MoveNameFrame.grid(row = 0, column = 1, padx = 15, pady = 5, sticky = "w")
+    MoveNameHelpButton.pack(side = "left")
+    MoveNameLabel.pack(side = "left", padx = (0,5))
+    MoveNameEntry.pack(side = "left")
 
-    MoveScriptFrame.grid(row = 0, column = 1, padx = 15, pady = 5, sticky = W)
-    MoveScriptHelpButton.pack(side = tk.LEFT)
-    MoveScriptLabel.pack(side = tk.LEFT, padx = (0,5))
-    MoveScriptEntry.pack(side = tk.LEFT)
+    MoveScriptFrame.grid(row = 1, column = 0, padx = 15, pady = 5, sticky = "w")
+    MoveScriptHelpButton.pack(side = "left")
+    MoveScriptLabel.pack(side = "left", padx = (0,5))
+    MoveScriptEntry.pack(side = "left")
 
-    BasePowerFrame.grid(row = 0, column = 2, padx = 15, pady = 5, sticky = W)
-    BasePowerHelpButton.pack(side = tk.LEFT)
-    BasePowerLabel.pack(side = tk.LEFT, padx = (0,5))
-    BasePowerEntry.pack(side = tk.LEFT)
+    BasePowerFrame.grid(row = 1, column = 1, padx = 15, pady = 5, sticky = "w")
+    BasePowerHelpButton.pack(side = "left")
+    BasePowerLabel.pack(side = "left", padx = (0,5))
+    BasePowerEntry.pack(side = "left")
 
-    TypeFrame.grid(row = 1, column = 0, padx = 15, pady = 5, sticky = W)
-    TypeHelpButton.pack(side = tk.LEFT)
-    TypeLabel.pack(side = tk.LEFT, padx = (0,5))
-    TypeEntry.pack(side = tk.LEFT)
+    TypeFrame.grid(row = 1, column = 2, padx = 15, pady = 5, sticky = "w")
+    TypeHelpButton.pack(side = "left")
+    TypeLabel.pack(side = "left", padx = (0,5))
+    TypeEntry.pack(side = "left")
 
-    AccuracyFrame.grid(row = 1, column = 1, padx = 15, pady = 5, sticky = W)
-    AccuracyHelpButton.pack(side = tk.LEFT)
-    AccuracyLabel.pack(side = tk.LEFT, padx = (0,5))
-    AccuracyEntry.pack(side = tk.LEFT)
+    AccuracyFrame.grid(row = 2, column = 0, padx = 15, pady = 5, sticky = "w")
+    AccuracyHelpButton.pack(side = "left")
+    AccuracyLabel.pack(side = "left", padx = (0,5))
+    AccuracyEntry.pack(side = "left")
 
-    PowerPointFrame.grid(row = 1, column = 2, padx = 15, pady = 5, sticky = W)
-    PowerPointHelpButton.pack(side = tk.LEFT)
-    PowerPointLabel.pack(side = tk.LEFT, padx = (0,5))
-    PowerPointEntry.pack(side = tk.LEFT)
+    PowerPointFrame.grid(row = 2, column = 1, padx = 15, pady = 5, sticky = "w")
+    PowerPointHelpButton.pack(side = "left")
+    PowerPointLabel.pack(side = "left", padx = (0,5))
+    PowerPointEntry.pack(side = "left")
 
-    EffectChanceFrame.grid(row = 2, column = 0, padx = 15, pady = 5, sticky = W)
-    EffectChanceHelpButton.pack(side = tk.LEFT)
-    EffectChanceLabel.pack(side = tk.LEFT, padx = (0,5))
-    EffectChanceEntry.pack(side = tk.LEFT)
+    EffectChanceFrame.grid(row = 2, column = 2, padx = 15, pady = 5, sticky = "w")
+    EffectChanceHelpButton.pack(side = "left")
+    EffectChanceLabel.pack(side = "left", padx = (0,5))
+    EffectChanceEntry.pack(side = "left")
 
-    RangeFrame.grid(row = 2, column = 1, padx = 15, pady = 5, sticky = W)
-    RangeHelpButton.pack(side = tk.LEFT)
-    RangeLabel.pack(side = tk.LEFT, padx = (0,5))
-    RangeEntry.pack(side = tk.LEFT)
+    RangeFrame.grid(row = 3, column = 0, padx = 15, pady = 5, sticky = "w")
+    RangeHelpButton.pack(side = "left")
+    RangeLabel.pack(side = "left", padx = (0,5))
+    RangeEntry.pack(side = "left")
 
-    PriorityFrame.grid(row = 2, column = 2, padx = 15, pady = 5, sticky = W)
-    PriorityHelpButton.pack(side = tk.LEFT)
-    PriorityLabel.pack(side = tk.LEFT, padx = (0,5))
-    ParityButton.pack(side = tk.LEFT)
-    PriorityEntry.pack(side = tk.LEFT)
+    PriorityFrame.grid(row = 3, column = 2, padx = 15, pady = 5, sticky = "w")
+    PriorityHelpButton.pack(side = "left")
+    PriorityLabel.pack(side = "left", padx = (0,5))
+    ParityButton.pack(side = "left")
+    PriorityEntry.pack(side = "left")
 
-    MoveFlagLabelFrame.grid(row = 4, column = 0, padx = 15, pady = (5,0), sticky = W)
-    MoveFlagHelpButton.pack(side = tk.LEFT)
-    MoveFlagLabel.pack(side = tk.LEFT)
+    MoveKindFrame.grid(row = 3, column = 1, padx = 15, pady = 5, sticky = "w")
+    MoveKindHelpButton.pack(side = "left")
+    MoveKindLabel.pack(side = "left", padx = (0,5))
+    MoveKindEntry.pack(side = "left")
 
-    MoveFlagFrame.grid(row = 5, column = 0, padx = 15, pady = 5, sticky = W)
-    SetAbilityFlag.grid(row = 0, column = 0, sticky = W)
-    SetSelfFlag.grid(row = 0, column = 1, sticky = W)
-    SetKingsRockFlag.grid(row = 1, column = 0, sticky = W)
-    SetMirrorMoveFlag.grid(row = 1, column = 1, sticky = W)
-    SetSnatchFlag.grid(row = 2, column = 0, sticky = W)
-    SetMagicCoatFlag.grid(row = 2, column = 1, sticky = W)
-    SetProtectFlag.grid(row = 3, column = 0, sticky = W)
-    SetDirectContactFlag.grid(row = 3, column = 1, sticky = W)
+    DamageFormulaFrame.grid(row = 4, column = 0, padx = 15, pady = 5, sticky = "w")
+    DamageFormulaHelpButton.pack(side = "left")
+    DamageFormulaLabel.pack(side = "left", padx = (0,5))
+    DamageFormulaEntry.pack(side = "left")
 
-    DamageFormulaFrame.grid(row = 3, column = 0, padx = 15, pady = 5, sticky = W)
-    DamageFormulaHelpButton.pack(side = tk.LEFT)
-    DamageFormulaLabel.pack(side = tk.LEFT, padx = (0,5))
-    DamageFormulaEntry.pack(side = tk.LEFT)
+    DamageArgumentFrame.grid(row = 4, column = 1, padx = 15, pady = 5, sticky = "w")
+    DamageArgumentHelpButton.pack(side = "left")
+    DamageArgumentLabel.pack(side = "left", padx = (0,5))
+    DamageArgumentEntry.pack(side = "left")
 
-    MoveKindFrame.grid(row = 3, column = 1, padx = 15, pady = 5, sticky = W)
-    MoveKindHelpButton.pack(side = tk.LEFT)
-    MoveKindLabel.pack(side = tk.LEFT, padx = (0,5))
-    MoveKindEntry.pack(side = tk.LEFT)
+    ScriptArgFrame.grid(row = 4, column = 2, padx = 15, pady = 5, sticky = "w")
+    ScriptArgHelpButton.pack(side = "left")
+    ScriptArgLabel.pack(side = "left", padx = (0, 5))
+    ScriptArgEntry.pack(side = "left")
 
-    ScriptArgFrame.grid(row = 3, column = 2, padx = 15, pady = 5, sticky = W)
-    ScriptArgHelpButton.pack(side = tk.LEFT)
-    ScriptArgLabel.pack(side = tk.LEFT, padx = (0, 5))
-    ScriptArgEntry.pack(side = tk.LEFT)
+    MoveFlagLabelFrame.grid(row = 5, column = 0, padx = 15, pady = (5,0), sticky = "w")
+    MoveFlagHelpButton.pack(side = "left")
+    MoveFlagLabel.pack(side = "left")
 
-    TableHexFrame.grid(row = 4, column = 1, padx = 15, pady = 5, sticky = W)
-    HexHelpButton.pack(side = tk.LEFT)
-    TableHexLabel.pack(side = tk.LEFT)
+    MoveFlagFrame.grid(row = 6, column = 0, padx = 15, pady = 5, sticky = "w")
+    SetAbilityFlag.grid(row = 0, column = 0, sticky = "w")
+    SetSelfFlag.grid(row = 0, column = 1, sticky = "w")
+    SetKingsRockFlag.grid(row = 1, column = 0, sticky = "w")
+    SetMirrorMoveFlag.grid(row = 1, column = 1, sticky = "w")
+    SetSnatchFlag.grid(row = 2, column = 0, sticky = "w")
+    SetMagicCoatFlag.grid(row = 2, column = 1, sticky = "w")
+    SetProtectFlag.grid(row = 3, column = 0, sticky = "w")
+    SetDirectContactFlag.grid(row = 3, column = 1, sticky = "w")
 
-    HexViewFrame.grid(row = 5, column = 1, padx = 15, pady = 5, sticky = W)
-    MoveScriptByte.grid(row = 0, column = 0, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
-    BasePowerByte.grid(row = 0, column = 1, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
-    TypeByte.grid(row = 0, column = 2, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
-    AccuracyByte.grid(row = 0, column = 3, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
-    PowerPointByte.grid(row = 0, column = 4, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
-    EffectChanceByte.grid(row = 0, column = 5, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
-    RangeByte.grid(row = 1, column = 0, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
-    PriorityByte.grid(row = 1, column = 1, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
-    MoveFlagsByte.grid(row = 1, column = 2, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
-    DamageFormulaByte.grid(row = 1, column = 3, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
-    MoveKindByte.grid(row = 1, column = 4, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
-    ScriptArgByte.grid(row = 1, column = 5, padx = HexByteHSpace, pady = HexByteVSpace, sticky = W)
+    TableHexFrame.grid(row = 5, column = 1, padx = 15, pady = 5, sticky = "w")
+    HexHelpButton.pack(side = "left")
+    TableHexLabel.pack(side = "left")
 
-    DescriptionLabelFrame.grid(row = 4, column = 2, padx = 15, pady = 5, sticky = W)
-    DescriptionHelpButton.pack(side = tk.LEFT)
-    DescriptionLabel.pack(side = tk.LEFT)
+    HexViewFrame.grid(row = 6, column = 1, padx = 15, pady = 5, sticky = "w")
+    MoveScriptByte.grid(row = 0, column = 0, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
+    BasePowerByte.grid(row = 0, column = 1, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
+    TypeByte.grid(row = 0, column = 2, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
+    AccuracyByte.grid(row = 0, column = 3, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
+    PowerPointByte.grid(row = 0, column = 4, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
+    EffectChanceByte.grid(row = 0, column = 5, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
+    
+    RangeByte.grid(row = 1, column = 0, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
+    PriorityByte.grid(row = 1, column = 1, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
+    MoveFlagsByte.grid(row = 1, column = 2, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
+    DamageFormulaByte.grid(row = 1, column = 3, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
+    MoveKindByte.grid(row = 1, column = 4, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
+    ScriptArgByte.grid(row = 1, column = 5, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
 
-    TextBoxFrame.grid(row = 5, column = 2, padx = 15, pady = 5, sticky = W)
+    DescriptionLabelFrame.grid(row = 5, column = 2, padx = 15, pady = 5, sticky = "w")
+    DescriptionHelpButton.pack(side = "left")
+    DescriptionLabel.pack(side = "left")
+
+    TextBoxFrame.grid(row = 6, column = 2, padx = 15, pady = 5, sticky = "w")
     DescriptionBox.pack()
 
     #------------------------------------------------------------
@@ -2772,3 +2235,6 @@ try:
 except Exception as e:
     print("Crash alert!")
     print(e)
+    exc_type, exc_obj, exc_tb = sys.exc_info()
+    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+    print(exc_type, fname, exc_tb.tb_lineno)
