@@ -8,9 +8,10 @@ from tkinter import filedialog as fd
 from tkinter import simpledialog as sd
 from subprocess import call, Popen
 from random import randint
+from math import modf
 
 # Set the Version Number
-VerNum = "2.0.0"
+VerNum = "2.0.1"
 AutoSave = True
 
 def PrintError(Error):
@@ -700,9 +701,8 @@ MoveScriptText = {
     ["This script has the effect of lowering the User's Defence",
     "Stat Stages by the given amount."],
 
-    "":
-    ["Script 14",
-    "This script has the effect of lowering the User's Speed",
+    "Script 14":
+    ["This script has the effect of lowering the User's Speed",
     "Stat Stages by the given amount."],
 
     "Script 15":
@@ -5506,6 +5506,19 @@ def JumpToMove(self):
     MoveNumber = int(CurrentMove.get().split("-")[0].strip()) - 1
 
     CurrentMoveNumber.set(MoveNumber)
+    
+    if CurrentMoveNumber.get() <= 0: # Disable Back, enable Forward
+        BackButton.configure(state = "disabled")
+        ForwardButton.configure(state = "normal")
+
+    elif CurrentMoveNumber.get() >= len(Table) - 1: # Disable Forward, enable Back
+        BackButton.configure(state = "normal")
+        ForwardButton.configure(state = "disabled")
+
+    else:
+        BackButton.configure(state = "normal")
+        ForwardButton.configure(state = "normal")
+        
     Refresh()
 
 MoveFinder = ttk.Combobox(MoveFinderFrame, textvariable = CurrentMove, width = 18, values = MoveNameList, font = ("Courier", SmallSize))
@@ -6316,8 +6329,6 @@ DescriptionLabel = ttk.Label(DescriptionLabelFrame, text = "Move Description")
 def SanitiseDescription(Text):
     if DescriptionBox.cget('state') == "normal" and not DescriptionBox.tag_ranges("sel"):
         NewText = SanitiseText(Text)
-        DescriptionBox.delete(1.0, "end-1c")
-        DescriptionBox.insert(1.0, NewText)
         ProcessText(NewText)
 
 # Process Description Text - Split NewLines + Truncate
@@ -6356,18 +6367,9 @@ def ProcessText(Text):
         Lines[2] = Line3
         Lines[3] = Line4
 
-        if len(Lines) > 4:
-            Lines = Lines[0:4]
-            DescriptionBox.delete(1.0, "end-1c")
-            DescriptionBox.insert(1.0, Line4)
-            DescriptionBox.insert(1.0, "\n")
-            DescriptionBox.insert(1.0, Line3)
-            DescriptionBox.insert(1.0, "\n")
-            DescriptionBox.insert(1.0, Line2)
-            DescriptionBox.insert(1.0, "\n")
-            DescriptionBox.insert(1.0, Line1)
-
         NewText = "{}\n{}\n{}\n{}".format(Line1, Line2, Line3, Line4)
+
+        OldText = DescriptionBox.get(1.0, "end-1c")
                      
         Table[CurrentMoveNumber.get()][DescriptionIndex] = NewText
         Refresh()
@@ -6539,7 +6541,7 @@ def SetVariables():
 #------------------------------------------------------------
 # Update Display Function
 #------------------------------------------------------------
-def Refresh(Desc = False):
+def Refresh():
     global MoveNameList
      
     SetVariables()
@@ -6581,12 +6583,18 @@ def Refresh(Desc = False):
 
     ScriptArgEntry.delete(1.0, "end")
     ScriptArgEntry.insert(1.0, ScriptArgument.get())
-
     CompileToHexViewer()
 
-    if Desc:
-        DescriptionBox.delete(1.0, "end")
-        DescriptionBox.insert(1.0, Description.get())
+    Place = float(DescriptionBox.index("insert"))
+    
+    if modf(Place)[0] > 0.19:
+        Place = Place + 1.0
+
+    if DescriptionBox.get(1.0, "end-1c").strip() != Description.get().strip() or DescriptionBox.get(1.0, "end-1c").count("\n") > 3: # Text different than box       
+        DescriptionBox.delete(1.0, "end-1c")
+        DescriptionBox.insert("insert", Description.get().strip())
+
+        DescriptionBox.mark_set("insert", Place)
 
     MoveFinder.configure(values = MoveNameList)
     CurrentMove.set(MoveNameList[CurrentMoveNumber.get()])
@@ -6680,7 +6688,7 @@ def CreateNewFile():
 
         CurrentMoveNumber.set(0)
         EnableEverything()
-        Refresh(True)
+        Refresh()
         SaveFile(Table, CurrentOpenFile, True)
 
 NewFileButton = ttk.Button(ButtonFrame, text = "New Table", command = CreateNewFile)
@@ -6766,7 +6774,7 @@ def OpenFile():
         # Refresh the screen
         CurrentMoveNumber.set(0)
         EnableEverything()
-        Refresh(True) 
+        Refresh() 
         EnableEverything()
         
     else:
@@ -7200,7 +7208,7 @@ def ConvertTable():
             
             CurrentMoveNumber.set(0)
             EnableEverything()
-            Refresh(True) 
+            Refresh() 
             EnableEverything()
           
 ConvertButton = ttk.Button(ButtonFrame, text = "Convert Table", command = ConvertTable)
@@ -7219,7 +7227,7 @@ def GoBackward():
 
     ForwardButton.configure(state = "normal")
     CurrentMoveNumber.set(i)
-    Refresh(True)
+    Refresh()
 
 BackButton = ttk.Button(ButtonFrame, text = "Back", command = GoBackward)
 
@@ -7237,7 +7245,7 @@ def GoForward():
 
     BackButton.configure(state = "normal")
     CurrentMoveNumber.set(i)
-    Refresh(True)
+    Refresh()
 
 ForwardButton = ttk.Button(ButtonFrame, text = "Forward", command = GoForward)
 
@@ -7293,7 +7301,7 @@ def AddMoves():
                     ["The table was modified successfully.",
                      "There are now {} Moves in total.".format(len(Table))])
 
-        Refresh(True)
+        Refresh()
 
         if AutoSave:
             SaveFile(Table, CurrentOpenFile, True)
@@ -7333,7 +7341,7 @@ def DeleteMove():
             if i > len(Table) - 1:
                 CurrentMoveNumber.set(len(Table) - 1)
 
-            Refresh(True)
+            Refresh()
 
             if AutoSave:
                 SaveFile(Table, CurrentOpenFile, True)
