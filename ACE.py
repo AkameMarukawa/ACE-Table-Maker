@@ -4,6 +4,7 @@ import platform
 import shutil
 import tkinter as tk
 from tkinter import ttk
+from tkinter import scrolledtext as stxt
 from tkinter import filedialog as fd
 from tkinter import simpledialog as sd
 from subprocess import call, Popen
@@ -11,7 +12,7 @@ from random import randint
 from math import modf
 
 # Set the Version Number
-VerNum = "2.0.1"
+VerNum = "2.1.0"
 AutoSave = True
 
 def PrintError(Error):
@@ -45,6 +46,3625 @@ SmallSize = 16
 DICTIONARIES - Create the Lists and Dictionaries used by many other functions
 ================================================================================================
 """
+
+# ------------------------------------------------------------
+# Preset Move List Dictionary
+# ---------------------------------------------------------
+PresetMoveList = {
+        "None": ["None", "00", 0, "Normal", 0, 0, 0, 
+                "Target", 0, [0, 1, 1, 1, 1, 1, 1, 1], "00", "Status", 0, 
+                ""],
+
+        "Pound": ["Pound", "00", 40, "Normal", 100, 35, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A physical attack\ndelivered with a\nlong tail or a\nforeleg, etc."],
+
+        "Karate Chop": ["Karate Chop", "00", 50, "Fighting", 100, 25, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is attacked\nwith a sharp chop.\nIt has a high\ncritical-hit ratio."],
+
+        "Double-Slap": ["Double-Slap", "1D", 15, "Normal", 85, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 21, 
+                "The foe is slapped\nrepeatedly, back\nand forth, two to\nfive times."],
+
+        "Comet Punch": ["Comet Punch", "1D", 18, "Normal", 85, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 21, 
+                "The foe is hit with\na flurry of punches\nthat strike two to\nfive times."],
+
+        "Mega Punch": ["Mega Punch", "00", 80, "Normal", 85, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is slugged\nby a punch thrown\nwith muscle-packed\npower."],
+
+        "Pay Day": ["Pay Day", "22", 40, "Normal", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 1, 
+                "Numerous coins are\nhurled at the foe.\nMoney is earned\nafter battle."],
+
+        "Fire Punch": ["Fire Punch", "04", 75, "Fire", 100, 15, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is punched\nwith a fiery fist.\nIt may leave the\nfoe with a burn."],
+
+        "Ice Punch": ["Ice Punch", "05", 75, "Ice", 100, 15, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is punched\nwith an icy fist.\nIt may leave the\nfoe frozen."],
+
+        "Thunderpunch": ["Thunderpunch", "06", 75, "Electric", 100, 15, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is punched\nwith an electrified\nfist. It may leave\nthe foe paralyzed."],
+
+        "Scratch": ["Scratch", "00", 40, "Normal", 100, 35, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "Hard, pointed, and\nsharp claws rake\nthe foe."],
+
+        "Vise Grip": ["Vise Grip", "00", 55, "Normal", 100, 30, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "Huge, impressive\npincers grip and\nsqueeze the foe."],
+
+        "Guillotine": ["Guillotine", "00", 0, "Normal", 30, 5, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 1], "D9", "Physical", 0, 
+                "A vicious tearing\nattack with\npincers. The foe\nfaints if it hits."],
+
+        "Razor Wind": ["Razor Wind", "00", 80, "Normal", 100, 10, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "Blades of wind hit\nthe foe on the 2nd\nturn. It has a high\ncritical-hit ratio."],
+
+        "Swords Dance": ["Swords Dance", "0A", 0, "Normal", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                "A frenetic dance of\nfighting. It\nsharply raises the\nAttack Stat."],
+
+        "Cut": ["Cut", "00", 50, "Normal", 95, 30, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A basic attack.\nIt can be used to\ncut down thin trees\nand grass."],
+
+        "Gust": ["Gust", "00", 40, "Flying", 100, 35, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "Strikes the foe\nwith a gust of wind\nwhipped up by\nwings."],
+
+        "Wing Attack": ["Wing Attack", "00", 60, "Flying", 100, 35, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is struck\nwith large,\nimposing wings\nspread wide."],
+
+        "Whirlwind": ["Whirlwind", "1C", 0, "Normal", 0, 20, 0, 
+                "Target", 250, [0, 0, 0, 1, 0, 1, 0, 0], "00", "Status", 0, 
+                "The foe is made to\nswitch out with an\nally. In the wild,\nthe battle ends."],
+
+        "Fly": ["Fly", "00", 90, "Flying", 95, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A 2-turn move that\nhits on the 2nd\nturn. Use it to fly\nto any known town."],
+
+        "Bind": ["Bind", "2A", 15, "Normal", 85, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A long body or\ntentacles are used\nto bind the foe for\ntwo to five turns."],
+
+        "Slam": ["Slam", "00", 80, "Normal", 75, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is struck\nwith a long tail,\nvines, etc."],
+
+        "Vine Whip": ["Vine Whip", "00", 45, "Grass", 100, 25, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is struck\nwith slender,\nwhiplike vines."],
+
+        "Stomp": ["Stomp", "00", 65, "Normal", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is stomped\nwith a big foot.\nIt may make the\nfoe flinch."],
+
+        "Double Kick": ["Double Kick", "1D", 30, "Fighting", 100, 30, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 2, 
+                "Two legs are used\nto quickly kick the\nfoe twice in one\nturn."],
+
+        "Mega Kick": ["Mega Kick", "00", 120, "Normal", 75, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is attacked\nby a kick fired\nwith muscle-packed\npower."],
+
+        "Jump Kick": ["Jump Kick", "00", 100, "Fighting", 95, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The user jumps up\nhigh, then kicks.\nIf it misses, the\nuser hurts itself."],
+
+        "Rolling Kick": ["Rolling Kick", "1F", 60, "Fighting", 85, 15, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A quick kick from a\nrolling spin.\nIt may make the\nfoe flinch."],
+
+        "Sand-Attack": ["Sand-Attack", "17", 0, "Ground", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                "A lot of sand is\nhurled in the foe's\nface, reducing its\naccuracy."],
+
+        "Headbutt": ["Headbutt", "1F", 70, "Normal", 100, 15, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The user sticks its\nhead out and rams.\nIt may make the\nfoe flinch."],
+
+        "Horn Attack": ["Horn Attack", "00", 65, "Normal", 100, 25, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is jabbed\nwith a sharply\npointed horn to\ninflict damage."],
+
+        "Fury Attack": ["Fury Attack", "1D", 15, "Normal", 85, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 21, 
+                "The foe is jabbed\nrepeatedly with a\nhorn or beak two to\nfive times."],
+
+        "Horn Drill": ["Horn Drill", "00", 0, "Normal", 30, 5, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 1], "D9", "Physical", 0, 
+                "The horn is rotated\nlike a drill to\nram. The foe will\nfaint if it hits."],
+
+        "Tackle": ["Tackle", "00", 40, "Normal", 100, 35, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A physical attack\nin which the user\ncharges, full body,\ninto the foe."],
+
+        "Body Slam": ["Body Slam", "06", 85, "Normal", 100, 15, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The user drops its\nfull body on the\nfoe. It may leave\nthe foe paralyzed."],
+
+        "Wrap": ["Wrap", "2A", 15, "Normal", 90, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A long body or\nvines are used to\nwrap the foe for\ntwo to five turns."],
+
+        "Take Down": ["Take Down", "30", 90, "Normal", 85, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 25, 
+                "A reckless, full-\nbody charge attack\nthat also hurts the\nuser a little."],
+
+        "Thrash": ["Thrash", "1B", 120, "Normal", 100, 10, 0, 
+                "Random", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 3, 
+                "The user rampages\nabout for two to\nthree turns, then\nbecomes confused."],
+
+        "Double-Edge": ["Double-Edge", "30", 120, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 33, 
+                "A reckless, life-\nrisking tackle\nthat also hurts the\nuser a little."],
+
+        "Tail Whip": ["Tail Whip", "13", 0, "Normal", 100, 30, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                "The user wags its\ntail cutely, making\nthe foe lower its\nDefense stat."],
+
+        "Poison Sting": ["Poison Sting", "02", 15, "Poison", 100, 35, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                "The foe is stabbed\nwith a toxic barb,\netc. It may poison\nthe foe."],
+
+        "Twineedle": ["Twineedle", "1D", 25, "Bug", 100, 20, 20, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Physical", 2, 
+                "The foe is stabbed\ntwice with foreleg\nstingers. It may\npoison the foe."],
+
+        "Pin Missile": ["Pin Missile", "1D", 25, "Bug", 95, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 21, 
+                "Sharp pins are shot\nat the foe and hit\ntwo to five times\nat once."],
+
+        "Leer": ["Leer", "13", 0, "Normal", 100, 30, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                "The foe is given an\nintimidating look\nthat lowers its\nDefense stat."],
+
+        "Bite": ["Bite", "1F", 60, "Dark", 100, 25, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The user bites with\nvicious fangs.\nIt may make the\nfoe flinch."],
+
+        "Growl": ["Growl", "12", 0, "Normal", 100, 40, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                "The user growls in\na cute way, making\nthe foe lower its\nAttack stat."],
+
+        "Roar": ["Roar", "1C", 0, "Normal", 0, 20, 0, 
+                "Target", 250, [0, 0, 0, 1, 0, 1, 0, 0], "00", "Status", 0, 
+                "The foe is made to\nswitch out with an\nally. In the wild,\nthe battle ends."],
+
+        "Sing": ["Sing", "01", 0, "Normal", 55, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "A soothing song\nin a calming voice\nlulls the foe into\na deep slumber."],
+
+        "Supersonic": ["Supersonic", "31", 0, "Normal", 55, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "The user generates\nodd sound waves.\nIt may confuse the\nfoe."],
+
+        "Sonic Boom": ["Sonic Boom", "00", 0, "Normal", 90, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "24", "Special", 0, 
+                ""],
+
+        "Disable": ["Disable", "56", 0, "Normal", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "For a few turns,\nit prevents the foe\nfrom using the move\nit last used."],
+
+        "Acid": ["Acid", "13", 40, "Poison", 100, 30, 33, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Ember": ["Ember", "04", 40, "Fire", 100, 25, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is attacked\nwith small flames.\nThe foe may suffer\na burn."],
+
+        "Flamethrower": ["Flamethrower", "04", 90, "Fire", 100, 15, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is scorched\nwith intense flames.\nThe foe may suffer\na burn."],
+
+        "Mist": ["Mist", "2E", 0, "Ice", 0, 30, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "The ally party is\nprotected by a\nmist that prevents\nstat reductions."],
+
+        "Water Gun": ["Water Gun", "00", 40, "Water", 100, 25, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is struck\nwith a lot of water\nexpelled forcibly\nfrom the mouth."],
+
+        "Hydro Pump": ["Hydro Pump", "00", 110, "Water", 80, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "A high volume of\nwater is blasted at\nthe foe under great\npressure."],
+
+        "Surf": ["Surf", "00", 90, "Water", 100, 15, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "A big wave crashes\ndown on the foe.\nCan also be used\nfor crossing water."],
+
+        "Ice Beam": ["Ice Beam", "05", 90, "Ice", 100, 10, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is struck\nwith an icy beam.\nIt may freeze the\nfoe solid."],
+
+        "Blizzard": ["Blizzard", "05", 110, "Ice", 70, 5, 10, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is blasted\nwith a blizzard.\nIt may freeze the\nfoe solid."],
+
+        "Psybeam": ["Psybeam", "31", 65, "Psychic", 100, 20, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "A peculiar ray is\nshot at the foe.\nIt may leave the\nfoe confused."],
+
+        "Bubblebeam": ["Bubblebeam", "14", 65, "Water", 100, 20, 33, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                "A spray of bubbles\nstrikes the foe.\nIt may lower the\nfoe's SPEED stat."],
+
+        "Aurora Beam": ["Aurora Beam", "12", 65, "Ice", 100, 20, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Hyper Beam": ["Hyper Beam", "50", 150, "Normal", 90, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                "A severely damaging\nattack that makes\nthe user rest on\nthe next turn."],
+
+        "Peck": ["Peck", "00", 35, "Flying", 100, 35, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is jabbed\nwith a sharply\npointed beak or\nhorn."],
+
+        "Drill Peck": ["Drill Peck", "00", 80, "Flying", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A corkscrewing\nattack with the\nsharp beak acting\nas a drill."],
+
+        "Submission": ["Submission", "30", 80, "Fighting", 80, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 25, 
+                ""],
+
+        "Low Kick": ["Low Kick", "00", 0, "Fighting", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "15", "Physical", 0, 
+                "A low, tripping kick\nthat inflicts more\ndamage on heavier\nfoes."],
+
+        "Counter": ["Counter", "00", 0, "Fighting", 100, 20, 0, 
+                "LastHitMe", 251, [0, 0, 0, 0, 0, 0, 1, 1], "00B", "Physical", 0, 
+                "A retaliation move\nthat counters any\nphysical hit with\ndouble the damage."],
+
+        "Seismic Toss": ["Seismic Toss", "00", 0, "Fighting", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "01", "Physical", 0, 
+                ""],
+
+        "Strength": ["Strength", "00", 80, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is slugged\nat maximum power.\nCan also be used\nto move boulders."],
+
+        "Absorb": ["Absorb", "03", 20, "Grass", 100, 25, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 50, 
+                "An attack that\nabsorbs half the\ndamage it inflicted\nto restore HP."],
+
+        "Mega Drain": ["Mega Drain", "03", 40, "Grass", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 50, 
+                "A tough attack that\ndrains half the\ndamage it inflicted\nto restore HP."],
+
+        "Leech Seed": ["Leech Seed", "54", 0, "Grass", 90, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "A seed is planted\non the foe to steal\nsome HP for the\nuser on every turn."],
+
+        "Growth": ["Growth", "CF", 0, "Normal", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 4, 
+                "The user's body is\nforced to grow,\nraising the SP.\nATK stat."],
+
+        "Razor Leaf": ["Razor Leaf", "00", 55, "Grass", 95, 25, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Solarbeam": ["Solarbeam", "00", 120, "Grass", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Poisonpowder": ["Poisonpowder", "02", 0, "Poison", 75, 35, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "A cloud of toxic\ndust is scattered.\nIt may poison the\nfoe."],
+
+        "Stun Spore": ["Stun Spore", "06", 0, "Grass", 75, 30, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "Paralyzing dust is\nscattered wildly.\nIt may paralyze\nthe foe."],
+
+        "Sleep Powder": ["Sleep Powder", "01", 0, "Grass", 75, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Petal Dance": ["Petal Dance", "1B", 120, "Grass", 100, 10, 0, 
+                "Random", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Special", 3, 
+                "The user attacks\nwith petals for two\nto three turns,\nthen gets confused."],
+
+        "String Shot": ["String Shot", "14", 0, "Bug", 95, 40, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                "The foe is bound\nwith strings shot\nfrom the mouth to\nreduce its SPEED."],
+
+        "Dragon Rage": ["Dragon Rage", "00", 0, "Dragon", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "44", "Special", 0, 
+                ""],
+
+        "Fire Spin": ["Fire Spin", "2A", 35, "Fire", 85, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is trapped\nin an intense spiral\nof fire that rages\ntwo to five turns."],
+
+        "Thundershock": ["Thundershock", "06", 40, "Electric", 100, 30, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "An electric shock\nattack that may\nalso leave the foe\nparalyzed."],
+
+        "Thunderbolt": ["Thunderbolt", "06", 90, "Electric", 100, 15, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "A strong electrical\nattack that may\nalso leave the foe\nparalyzed."],
+
+        "Thunder Wave": ["Thunder Wave", "06", 0, "Electric", 90, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "A weak electric\nshock that is sure\nto cause paralysis\nif it hits."],
+
+        "Thunder": ["Thunder", "06", 110, "Electric", 70, 10, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "A brutal lightning\nattack that may\nalso leave the foe\nparalyzed."],
+
+        "Rock Throw": ["Rock Throw", "00", 50, "Rock", 90, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                "The foe is attacked\nwith a shower of\nsmall, easily\nthrown rocks."],
+
+        "Earthquake": ["Earthquake", "00", 100, "Ground", 100, 10, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Fissure": ["Fissure", "00", 0, "Ground", 30, 5, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "D9", "Physical", 0, 
+                "The foe is dropped\ninto a fissure.\nThe foe faints if it\nhits."],
+
+        "Dig": ["Dig", "00", 80, "Ground", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack that hits\non the 2nd turn.\nCan also be used\nto exit dungeons."],
+
+        "Toxic": ["Toxic", "21", 0, "Poison", 90, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "A move that badly\npoisons the foe.\nIts poison damage\nworsens every turn."],
+
+        "Confusion": ["Confusion", "31", 50, "Psychic", 100, 25, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "A weak telekinetic\nattack that may\nalso leave the foe\nconfused."],
+
+        "Psychic": ["Psychic", "16", 90, "Psychic", 100, 10, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                "A strong telekinetic\nattack. It may also\nlower the foe's\nSP. DEF stat."],
+
+        "Hypnosis": ["Hypnosis", "01", 0, "Psychic", 60, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "Hypnotic suggestion\nis used to make the\nfoe fall into a\ndeep sleep."],
+
+        "Meditate": ["Meditate", "0A", 0, "Psychic", 0, 40, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 1, 
+                "The user meditates\nto awaken its power\nand raise its\nATTACK stat."],
+
+        "Agility": ["Agility", "0C", 0, "Psychic", 0, 30, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                "The user relaxes\nand lightens its\nbody to sharply\nboost its SPEED."],
+
+        "Quick Attack": ["Quick Attack", "00", 40, "Normal", 100, 30, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An almost invisibly\nfast attack that\nis certain to strike\nfirst."],
+
+        "Rage": ["Rage", "51", 20, "Normal", 100, 20, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack that\nbecomes stronger\neach time the user\nis hit in battle."],
+
+        "Teleport": ["Teleport", "29", 0, "Psychic", 0, 20, 0, 
+                "User", 250, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Night Shade": ["Night Shade", "00", 0, "Ghost", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "01", "Special", 0, 
+                "An attack with a\nmirage that inflicts\ndamage matching\nthe user's level."],
+
+        "Mimic": ["Mimic", "52", 0, "Normal", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Status", 0, 
+                "The user copies the\nmove last used by\nthe foe for the\nrest of the battle."],
+
+        "Screech": ["Screech", "13", 0, "Normal", 85, 40, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 2, 
+                ""],
+
+        "Double Team": ["Double Team", "10", 0, "Normal", 0, 15, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 1, 
+                "The user creates\nillusory copies of\nitself to raise its\nevasiveness."],
+
+        "Recover": ["Recover", "9D", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Harden": ["Harden", "0B", 0, "Normal", 0, 30, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 1, 
+                "The user stiffens\nall the muscles in\nits body to raise\nits DEFENSE stat."],
+
+        "Minimize": ["Minimize", "6C", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "The user compresses\nall the cells in its\nbody to raise its\nevasiveness."],
+
+        "Smokescreen": ["Smokescreen", "17", 0, "Normal", 0, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                "An obscuring cloud\nof smoke or ink\nreduces the foe's\naccuracy."],
+
+        "Confuse Ray": ["Confuse Ray", "31", 0, "Ghost", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "The foe is exposed\nto a sinister ray\nthat triggers\nconfusion."],
+
+        "Withdraw": ["Withdraw", "0B", 0, "Water", 0, 40, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 1, 
+                "The user withdraws\nits body in its hard\nshell, raising its\nDEFENSE stat."],
+
+        "Defense Curl": ["Defense Curl", "9C", 0, "Normal", 0, 40, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "The user curls up\nto conceal weak\nspots and raise its\nDEFENSE stat."],
+
+        "Barrier": ["Barrier", "0B", 0, "Psychic", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                "The user creates a\nsturdy wall that\nsharply raises its\nDEFENSE stat."],
+
+        "Light Screen": ["Light Screen", "23", 0, "Psychic", 0, 30, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "A wall of light\ncuts damage from\nSP. ATK attacks\nfor five turns."],
+
+        "Haze": ["Haze", "19", 0, "Ice", 0, 30, 0, 
+                "Everyone", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Reflect": ["Reflect", "41", 0, "Psychic", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "A wall of light\ncuts damage from\nphysical attacks\nfor five turns."],
+
+        "Focus Energy": ["Focus Energy", "2F", 0, "Normal", 0, 0, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Bide": ["Bide", "1A", 0, "Normal", 0, 10, 0, 
+                "User", 1, [0, 0, 1, 0, 0, 0, 1, 1], "CB", "Physical", 3, 
+                "The user endures\nattacks for two\nturns, then strikes\nback double."],
+
+        "Metronome": ["Metronome", "53", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "Waggles a finger\nand stimulates the\nbrain into using any\nmove at random."],
+
+        "Mirror Move": ["Mirror Move", "09", 0, "Flying", 0, 20, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "The user counters\nthe move last used\nby the foe with the\nsame move."],
+
+        "Self-Destruct": ["Self-Destruct", "07", 200, "Normal", 100, 5, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                "The user blows up\nto inflict severe\ndamage, even\nmaking itself faint."],
+
+        "Egg Bomb": ["Egg Bomb", "00", 100, "Normal", 75, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                "A large egg is\nhurled with great\nforce at the foe to\ninflict damage."],
+
+        "Lick": ["Lick", "06", 30, "Ghost", 100, 30, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is licked\nand hit with a long\ntongue. It may\nalso paralyze."],
+
+        "Smog": ["Smog", "02", 30, "Poison", 70, 20, 40, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is attacked\nwith exhaust gases.\nIt may also poison\nthe foe."],
+
+        "Sludge": ["Sludge", "02", 65, "Poison", 100, 20, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "Toxic sludge is\nhurled at the foe.\nIt may poison the\ntarget."],
+
+        "Bone Club": ["Bone Club", "1F", 65, "Ground", 85, 20, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                "The foe is clubbed\nwith a bone held in\nhand. It may make\nthe foe flinch."],
+
+        "Fire Blast": ["Fire Blast", "04", 110, "Fire", 85, 5, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is hit with\nan intense flame.\nIt may leave the\ntarget with a burn."],
+
+        "Waterfall": ["Waterfall", "1F", 80, "Water", 100, 15, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A powerful charge\nattack. It can also\nbe used to climb\na waterfall."],
+
+        "Clamp": ["Clamp", "2A", 35, "Water", 85, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is clamped\nand squeezed by\nthe user's shell for\ntwo to five turns."],
+
+        "Swift": ["Swift", "00", 60, "Normal", 0, 20, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Skull Bash": ["Skull Bash", "00", 130, "Normal", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The user raises its\nDEFENSE in the 1st\nturn, then attacks\nin the 2nd turn."],
+
+        "Spike Cannon": ["Spike Cannon", "1D", 20, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 21, 
+                "Sharp spikes are\nfired at the foe to\nstrike two to five\ntimes."],
+
+        "Constrict": ["Constrict", "14", 10, "Normal", 100, 35, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                "The foe is attacked\nwith long tentacles\nor vines. It may\nlower SPEED."],
+
+        "Amnesia": ["Amnesia", "0E", 0, "Psychic", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                "Forgets about\nsomething and\nsharply raises\nSP. DEF."],
+
+        "Kinesis": ["Kinesis", "17", 0, "Psychic", 80, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                "The user distracts\nthe foe by bending\na spoon. It may\nlower accuracy."],
+
+        "Softboiled": ["Softboiled", "9D", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "Heals the user by\nup to half its full\nHP. It can be used\nto heal an ally."],
+
+        "Hi Jump Kick": ["Hi Jump Kick", "00", 130, "Fighting", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A strong jumping\nknee kick. If it\nmisses, the user is\nhurt."],
+
+        "Glare": ["Glare", "06", 0, "Normal", 100, 30, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "The user intimidates\nthe foe with the\ndesign on its belly\nto cause paralysis."],
+
+        "Dream Eater": ["Dream Eater", "03", 100, "Psychic", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 50, 
+                "Absorbs half the\ndamage it inflicted\non a sleeping foe\nto restore HP."],
+
+        "Poison Gas": ["Poison Gas", "02", 0, "Poison", 90, 40, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "The foe is sprayed\nwith a cloud of\ntoxic gas that may\npoison the foe."],
+
+        "Barrage": ["Barrage", "1D", 15, "Normal", 85, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 21, 
+                "Round objects are\nhurled at the foe\nto strike two to\nfive times."],
+
+        "Leech Life": ["Leech Life", "03", 80, "Bug", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 50, 
+                "An attack that\nabsorbs half the\ndamage it inflicted\nto restore HP."],
+
+        "Lovely Kiss": ["Lovely Kiss", "01", 0, "Normal", 75, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "The user forces a\nkiss on the foe\nwith a scary face\nthat induces sleep."],
+
+        "Sky Attack": ["Sky Attack", "1F", 140, "Flying", 90, 5, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Transform": ["Transform", "39", 0, "Normal", 0, 10, 0, 
+                "Target", 0, [0, 1, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "The user transforms\ninto a copy of the\nfoe with even the\nsame move set."],
+
+        "Bubble": ["Bubble", "14", 40, "Water", 100, 30, 10, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                "A spray of bubbles\nhits the foe.\nIt may lower the\nfoe's SPEED stat."],
+
+        "Dizzy Punch": ["Dizzy Punch", "31", 70, "Normal", 100, 10, 20, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is hit with\na rhythmic punch\nthat may leave it\nconfused."],
+
+        "Spore": ["Spore", "01", 0, "Grass", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "The user scatters\nbursts of fine\nspores that induce\nsleep."],
+
+        "Flash": ["Flash", "17", 0, "Normal", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                "A blast of light\nthat cuts the foe's\naccuracy. It also\nilluminates caves."],
+
+        "Psywave": ["Psywave", "000", 0, "Psychic", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "007", "Special", 0, 
+                "The foe is attacked\nwith an odd, hot\nenergy wave that\nvaries in intensity."],
+
+        "Splash": ["Splash", "8B", 0, "Normal", 0, 40, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "The user just flops\nand splashes around\nwithout having any\neffect."],
+
+        "Acid Armor": ["Acid Armor", "0B", 0, "Poison", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                "The user alters its\ncells to liquefy\nitself and sharply\nraise DEFENSE."],
+
+        "Crabhammer": ["Crabhammer", "00", 100, "Water", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Explosion": ["Explosion", "07", 250, "Normal", 100, 5, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                "The user explodes\nto inflict terrible\ndamage even while\nfainting itself."],
+
+        "Fury Swipes": ["Fury Swipes", "1D", 18, "Normal", 80, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 21, 
+                "The foe is raked\nwith sharp claws or\nscythes two to five\ntimes."],
+
+        "Bonemerang": ["Bonemerang", "1D", 50, "Ground", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 2, 
+                "The user throws a\nbone that hits the\nfoe once, then once\nagain on return."],
+
+        "Rest": ["Rest", "25", 0, "Psychic", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                "The user sleeps for\ntwo turns to fully\nrestore HP and heal\nany status problem."],
+
+        "Rock Slide": ["Rock Slide", "1F", 75, "Rock", 90, 10, 30, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                "Large boulders are\nhurled at the foe.\nIt may make the\nfoe flinch."],
+
+        "Hyper Fang": ["Hyper Fang", "1F", 80, "Normal", 90, 15, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is attacked\nwith sharp fangs.\nIt may make the\nfoe flinch."],
+
+        "Sharpen": ["Sharpen", "0A", 0, "Normal", 0, 30, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 1, 
+                "The user reduces\nits polygon count\nto sharpen edges\nand raise ATTACK."],
+
+        "Conversion": ["Conversion", "1E", 0, "Normal", 0, 30, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "The user changes\nits type to match\nthe type of one of\nits moves."],
+
+        "Tri-Attack": ["Tri-Attack", "24", 80, "Normal", 100, 10, 20, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 112, 
+                ""],
+
+        "Super Fang": ["Super Fang", "00", 0, "Normal", 90, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "59", "Physical", 0, 
+                "The user attacks\nwith sharp fangs\nand halves the\nfoe's HP."],
+
+        "Slash": ["Slash", "00", 70, "Normal", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Substitute": ["Substitute", "4F", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Struggle": ["Struggle", "30", 50, "Normal", 0, 1, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 1, 1], "00", "Physical", 25, 
+                "An attack that is\nused only if there\nis no PP. It also\nhurts the user."],
+
+        "Sketch": ["Sketch", "5F", 0, "Normal", 0, 1, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "This move copies\nthe move last used\nby the foe, then\ndisappears."],
+
+        "Triple Kick": ["Triple Kick", "00", 10, "Fighting", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "1B", "Physical", 0, 
+                ""],
+
+        "Thief": ["Thief", "69", 60, "Dark", 100, 25, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack that may\ntake the foe's held\nitem if the user\nisn't holding one."],
+
+        "Spider Web": ["Spider Web", "6A", 0, "Bug", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 0, 0], "00", "Status", 0, 
+                "Ensnares the foe\nwith sticky string\nso it doesn't flee\nor switch out."],
+
+        "Mind Reader": ["Mind Reader", "5E", 0, "Normal", 0, 5, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                "The user predicts\nthe foe's action to\nensure its next\nattack hits."],
+
+        "Nightmare": ["Nightmare", "6B", 0, "Ghost", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                "A sleeping foe is\nshown a nightmare\nthat inflicts some\ndamage every turn."],
+
+        "FlameWheel": ["FlameWheel", "7D", 60, "Fire", 100, 25, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The user makes a\nfiery charge at the\nfoe. It may cause\na burn."],
+
+        "Snore": ["Snore", "1F", 50, "Normal", 100, 15, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "An attack that can\nbe used only while\nasleep. It may\ncause flinching."],
+
+        "Curse": ["Curse", "6D", 0, "Ghost", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Flail": ["Flail", "00", 0, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "43", "Physical", 0, 
+                "A desperate attack\nthat becomes more\npowerful the less\nHP the user has."],
+
+        "Conversion 2": ["Conversion 2", "5D", 0, "Normal", 0, 30, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "The user changes\ntype to make itself\nresistant to the\nlast attack it took."],
+
+        "Aeroblast": ["Aeroblast", "00", 100, "Flying", 95, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Cotton Spore": ["Cotton Spore", "14", 0, "Grass", 100, 40, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 2, 
+                ""],
+
+        "Reversal": ["Reversal", "00", 0, "Fighting", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "43", "Physical", 0, 
+                ""],
+
+        "Spite": ["Spite", "64", 0, "Ghost", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 4, 
+                "A move that cuts\n2 to 5 PP from the\nmove last used by\nthe foe."],
+
+        "Powder Snow": ["Powder Snow", "05", 40, "Ice", 100, 25, 10, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "Blasts the foe with\na snowy gust.\nIt may cause\nfreezing."],
+
+        "Protect": ["Protect", "6F", 0, "Normal", 0, 10, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "Enables the user to\nevade all attacks.\nIt may fail if used\nin succession."],
+
+        "Mach Punch": ["Mach Punch", "00", 40, "Fighting", 100, 30, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A punch thrown at\nblinding speed.\nIt is certain to\nstrike first."],
+
+        "Scary Face": ["Scary Face", "14", 0, "Normal", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 2, 
+                "Frightens the foe\nwith a scary face\nto sharply reduce\nits SPEED."],
+
+        "Feint Attack": ["Feint Attack", "00", 60, "Dark", 0, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The user draws up\nclose to the foe\ndisarmingly, then\nhits without fail."],
+
+        "Sweet Kiss": ["Sweet Kiss", "31", 0, "Fairy", 75, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "The user kisses\nthe foe with sweet\ncuteness that\ncauses confusion."],
+
+        "Belly Drum": ["Belly Drum", "8E", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 1, 
+                "The user maximizes\nits ATTACK stat at\nthe cost of half\nits full HP."],
+
+        "Sludge Bomb": ["Sludge Bomb", "02", 90, "Poison", 100, 10, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "Filthy sludge is\nhurled at the foe.\nIt may poison the\ntarget."],
+
+        "Mud-Slap": ["Mud-Slap", "17", 20, "Ground", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                "Mud is hurled in\nthe foe's face to\ninflict damage and\nlower its accuracy."],
+
+        "Octazooka": ["Octazooka", "17", 65, "Water", 85, 10, 50, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                "Ink is blasted in\nthe foe's face or\neyes to damage and\nlower accuracy."],
+
+        "Spikes": ["Spikes", "70", 0, "Ground", 0, 20, 0, 
+                "FoeSide", 0, [0, 0, 0, 0, 0, 1, 0, 0], "00", "Status", 0, 
+                "A trap of spikes is\nlaid around the\nfoe's party to hurt\nfoes switching in."],
+
+        "Zap Cannon": ["Zap Cannon", "06", 120, "Electric", 50, 5, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "An electric blast is\nfired like a cannon\nto inflict damage\nand paralyze."],
+
+        "Foresight": ["Foresight", "71", 0, "Normal", 0, 40, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "Completely negates\nthe foe's efforts to\nheighten its ability\nto evade."],
+
+        "Destiny Bond": ["Destiny Bond", "62", 0, "Ghost", 0, 5, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "If the user faints,\nthe foe delivering\nthe final hit also\nfaints."],
+
+        "Perish Song": ["Perish Song", "72", 0, "Normal", 0, 5, 0, 
+                "Everyone", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "Any battler that\nhears this faints\nin three turns\nunless it switches."],
+
+        "Icy Wind": ["Icy Wind", "14", 55, "Ice", 95, 15, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                "A chilling wind is\nused to attack.\nIt also lowers the\nSPEED stat."],
+
+        "Detect": ["Detect", "6F", 0, "Fighting", 0, 5, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "Enables the user to\nevade all attacks.\nIt may fail if used\nin succession."],
+
+        "Bone Rush": ["Bone Rush", "1D", 25, "Ground", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 21, 
+                "The user strikes\nthe foe with a bone\nin hand two to five\ntimes."],
+
+        "Lock-On": ["Lock-On", "5E", 0, "Normal", 0, 5, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                "The user locks on\nto the foe, making\nthe next move sure\nto hit."],
+
+        "Outrage": ["Outrage", "1B", 120, "Dragon", 100, 10, 0, 
+                "Random", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 3, 
+                "The user thrashes\nabout for two to\nthree turns, then\nbecomes confused."],
+
+        "Sandstorm": ["Sandstorm", "73", 0, "Rock", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "Giga Drain": ["Giga Drain", "03", 75, "Grass", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 50, 
+                "A harsh attack that\nabsorbs half the\ndamage it inflicted\nto restore HP."],
+
+        "Endure": ["Endure", "74", 0, "Normal", 0, 10, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "The user endures\nany hit with 1 HP\nleft. It may fail if\nused in succession."],
+
+        "Charm": ["Charm", "12", 0, "Fairy", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 2, 
+                "The foe is charmed\nby the user's cute\nappeals, sharply\ncutting its ATTACK."],
+
+        "Rollout": ["Rollout", "75", 30, "Rock", 90, 20, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "37", "Physical", 0, 
+                ""],
+
+        "False Swipe": ["False Swipe", "00", 40, "Normal", 100, 40, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A restrained attack\nthat always leaves\nthe foe with at\nleast 1 HP."],
+
+        "Swagger": ["Swagger", "76", 0, "Normal", 85, 0, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                "A move that makes\nthe foe confused,\nbut also sharply\nraises its ATTACK."],
+
+        "Milk Drink": ["Milk Drink", "9D", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "Heals the user by\nup to half its full\nHP. It can be used\nto heal an ally."],
+
+        "Spark": ["Spark", "06", 65, "Electric", 100, 20, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An electrically\ncharged tackle that\nmay also paralyze\nthe foe."],
+
+        "Fury Cutter": ["Fury Cutter", "77", 40, "Bug", 95, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "47", "Physical", 0, 
+                "An attack that\ngrows stronger on\neach successive\nhit."],
+
+        "Steel Wing": ["Steel Wing", "0B", 70, "Steel", 90, 25, 10, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                "The foe is hit with\nwings of steel.\nIt may also raise\nthe user's DEFENSE."],
+
+        "Mean Look": ["Mean Look", "6A", 0, "Normal", 0, 5, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 0, 0], "00", "Status", 0, 
+                "The foe is fixed\nwith a mean look\nthat prevents it\nfrom escaping."],
+
+        "Attract": ["Attract", "78", 0, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "If it is the other\ngender, the foe is\nmade infatuated and\nunlikely to attack."],
+
+        "Sleep Talk": ["Sleep Talk", "61", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "While asleep, the\nuser randomly uses\none of the moves it\nknows."],
+
+        "Heal Bell": ["Heal Bell", "66", 0, "Normal", 0, 5, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "A soothing bell\nchimes to heal the\nstatus problems of\nall allies."],
+
+        "Return": ["Return", "00", 0, "Normal", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "02", "Physical", 0, 
+                "This attack move\ngrows more powerful\nthe more the user\nlikes its TRAINER."],
+
+        "Present": ["Present", "00", 0, "Normal", 90, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "57", "Physical", 0, 
+                ""],
+
+        "Frustration": ["Frustration", "00", 0, "Normal", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "42", "Physical", 0, 
+                "This attack move\ngrows more powerful\nthe less the user\nlikes its TRAINER."],
+
+        "Safeguard": ["Safeguard", "7C", 0, "Normal", 0, 25, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "It protects the\nuser's party from\nall status problems\nfor five turns."],
+
+        "Pain Split": ["Pain Split", "57", 0, "Normal", 0, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                "The user adds its\nHP to the foe's HP,\nthen equally shares\nthe total HP."],
+
+        "Sacred Fire": ["Sacred Fire", "04", 100, "Fire", 95, 5, 50, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                "A mystical and\npowerful fire\nattack that may\ninflict a burn."],
+
+        "Magnitude": ["Magnitude", "00", 0, "Ground", 100, 30, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "17", "Physical", 0, 
+                ""],
+
+        "Dynamicpunch": ["Dynamicpunch", "31", 100, "Fighting", 50, 5, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is punched\nwith the user's full\npower. It confuses\nthe foe if it hits."],
+
+        "Megahorn": ["Megahorn", "00", 120, "Bug", 85, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A brutal ramming\nattack delivered\nwith a tough and\nimpressive horn."],
+
+        "Dragonbreath": ["Dragonbreath", "06", 60, "Dragon", 100, 20, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is hit with\nan incredible blast\nof breath that may\nalso paralyze."],
+
+        "Baton Pass": ["Baton Pass", "1C", 0, "Normal", 0, 40, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 1, 
+                "The user switches\nout, passing along\nany stat changes\nto the new battler."],
+
+        "Encore": ["Encore", "5A", 0, "Normal", 100, 5, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "Makes the foe use\nthe move it last\nused repeatedly for\ntwo to six turns."],
+
+        "Pursuit": ["Pursuit", "00", 40, "Dark", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack move that\nworks especially\nwell on a foe that\nis switching out."],
+
+        "Rapid Spin": ["Rapid Spin", "81", 50, "Normal", 100, 40, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack that\nfrees the user from\nBIND, WRAP, LEECH\nSEED, and SPIKES."],
+
+        "Sweet Scent": ["Sweet Scent", "18", 0, "Normal", 100, 20, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                ""],
+
+        "Iron Tail": ["Iron Tail", "13", 100, "Steel", 75, 15, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Metal Claw": ["Metal Claw", "0A", 50, "Steel", 95, 35, 10, 
+                "Target", 0, [0, 1, 0, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                "The foe is attacked\nwith steel claws.\nIt may also raise\nthe user's ATTACK."],
+
+        "Vital Throw": ["Vital Throw", "00", 70, "Fighting", 0, 10, 0, 
+                "Target", 255, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "Makes the user\nattack after the\nfoe. In return,\nit will not miss."],
+
+        "Morning Sun": ["Morning Sun", "9D", 0, "Normal", 0, 5, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 1, 
+                "Restores the user's\nHP. The amount of\nHP regained varies\nwith the weather."],
+
+        "Synthesis": ["Synthesis", "9D", 0, "Grass", 0, 5, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 1, 
+                "Restores the user's\nHP. The amount of\nHP regained varies\nwith the weather."],
+
+        "Moonlight": ["Moonlight", "9D", 0, "Fairy", 0, 5, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 1, 
+                "Restores the user's\nHP. The amount of\nHP regained varies\nwith the weather."],
+
+        "Hidden Power": ["Hidden Power", "00", 60, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "An attack that\nvaries in type and\nintensity depending\non the user."],
+
+        "Cross Chop": ["Cross Chop", "00", 100, "Fighting", 80, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Twister": ["Twister", "1F", 40, "Dragon", 100, 20, 20, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "A vicious twister\nattacks the foe.\nIt may make the\nfoe flinch."],
+
+        "Rain Dance": ["Rain Dance", "73", 0, "Water", 0, 5, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 1, 
+                ""],
+
+        "Sunny Day": ["Sunny Day", "73", 0, "Fire", 0, 5, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 4, 
+                ""],
+
+        "Crunch": ["Crunch", "16", 80, "Dark", 100, 15, 20, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                "The foe is crunched\nwith sharp fangs.\nIt may lower the\nfoe's SP. DEF."],
+
+        "Mirror Coat": ["Mirror Coat", "00", 0, "Psychic", 100, 20, 0, 
+                "LastHitMe", 251, [0, 0, 0, 0, 0, 0, 1, 0], "4B", "Special", 0, 
+                "A retaliation move\nthat pays back the\nfoe's special attack\ndouble."],
+
+        "Psych Up": ["Psych Up", "8F", 0, "Normal", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "The user hypnotizes\nitself into copying\nany stat change\nmade by the foe."],
+
+        "Extremespeed": ["Extremespeed", "00", 80, "Normal", 100, 5, 0, 
+                "Target", 2, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A blindingly speedy\ncharge attack that\nalways goes before\nany other."],
+
+        "Ancientpower": ["Ancientpower", "8C", 60, "Rock", 100, 5, 10, 
+                "Target", 0, [0, 1, 0, 1, 0, 0, 1, 0], "00", "Special", 31, 
+                "An ancient power is\nused to attack. It\nmay also raise all\nthe user's stats."],
+
+        "Shadow Ball": ["Shadow Ball", "16", 80, "Ghost", 100, 15, 20, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                "A shadowy blob is\nhurled at the foe.\nMay also lower the\nfoe's SP. DEF."],
+
+        "Future Sight": ["Future Sight", "32", 120, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Special", 2, 
+                "Two turns after\nthis move is used,\nthe foe is attacked\npsychically."],
+
+        "Rock Smash": ["Rock Smash", "13", 40, "Fighting", 100, 15, 50, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                "An attack that may\nalso cut DEFENSE.\nIt can also smash\ncracked boulders."],
+
+        "Whirlpool": ["Whirlpool", "2A", 35, "Water", 85, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is trapped\nin a fast, vicious\nwhirlpool for two\nto five turns."],
+
+        "Beat Up": ["Beat Up", "9A", 0, "Dark", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "67", "Physical", 0, 
+                ""],
+
+        "Fake Out": ["Fake Out", "1F", 40, "Normal", 100, 10, 0, 
+                "Target", 3, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack that hits\nfirst and causes\nflinching. Usable\nonly on 1st turn."],
+
+        "Uproar": ["Uproar", "9F", 90, "Normal", 100, 10, 0, 
+                "Random", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The user attacks in\nan uproar that\nprevents sleep for\ntwo to five turns."],
+
+        "Stockpile": ["Stockpile", "A0", 0, "Normal", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "The user charges\nup power for use\nlater. It can be\nused three times."],
+
+        "Spit Up": ["Spit Up", "00", 0, "Normal", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 1, 0], "77", "Special", 0, 
+                "The power built\nusing STOCKPILE is\nreleased at once\nfor attack."],
+
+        "Swallow": ["Swallow", "9D", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 5, 
+                "The energy it built\nusing STOCKPILE is\nabsorbed to restore\nHP."],
+
+        "Heat Wave": ["Heat Wave", "04", 95, "Fire", 90, 10, 10, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The user exhales a\nheated breath to\nattack. It may also\ninflict a burn."],
+
+        "Hail": ["Hail", "73", 0, "Ice", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 8, 
+                ""],
+
+        "Torment": ["Torment", "A5", 0, "Dark", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "It enrages the foe,\nmaking it incapable\nof using the same\nmove successively."],
+
+        "Flatter": ["Flatter", "76", 0, "Dark", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 8, 
+                "Flattery is used to\nconfuse the foe,\nbut its SP. ATK\nalso rises."],
+
+        "Will-O-Wisp": ["Will-O-Wisp", "04", 0, "Fire", 85, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "A sinister, bluish\nwhite flame is shot\nat the foe to\ninflict a burn."],
+
+        "Memento": ["Memento", "A8", 0, "Dark", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                "The user faints,\nbut sharply lowers\nthe foe's ATTACK\nand SP. ATK."],
+
+        "Facade": ["Facade", "00", 70, "Normal", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack that is\nboosted if user is\nburned, poisoned,\nor paralyzed."],
+
+        "Focus Punch": ["Focus Punch", "00", 150, "Fighting", 100, 20, 0, 
+                "Target", 253, [0, 0, 0, 0, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack that is\nexecuted last.\nThe user flinches\nif hit beforehand."],
+
+        "Smellingsalt": ["Smellingsalt", "AB", 70, "Normal", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 64, 
+                "Doubly effective on\na paralyzed foe,\nbut it also cures\nthe foe's paralysis."],
+
+        "Follow Me": ["Follow Me", "AC", 0, "Normal", 0, 20, 0, 
+                "User", 2, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "The user draws\nattention to itself,\nmaking foes attack\nonly the user."],
+
+        "Nature Power": ["Nature Power", "AD", 0, "Normal", 0, 20, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "An attack that\nchanges type\ndepending on the\nuser's location."],
+
+        "Charge": ["Charge", "AE", 0, "Electric", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "The user charges\npower to boost the\nELECTRIC move it\nuses next."],
+
+        "Taunt": ["Taunt", "AF", 0, "Dark", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "The foe is taunted\ninto a rage that\nallows it to use\nonly attack moves."],
+
+        "Helping Hand": ["Helping Hand", "B0", 0, "Normal", 0, 20, 0, 
+                "User", 5, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "A move that boosts\nthe power of the\nally's attack in a\nbattle."],
+
+        "Trick": ["Trick", "B1", 0, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                "A move that tricks\nthe foe into\ntrading held items\nwith the user."],
+
+        "Role Play": ["Role Play", "B2", 0, "Psychic", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "The user mimics the\nfoe completely and\ncopies the foe's\nability."],
+
+        "Wish": ["Wish", "B3", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Assist": ["Assist", "B4", 0, "Normal", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Ingrain": ["Ingrain", "B5", 0, "Grass", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "The user lays roots\nthat restore HP on\nevery turn.\nIt can't switch out."],
+
+        "Superpower": ["Superpower", "8D", 120, "Fighting", 100, 5, 0, 
+                "Target", 0, [0, 1, 0, 1, 0, 0, 1, 1], "00", "Physical", 3, 
+                "A powerful attack,\nbut it also lowers\nthe user's ATTACK\nand DEFENSE stats."],
+
+        "Magic Coat": ["Magic Coat", "B7", 0, "Psychic", 0, 15, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Recycle": ["Recycle", "B8", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "A move that\nrecycles a used\nitem for use once\nmore."],
+
+        "Revenge": ["Revenge", "00", 60, "Fighting", 100, 10, 0, 
+                "Target", 252, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack move that\ngains in intensity if\nthe target has hurt\nthe user."],
+
+        "Brick Break": ["Brick Break", "BA", 75, "Fighting", 100, 15, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack that also\nbreaks any barrier\nlike LIGHT SCREEN\nand REFLECT."],
+
+        "Yawn": ["Yawn", "BB", 0, "Normal", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "A huge yawn lulls\nthe foe into falling\nasleep on the next\nturn."],
+
+        "Knock Off": ["Knock Off", "BC", 65, "Dark", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "Knocks down the\nfoe's held item to\nprevent its use\nduring the battle."],
+
+        "Endeavor": ["Endeavor", "00", 0, "Normal", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "87", "Physical", 0, 
+                "Gains power the\nfewer HP the user\nhas compared with\nthe foe."],
+
+        "Eruption": ["Eruption", "00", 150, "Fire", 100, 5, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "03", "Special", 0, 
+                "The higher the\nuser's HP, the more\npowerful this\nattack becomes."],
+
+        "Skill Swap": ["Skill Swap", "BF", 0, "Psychic", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                "The user employs\nits psychic power\nto swap abilities\nwith the foe."],
+
+        "Imprison": ["Imprison", "C0", 0, "Psychic", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "Prevents foes from\nusing any move\nthat is also known\nby the user."],
+
+        "Refresh": ["Refresh", "AB", 0, "Normal", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 88, 
+                ""],
+
+        "Grudge": ["Grudge", "C2", 0, "Ghost", 0, 5, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                "If the user faints,\nthis move deletes\nthe PP of the move\nthat finished it."],
+
+        "Snatch": ["Snatch", "C3", 0, "Dark", 0, 10, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Secret Power": ["Secret Power", "C5", 70, "Normal", 100, 20, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                "An attack that may\nhave an additional\neffect that varies\nwith the terrain."],
+
+        "Dive": ["Dive", "00", 80, "Water", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The user dives\nunderwater on the\nfirst turn and\nstrikes next turn."],
+
+        "Arm Thrust": ["Arm Thrust", "1D", 15, "Fighting", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 21, 
+                ""],
+
+        "Camouflage": ["Camouflage", "D5", 0, "Normal", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "Alters the user's\ntype depending on\nthe location's\nterrain."],
+
+        "Tail Glow": ["Tail Glow", "0D", 0, "Bug", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 3, 
+                "The user flashes a\nlight that sharply\nraises its SP. ATK\nstat."],
+
+        "Luster Purge": ["Luster Purge", "16", 70, "Psychic", 100, 5, 50, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                "A burst of light\ninjures the foe. It\nmay also lower the\nfoe's SP. DEF."],
+
+        "Mist Ball": ["Mist Ball", "15", 70, "Psychic", 100, 5, 50, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                "A flurry of down\nhits the foe. It\nmay also lower the\nfoe's SP. ATK."],
+
+        "Featherdance": ["Featherdance", "12", 0, "Flying", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 2, 
+                "The foe is covered\nwith a mass of down\nthat sharply cuts\nthe ATTACK stat."],
+
+        "Teeter Dance": ["Teeter Dance", "31", 0, "Normal", 100, 20, 0, 
+                "AllButUser", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Blaze Kick": ["Blaze Kick", "04", 85, "Fire", 90, 10, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Mud Sport": ["Mud Sport", "C9", 0, "Ground", 0, 15, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Ice Ball": ["Ice Ball", "75", 30, "Ice", 90, 20, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "37", "Physical", 0, 
+                ""],
+
+        "Needle Arm": ["Needle Arm", "1F", 60, "Grass", 100, 15, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack using\nthorny arms.\nIt may make the\nfoe flinch."],
+
+        "Slack Off": ["Slack Off", "9D", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "The user slacks off\nand restores its HP\nby half its full\nHP."],
+
+        "Hyper Voice": ["Hyper Voice", "00", 90, "Normal", 100, 10, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The user lets loose\na horribly loud\nshout with the\npower to damage."],
+
+        "Poison Fang": ["Poison Fang", "21", 50, "Poison", 100, 15, 50, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The foe is bitten\nwith toxic fangs.\nIt may also badly\npoison the foe."],
+
+        "Crush Claw": ["Crush Claw", "13", 75, "Normal", 95, 10, 50, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                "The foe is attacked\nwith sharp claws.\nIt may also lower\nthe foe's DEFENSE."],
+
+        "Blast Burn": ["Blast Burn", "50", 150, "Fire", 90, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is hit with\na huge explosion.\nThe user can't move\non the next turn."],
+
+        "Hydro Cannon": ["Hydro Cannon", "50", 150, "Water", 90, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is hit with\na watery cannon.\nThe user can't move\non the next turn."],
+
+        "Meteor Mash": ["Meteor Mash", "0A", 90, "Steel", 90, 10, 20, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                "The foe is hit with\na hard, fast punch.\nIt may also raise\nthe user's ATTACK."],
+
+        "Astonish": ["Astonish", "1F", 30, "Ghost", 100, 15, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An attack using a\nstartling shout.\nIt also may make\nthe foe flinch."],
+
+        "Weather Ball": ["Weather Ball", "00", 50, "Normal", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "An attack that\nvaries in power and\ntype depending on\nthe weather."],
+
+        "Aromatherapy": ["Aromatherapy", "66", 0, "Grass", 0, 5, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                "A soothing scent is\nreleased to heal\nall status problems\nin the user's party."],
+
+        "Fake Tears": ["Fake Tears", "16", 0, "Dark", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 2, 
+                "The user feigns\ncrying to sharply\nlower the foe's\nSP. DEF stat."],
+
+        "Air Cutter": ["Air Cutter", "00", 60, "Flying", 95, 25, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Overheat": ["Overheat", "15", 130, "Fire", 90, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 2, 
+                "An intense attack\nthat also sharply\nreduces the user's\nSP. ATK stat."],
+
+        "Odor Sleuth": ["Odor Sleuth", "71", 0, "Normal", 0, 40, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "Completely negates\nthe foe's efforts to\nheighten its ability\nto evade."],
+
+        "Rock Tomb": ["Rock Tomb", "14", 60, "Rock", 95, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Physical", 1, 
+                "Boulders are hurled\nat the foe. It also\nlowers the foe's\nSPEED if it hits."],
+
+        "Silver Wind": ["Silver Wind", "8C", 60, "Bug", 100, 5, 10, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 31, 
+                "The foe is attacked\nwith a silver dust.\nIt may raise all\nthe user's stats."],
+
+        "Metal Sound": ["Metal Sound", "16", 0, "Steel", 85, 40, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 2, 
+                "A horrible metallic\nscreech is used to\nsharply lower the\nfoe's SP. DEF."],
+
+        "Grasswhistle": ["Grasswhistle", "01", 0, "Grass", 55, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                "A pleasant melody\nis played to lull\nthe foe into a deep\nsleep."],
+
+        "Tickle": ["Tickle", "8D", 0, "Normal", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 3, 
+                "The foe is made to\nlaugh, reducing its\nATTACK and DEFENSE\nstats."],
+
+        "Cosmic Power": ["Cosmic Power", "8C", 0, "Psychic", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 18, 
+                "The user absorbs a\nmystic power to\nraise its DEFENSE\nand SP. DEF."],
+
+        "Water Spout": ["Water Spout", "00", 150, "Water", 100, 5, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "03", "Special", 0, 
+                "The higher the\nuser's HP, the more\npowerful this\nattack becomes."],
+
+        "Signal Beam": ["Signal Beam", "31", 75, "Bug", 100, 15, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is hit with\na flashing beam\nthat may also\ncause confusion."],
+
+        "Shadow Punch": ["Shadow Punch", "00", 60, "Ghost", 0, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The user throws a\npunch from the\nshadows. It cannot\nbe evaded."],
+
+        "Extrasensory": ["Extrasensory", "1F", 80, "Psychic", 100, 20, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The user attacks\nwith an odd power\nthat may make the\nfoe flinch."],
+
+        "Sky Uppercut": ["Sky Uppercut", "00", 85, "Fighting", 90, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The user attacks\nwith an uppercut\nthrown skywards\nwith force."],
+
+        "Sand Tomb": ["Sand Tomb", "2A", 35, "Ground", 85, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                "The foe is trapped\ninside a painful\nsandstorm for two\nto five turns."],
+
+        "Sheer Cold": ["Sheer Cold", "00", 0, "Ice", 30, 5, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "D9", "Special", 0, 
+                "The foe is attacked\nwith ultimate cold\nthat causes fainting\nif it hits."],
+
+        "Muddy Water": ["Muddy Water", "17", 90, "Water", 85, 10, 30, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                "The user attacks\nwith muddy water.\nIt may also lower\nthe foe's accuracy."],
+
+        "Bullet Seed": ["Bullet Seed", "1D", 25, "Grass", 100, 30, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 21, 
+                "The user shoots\nseeds at the foe.\nTwo to five seeds\nare shot at once."],
+
+        "Aerial Ace": ["Aerial Ace", "00", 60, "Flying", 0, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "An extremely fast\nattack against one\ntarget. It can't be\nevaded."],
+
+        "Icicle Spear": ["Icicle Spear", "1D", 25, "Ice", 100, 30, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 21, 
+                "Sharp icicles are\nfired at the foe.\nIt strikes two to\nfive times."],
+
+        "Iron Defense": ["Iron Defense", "0B", 0, "Steel", 0, 15, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                "The user hardens\nits body's surface\nto sharply raise its\nDEFENSE stat."],
+
+        "Block": ["Block", "6A", 0, "Normal", 0, 5, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 0, 0], "00", "Status", 0, 
+                "The user blocks the\nfoe's way with arms\nspread wide to\nprevent escape."],
+
+        "Howl": ["Howl", "0A", 0, "Normal", 0, 40, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 1, 
+                "The user howls to\nraise its spirit and\nboost its ATTACK\nstat."],
+
+        "Dragon Claw": ["Dragon Claw", "00", 80, "Dragon", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "Sharp, huge claws\nhook and slash the\nfoe quickly and\nwith great power."],
+
+        "Frenzy Plant": ["Frenzy Plant", "50", 150, "Grass", 90, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is hit with\nan enormous branch.\nThe user can't move\non the next turn."],
+
+        "Bulk Up": ["Bulk Up", "8C", 0, "Fighting", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 3, 
+                "The user bulks up\nits body to boost\nboth its ATTACK and\nDEFENSE stats."],
+
+        "Bounce": ["Bounce", "06", 85, "Flying", 85, 5, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "The user bounces\non the foe on the\n2nd turn. It may\nparalyze the foe."],
+
+        "Mud Shot": ["Mud Shot", "14", 55, "Ground", 95, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                "The user attacks by\nhurling mud.\nIt also reduces the\nfoe's SPEED."],
+
+        "Poison Tail": ["Poison Tail", "02", 50, "Poison", 100, 25, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Covet": ["Covet", "69", 60, "Normal", 100, 25, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                "A cutely executed\nattack that also\nsteals the foe's\nhold item."],
+
+        "Volt Tackle": ["Volt Tackle", "33", 120, "Electric", 100, 15, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 64, 
+                "The user throws an\nelectrified tackle.\nIt hurts the user\na little."],
+
+        "Magical Leaf": ["Magical Leaf", "00", 60, "Grass", 0, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "The foe is attacked\nwith a strange leaf\nthat cannot be\nevaded."],
+
+        "Water Sport": ["Water Sport", "D2", 0, "Water", 0, 15, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Calm Mind": ["Calm Mind", "8C", 0, "Psychic", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 24, 
+                "The user focuses\nits mind to raise\nthe SP. ATK and\nSP. DEF stats."],
+
+        "Leaf Blade": ["Leaf Blade", "00", 90, "Grass", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Dragon Dance": ["Dragon Dance", "8C", 0, "Dragon", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 5, 
+                "A mystic, powerful\ndance that boosts\nthe user's ATTACK\nand SPEED stats."],
+
+        "Rock Blast": ["Rock Blast", "1D", 25, "Rock", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 21, 
+                "The user hurls two\nto five hard rocks\nat the foe to\nattack."],
+
+        "Shock Wave": ["Shock Wave", "00", 60, "Electric", 0, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "A rapid jolt of\nelectricity strikes\nthe foe. It can't\nbe evaded."],
+
+        "Water Pulse": ["Water Pulse", "31", 60, "Water", 100, 20, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                "An attack with a\npulsing blast of\nwater. It may also\nconfuse the foe."],
+
+        "Doom Desire": ["Doom Desire", "32", 140, "Steel", 100, 5, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Special", 2, 
+                "A move that attacks\nthe foe with a\nblast of light two\nturns after use."],
+
+        "Psycho Boost": ["Psycho Boost", "15", 140, "Psychic", 90, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 2, 
+                "An intense attack\nthat also sharply\nreduces the user's\nSP. ATK stat."],
+
+        "Roost": ["Roost", "3E", 0, "Flying", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "Gravity": ["Gravity", "11", 0, "Psychic", 0, 5, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Miracle Eye": ["Miracle Eye", "3F", 0, "Psychic", 0, 40, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Wake-Up Slap": ["Wake-Up Slap", "AB", 70, "Fighting", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 4, 
+                ""],
+
+        "Hammer Arm": ["Hammer Arm", "14", 100, "Fighting", 90, 10, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Gyro Ball": ["Gyro Ball", "00", 0, "Steel", 10, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "C6", "Physical", 0, 
+                ""],
+
+        "Healing Wish": ["Healing Wish", "A7", 0, "Psychic", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Brine": ["Brine", "00", 65, "Water", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Natural Gift": ["Natural Gift", "00", 0, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "4A", "Physical", 0, 
+                ""],
+
+        "Feint": ["Feint", "40", 30, "Normal", 100, 10, 0, 
+                "Target", 2, [0, 0, 0, 1, 0, 0, 0, 0], "00", "Physical", 0, 
+                ""],
+
+        "Pluck": ["Pluck", "42", 60, "Flying", 100, 20, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Tailwind": ["Tailwind", "35", 0, "Flying", 0, 15, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Acupressure": ["Acupressure", "43", 0, "Normal", 0, 30, 0, 
+                "UserAndPartner", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "Metal Burst": ["Metal Burst", "00", 0, "Steel", 100, 10, 0, 
+                "LastHitMe", 0, [0, 0, 0, 1, 0, 0, 1, 0], "8B", "Physical", 0, 
+                ""],
+
+        "U-Turn": ["U-Turn", "1C", 70, "Bug", 100, 20, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Close Combat": ["Close Combat", "8D", 120, "Fighting", 100, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 18, 
+                ""],
+
+        "Assurance": ["Assurance", "00", 60, "Dark", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Embargo": ["Embargo", "3C", 0, "Dark", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Fling": ["Fling", "00", 0, "Dark", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "0A", "Physical", 0, 
+                ""],
+
+        "Psycho Shift": ["Psycho Shift", "44", 0, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Trump Card": ["Trump Card", "00", 0, "Normal", 0, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "97", "Special", 0, 
+                ""],
+
+        "Heal Block": ["Heal Block", "3D", 0, "Psychic", 100, 15, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Wring Out": ["Wring Out", "00", 120, "Normal", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "13", "Special", 0, 
+                ""],
+
+        "Power Trick": ["Power Trick", "45", 0, "Psychic", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 16, 
+                ""],
+
+        "Gastro Acid": ["Gastro Acid", "46", 0, "Poison", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Lucky Chant": ["Lucky Chant", "3A", 0, "Normal", 0, 30, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Me First": ["Me First", "47", 0, "Normal", 0, 20, 0, 
+                "TargetOrPartner", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Copycat": ["Copycat", "48", 0, "Normal", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Power Swap": ["Power Swap", "49", 0, "Psychic", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 9, 
+                ""],
+
+        "Guard Swap": ["Guard Swap", "49", 0, "Psychic", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 18, 
+                ""],
+
+        "Punishment": ["Punishment", "00", 0, "Dark", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "08", "Physical", 0, 
+                ""],
+
+        "Last Resort": ["Last Resort", "00", 140, "Normal", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Worry Seed": ["Worry Seed", "4A", 0, "Grass", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 15, 
+                ""],
+
+        "Sucker Punch": ["Sucker Punch", "00", 70, "Dark", 100, 5, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Toxic Spikes": ["Toxic Spikes", "70", 0, "Poison", 0, 20, 0, 
+                "FoeSide", 0, [0, 0, 0, 0, 0, 1, 0, 0], "00", "Status", 1, 
+                ""],
+
+        "Heart Swap": ["Heart Swap", "49", 0, "Psychic", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 127, 
+                ""],
+
+        "Aqua Ring": ["Aqua Ring", "B6", 0, "Water", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Magnet Rise": ["Magnet Rise", "4B", 0, "Electric", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Flare Blitz": ["Flare Blitz", "33", 120, "Fire", 100, 15, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 16, 
+                ""],
+
+        "Force Palm": ["Force Palm", "06", 60, "Fighting", 100, 10, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Aura Sphere": ["Aura Sphere", "00", 80, "Fighting", 0, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Rock Polish": ["Rock Polish", "0C", 0, "Rock", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "Poison Jab": ["Poison Jab", "02", 80, "Poison", 100, 20, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Dark Pulse": ["Dark Pulse", "1F", 80, "Dark", 100, 15, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Night Slash": ["Night Slash", "00", 70, "Dark", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Aqua Tail": ["Aqua Tail", "00", 90, "Water", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Seed Bomb": ["Seed Bomb", "00", 80, "Grass", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Air Slash": ["Air Slash", "1F", 75, "Flying", 95, 15, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "X-Scissor": ["X-Scissor", "00", 80, "Bug", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Bug Buzz": ["Bug Buzz", "16", 90, "Bug", 100, 10, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Dragon Pulse": ["Dragon Pulse", "00", 85, "Dragon", 100, 85, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Dragon Rush": ["Dragon Rush", "1F", 100, "Dragon", 75, 10, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Power Gem": ["Power Gem", "00", 80, "Rock", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Drain Punch": ["Drain Punch", "03", 75, "Fighting", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 50, 
+                ""],
+
+        "Vacuum Wave": ["Vacuum Wave", "00", 40, "Fighting", 100, 30, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Focus Blast": ["Focus Blast", "16", 120, "Fighting", 70, 5, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Energy Ball": ["Energy Ball", "16", 80, "Grass", 100, 10, 10, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Brave Bird": ["Brave Bird", "30", 120, "Flying", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 33, 
+                ""],
+
+        "Earth Power": ["Earth Power", "16", 90, "Ground", 100, 10, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Switcheroo": ["Switcheroo", "B1", 0, "Dark", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Giga Impact": ["Giga Impact", "50", 150, "Normal", 90, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Nasty Plot": ["Nasty Plot", "0D", 0, "Dark", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "Bullet Punch": ["Bullet Punch", "00", 40, "Steel", 100, 30, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Avalanche": ["Avalanche", "00", 60, "Ice", 100, 10, 0, 
+                "Target", 252, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Ice Shard": ["Ice Shard", "00", 40, "Ice", 100, 30, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Shadow Claw": ["Shadow Claw", "00", 70, "Ghost", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Ice Fang": ["Ice Fang", "4C", 65, "Ice", 95, 15, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 32, 
+                ""],
+
+        "Fire Fang": ["Fire Fang", "4C", 65, "Fire", 95, 15, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 16, 
+                ""],
+
+        "Shadow Sneak": ["Shadow Sneak", "00", 40, "Ghost", 100, 30, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Mud Bomb": ["Mud Bomb", "17", 65, "Ground", 85, 15, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Psycho Cut": ["Psycho Cut", "00", 70, "Psychic", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Zen Headbutt": ["Zen Headbutt", "1F", 80, "Psychic", 90, 15, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Mirror Shot": ["Mirror Shot", "17", 65, "Steel", 85, 10, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Flash Cannon": ["Flash Cannon", "16", 80, "Steel", 100, 10, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Rock Climb": ["Rock Climb", "31", 90, "Normal", 85, 20, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Defog": ["Defog", "82", 0, "Flying", 0, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Trick Room": ["Trick Room", "4D", 0, "Psychic", 0, 5, 0, 
+                "User", 249, [0, 0, 0, 1, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Draco Meteor": ["Draco Meteor", "15", 130, "Dragon", 90, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 2, 
+                ""],
+
+        "Discharge": ["Discharge", "06", 80, "Electric", 100, 15, 30, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Lava Plume": ["Lava Plume", "04", 80, "Fire", 100, 15, 30, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Leaf Storm": ["Leaf Storm", "15", 130, "Grass", 90, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 2, 
+                ""],
+
+        "Power Whip": ["Power Whip", "00", 120, "Grass", 85, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Rock Wrecker": ["Rock Wrecker", "50", 150, "Rock", 90, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Cross Poison": ["Cross Poison", "02", 70, "Poison", 100, 20, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Gunk Shot": ["Gunk Shot", "02", 120, "Poison", 80, 5, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Iron Head": ["Iron Head", "1F", 80, "Steel", 100, 15, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Magnet Bomb": ["Magnet Bomb", "00", 60, "Steel", 0, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Stone Edge": ["Stone Edge", "00", 100, "Rock", 80, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Captivate": ["Captivate", "15", 0, "Normal", 100, 20, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 2, 
+                ""],
+
+        "Stealth Rock": ["Stealth Rock", "70", 0, "Rock", 0, 20, 0, 
+                "FoeSide", 0, [0, 0, 0, 0, 0, 1, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "Grass Knot": ["Grass Knot", "00", 0, "Grass", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "15", "Special", 0, 
+                ""],
+
+        "Chatter": ["Chatter", "31", 65, "Flying", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Judgment": ["Judgment", "00", 100, "Normal", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Bug Bite": ["Bug Bite", "42", 60, "Bug", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Charge Beam": ["Charge Beam", "0D", 50, "Electric", 90, 10, 70, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Wood Hammer": ["Wood Hammer", "30", 120, "Grass", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 33, 
+                ""],
+
+        "Aqua Jet": ["Aqua Jet", "00", 40, "Water", 100, 20, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Attack Order": ["Attack Order", "00", 90, "Bug", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Defend Order": ["Defend Order", "8C", 0, "Bug", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 18, 
+                ""],
+
+        "Heal Order": ["Heal Order", "9D", 0, "Bug", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Head Smash": ["Head Smash", "30", 150, "Rock", 80, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 33, 
+                ""],
+
+        "Double Hit": ["Double Hit", "1D", 35, "Normal", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 2, 
+                ""],
+
+        "Roar of Time": ["Roar of Time", "50", 150, "Dragon", 90, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Spacial Rend": ["Spacial Rend", "00", 100, "Dragon", 95, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Lunar Dance": ["Lunar Dance", "A7", 0, "Psychic", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "Crush Grip": ["Crush Grip", "00", 120, "Normal", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "13", "Physical", 0, 
+                ""],
+
+        "Magma Storm": ["Magma Storm", "2A", 100, "Fire", 75, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Dark Void": ["Dark Void", "01", 0, "Dark", 90, 10, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Seed Flare": ["Seed Flare", "16", 120, "Grass", 85, 5, 40, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 2, 
+                ""],
+
+        "Ominous Wind": ["Ominous Wind", "8C", 60, "Ghost", 100, 15, 10, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 31, 
+                ""],
+
+        "Shadow Force": ["Shadow Force", "00", 120, "Ghost", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 0, 1], "00", "Physical", 0, 
+                ""],
+
+        "Hone Claws": ["Hone Claws", "8C", 0, "Dark", 0, 15, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 33, 
+                ""],
+
+        "Wide Guard": ["Wide Guard", "37", 0, "Rock", 0, 10, 0, 
+                "MySide", 3, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Guard Split": ["Guard Split", "57", 0, "Psychic", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Status", 19, 
+                ""],
+
+        "Power Split": ["Power Split", "57", 0, "Psychic", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Status", 2, 
+                ""],
+
+        "Wonder Room": ["Wonder Room", "58", 0, "Psychic", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 1, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Psyshock": ["Psyshock", "00", 80, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Venoshock": ["Venoshock", "00", 65, "Poison", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Autotomize": ["Autotomize", "2D", 0, "Steel", 0, 15, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 100, 
+                ""],
+
+        "Rage Powder": ["Rage Powder", "AC", 0, "Bug", 0, 20, 0, 
+                "User", 2, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "Telekinesis": ["Telekinesis", "59", 0, "Psychic", 0, 15, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Magic Room": ["Magic Room", "5C", 0, "Psychic", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 1, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Smack Down": ["Smack Down", "60", 50, "Rock", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Storm Throw": ["Storm Throw", "00", 60, "Fighting", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Flame Burst": ["Flame Burst", "63", 70, "Fire", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 6, 
+                ""],
+
+        "Sludge Wave": ["Sludge Wave", "02", 95, "Poison", 100, 10, 10, 
+                "AllButUser", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Quiver Dance": ["Quiver Dance", "8C", 0, "Bug", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 28, 
+                ""],
+
+        "Heavy Slam": ["Heavy Slam", "000", 0, "Steel", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "95", "Physical", 0, 
+                ""],
+
+        "Synchronoise": ["Synchronoise", "00", 120, "Psychic", 100, 10, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Electro Ball": ["Electro Ball", "00", 0, "Electric", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "C6", "Special", 0, 
+                ""],
+
+        "Soak": ["Soak", "65", 0, "Water", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 11, 
+                ""],
+
+        "Flame Charge": ["Flame Charge", "0C", 50, "Fire", 100, 20, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Coil": ["Coil", "8C", 0, "Poison", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 35, 
+                ""],
+
+        "Low Sweep": ["Low Sweep", "14", 65, "Fighting", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Acid Spray": ["Acid Spray", "16", 40, "Poison", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 2, 
+                ""],
+
+        "Foul Play": ["Foul Play", "00", 95, "Dark", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Simple Beam": ["Simple Beam", "4A", 0, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 87, 
+                ""],
+
+        "Entrainment": ["Entrainment", "4A", 0, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 255, 
+                ""],
+
+        "After You": ["After You", "67", 0, "Normal", 0, 15, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Round": ["Round", "68", 60, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "A7", "Special", 0, 
+                ""],
+
+        "Echoed Voice": ["Echoed Voice", "6E", 40, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "B7", "Special", 0, 
+                ""],
+
+        "Chip Away": ["Chip Away", "00", 70, "Normal", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Clear Smog": ["Clear Smog", "19", 50, "Poison", 0, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Stored Power": ["Stored Power", "00", 20, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "14", "Special", 0, 
+                ""],
+
+        "Quick Guard": ["Quick Guard", "36", 0, "Fighting", 0, 15, 0, 
+                "MySide", 3, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Ally Switch": ["Ally Switch", "79", 0, "Psychic", 0, 15, 0, 
+                "User", 2, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Scald": ["Scald", "7D", 80, "Water", 100, 15, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Shell Smash": ["Shell Smash", "7A", 0, "Normal", 0, 15, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Heal Pulse": ["Heal Pulse", "9D", 0, "Psychic", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Hex": ["Hex", "00", 65, "Ghost", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Sky Drop": ["Sky Drop", "00", 60, "Flying", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Shift Gear": ["Shift Gear", "26", 0, "Steel", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Circle Throw": ["Circle Throw", "1C", 60, "Fighting", 90, 10, 0, 
+                "Target", 250, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Incinerate": ["Incinerate", "42", 60, "Fire", 100, 15, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Quash": ["Quash", "7B", 0, "Dark", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Acrobatics": ["Acrobatics", "00", 55, "Flying", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Reflect Type": ["Reflect Type", "7E", 0, "Normal", 0, 15, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Retaliate": ["Retaliate", "00", 70, "Normal", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Final Gambit": ["Final Gambit", "30", 0, "Fighting", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 1, 0], "C9", "Special", 100, 
+                ""],
+
+        "Bestow": ["Bestow", "69", 0, "Normal", 0, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 0, 0], "00", "Status", 1, 
+                ""],
+
+        "Inferno": ["Inferno", "04", 100, "Fire", 50, 5, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Water Pledge": ["Water Pledge", "00", 80, "Water", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Fire Pledge": ["Fire Pledge", "00", 80, "Fire", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Grass Pledge": ["Grass Pledge", "00", 80, "Grass", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Volt Switch": ["Volt Switch", "1C", 70, "Electric", 100, 20, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Struggle Bug": ["Struggle Bug", "15", 50, "Bug", 100, 20, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Bulldoze": ["Bulldoze", "14", 60, "Ground", 100, 20, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 1, 
+                ""],
+
+        "Frost Breath": ["Frost Breath", "00", 60, "Ice", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Dragon Tail": ["Dragon Tail", "1C", 60, "Dragon", 90, 10, 0, 
+                "Target", 250, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Work Up": ["Work Up", "8C", 0, "Normal", 0, 30, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 9, 
+                ""],
+
+        "Electroweb": ["Electroweb", "14", 55, "Electric", 95, 15, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Wild Charge": ["Wild Charge", "30", 90, "Electric", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 25, 
+                ""],
+
+        "Drill Run": ["Drill Run", "00", 80, "Ground", 95, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Dual Chop": ["Dual Chop", "1D", 40, "Dragon", 90, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 2, 
+                ""],
+
+        "Heart Stamp": ["Heart Stamp", "1F", 60, "Psychic", 100, 25, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Horn Leech": ["Horn Leech", "03", 75, "Grass", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 50, 
+                ""],
+
+        "Sacred Sword": ["Sacred Sword", "00", 90, "Fighting", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Razor Shell": ["Razor Shell", "13", 75, "Water", 95, 10, 50, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Heat Crash": ["Heat Crash", "000", 1, "Normal", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "95", "Status", 0, 
+                ""],
+
+        "Leaf Tornado": ["Leaf Tornado", "17", 65, "Grass", 90, 10, 50, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Steamroller": ["Steamroller", "1F", 65, "Bug", 100, 20, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Cotton Guard": ["Cotton Guard", "0B", 0, "Grass", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 3, 
+                ""],
+
+        "Night Daze": ["Night Daze", "17", 85, "Dark", 95, 10, 40, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Psystrike": ["Psystrike", "00", 100, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Tail Slap": ["Tail Slap", "1D", 25, "Normal", 85, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 37, 
+                ""],
+
+        "Hurricane": ["Hurricane", "31", 110, "Flying", 70, 10, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Head Charge": ["Head Charge", "30", 120, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 25, 
+                ""],
+
+        "Gear Grind": ["Gear Grind", "1D", 50, "Steel", 85, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 2, 
+                ""],
+
+        "Searing Shot": ["Searing Shot", "04", 100, "Fire", 100, 5, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Techno Blast": ["Techno Blast", "00", 120, "Normal", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Relic Song": ["Relic Song", "01", 75, "Normal", 100, 10, 10, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Secret Sword": ["Secret Sword", "00", 85, "Fighting", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Glaciate": ["Glaciate", "14", 65, "Ice", 95, 10, 0, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Bolt Strike": ["Bolt Strike", "06", 130, "Electric", 85, 5, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Blue Flare": ["Blue Flare", "04", 130, "Fire", 85, 5, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Fiery Dance": ["Fiery Dance", "0D", 80, "Fire", 100, 10, 50, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Freeze Shock": ["Freeze Shock", "06", 140, "Ice", 90, 5, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Ice Burn": ["Ice Burn", "04", 140, "Ice", 90, 5, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Snarl": ["Snarl", "15", 55, "Dark", 95, 15, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Icicle Crash": ["Icicle Crash", "1F", 85, "Ice", 90, 10, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "V-Create": ["V-Create", "8D", 180, "Fire", 95, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 22, 
+                ""],
+
+        "Fusion Flare": ["Fusion Flare", "00", 100, "Fire", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Fusion Bolt": ["Fusion Bolt", "00", 100, "Electric", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Flying Press": ["Flying Press", "00", 100, "Fighting", 95, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Mat Block": ["Mat Block", "38", 0, "Fighting", 0, 10, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Belch": ["Belch", "00", 120, "Poison", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Rototiller": ["Rototiller", "7F", 0, "Ground", 0, 10, 0, 
+                "Everyone", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Sticky Web": ["Sticky Web", "70", 0, "Bug", 0, 20, 0, 
+                "FoeSide", 0, [0, 0, 0, 0, 0, 1, 0, 0], "00", "Status", 3, 
+                ""],
+
+        "Fell Stinger": ["Fell Stinger", "55", 50, "Bug", 100, 25, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Phantom Force": ["Phantom Force", "00", 90, "Ghost", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 0, 1], "00", "Physical", 0, 
+                ""],
+
+        "Trick Or Treat": ["Trick Or Treat", "3B", 0, "Ghost", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 7, 
+                ""],
+
+        "Noble Roar": ["Noble Roar", "8D", 0, "Normal", 100, 30, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 9, 
+                ""],
+
+        "Ion Deluge": ["Ion Deluge", "2B", 0, "Electric", 0, 25, 0, 
+                "User", 1, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "CurvedCharge": ["CurvedCharge", "03", 65, "Electric", 100, 20, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 50, 
+                ""],
+
+        "ForestsCurse": ["ForestsCurse", "3B", 0, "Grass", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 12, 
+                ""],
+
+        "Petal Storm": ["Petal Storm", "00", 90, "Grass", 100, 15, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Freeze-Dry": ["Freeze-Dry", "05", 70, "Ice", 100, 20, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Disarm Voice": ["Disarm Voice", "00", 40, "Fairy", 0, 15, 0, 
+                "FoeSide", 0, [0, 0, 1, 0, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Parting Shot": ["Parting Shot", "80", 0, "Dark", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 9, 
+                ""],
+
+        "Topsy-Turvy": ["Topsy-Turvy", "83", 0, "Dark", 0, 20, 0, 
+                "Target", 0, [0, 1, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Draining Kiss": ["Draining Kiss", "03", 50, "Fairy", 100, 10, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Special", 75, 
+                ""],
+
+        "Crafty Shield": ["Crafty Shield", "84", 0, "Fairy", 0, 10, 0, 
+                "MySide", 3, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Flower Shield": ["Flower Shield", "85", 0, "Fairy", 0, 10, 0, 
+                "Everyone", 0, [0, 1, 0, 0, 0, 0, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "GrassTerrain": ["GrassTerrain", "2C", 0, "Grass", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 1, 
+                ""],
+
+        "Misty Terrain": ["Misty Terrain", "2C", 0, "Fairy", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 4, 
+                ""],
+
+        "Electrify": ["Electrify", "27", 0, "Electric", 0, 20, 0, 
+                "Target", 0, [0, 1, 0, 1, 0, 0, 1, 0], "00", "Status", 13, 
+                ""],
+
+        "Play Rough": ["Play Rough", "12", 90, "Fairy", 90, 10, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Fairy Wind": ["Fairy Wind", "00", 40, "Fairy", 100, 30, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Moonblast": ["Moonblast", "15", 95, "Fairy", 100, 15, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Boomburst": ["Boomburst", "00", 140, "Normal", 100, 10, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Fairy Lock": ["Fairy Lock", "86", 0, "Fairy", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 1, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "King's Shield": ["King's Shield", "87", 0, "Steel", 0, 10, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Play Nice": ["Play Nice", "12", 0, "Normal", 0, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 0, 0], "00", "Status", 1, 
+                ""],
+
+        "Confide": ["Confide", "15", 0, "Normal", 0, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 0, 0], "00", "Status", 1, 
+                ""],
+
+        "Diamond Storm": ["Diamond Storm", "0B", 100, "Rock", 95, 5, 50, 
+                "FoeSide", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Physical", 2, 
+                ""],
+
+        "AquaEruption": ["AquaEruption", "7D", 110, "Water", 95, 5, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "HyperHole": ["HyperHole", "40", 80, "Psychic", 0, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 0, 0], "00", "Special", 0, 
+                ""],
+
+        "AquaShuriken": ["AquaShuriken", "1D", 15, "Water", 100, 20, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 37, 
+                ""],
+
+        "Mystical Fire": ["Mystical Fire", "15", 75, "Fire", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Spiky Shield": ["Spiky Shield", "89", 0, "Grass", 0, 10, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Aromatic Mist": ["Aromatic Mist", "90", 0, "Fairy", 0, 20, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 16, 
+                ""],
+
+        "Eerie Impulse": ["Eerie Impulse", "15", 0, "Electric", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 2, 
+                ""],
+
+        "Venom Drench": ["Venom Drench", "28", 0, "Poison", 100, 20, 0, 
+                "FoeSide", 0, [0, 0, 0, 0, 0, 1, 1, 0], "00", "Status", 13, 
+                ""],
+
+        "Powder": ["Powder", "91", 0, "Bug", 100, 20, 0, 
+                "Target", 1, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                ""],
+
+        "Geomancy": ["Geomancy", "92", 0, "Fairy", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 28, 
+                ""],
+
+        "Magnetic Flux": ["Magnetic Flux", "5B", 0, "Electric", 0, 20, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 18, 
+                ""],
+
+        "Happy Hour": ["Happy Hour", "22", 0, "Normal", 0, 30, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 1, 
+                ""],
+
+        "SparkTerrain": ["SparkTerrain", "2C", 0, "Electric", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "Dazzle Gleam": ["Dazzle Gleam", "00", 80, "Fairy", 100, 10, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Celebrate": ["Celebrate", "8B", 0, "Normal", 0, 40, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Hold Hands": ["Hold Hands", "8B", 0, "Normal", 0, 40, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 1, 
+                ""],
+
+        "Baby-Doll Eyes": ["Baby-Doll Eyes", "12", 0, "Fairy", 100, 30, 0, 
+                "Target", 1, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                ""],
+
+        "Nuzzle": ["Nuzzle", "06", 20, "Electric", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Hold Back": ["Hold Back", "00", 40, "Normal", 100, 40, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "1C", "Physical", 0, 
+                ""],
+
+        "Infestation": ["Infestation", "2A", 20, "Bug", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Special", 0, 
+                ""],
+
+        "Power-Up Punch": ["Power-Up Punch", "0A", 40, "Fighting", 100, 20, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Oblivion Wing": ["Oblivion Wing", "03", 80, "Flying", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 75, 
+                ""],
+
+        "1,000 Arrows": ["1,000 Arrows", "60", 90, "Ground", 100, 10, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "1,000 Waves": ["1,000 Waves", "6A", 90, "Ground", 100, 10, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Land's Wrath": ["Land's Wrath", "00", 90, "Ground", 100, 10, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Light Of Ruin": ["Light Of Ruin", "30", 140, "Fairy", 90, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 50, 
+                ""],
+
+        "Origin Pulse": ["Origin Pulse", "00", 110, "Water", 85, 10, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "StoneyBlades": ["StoneyBlades", "00", 120, "Ground", 85, 10, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Dragon Ascent": ["Dragon Ascent", "8D", 120, "Dragon", 100, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 18, 
+                ""],
+
+        "Hyper Fury": ["Hyper Fury", "8D", 100, "Dark", 0, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 0, 0], "00", "Physical", 2, 
+                ""],
+
+        "ZNormal": ["ZNormal", "00", 0, "Normal", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZFighting": ["ZFighting", "00", 0, "Fighting", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZFlying": ["ZFlying", "00", 0, "Flying", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZPoison": ["ZPoison", "00", 0, "Poison", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZGround": ["ZGround", "00", 0, "Ground", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZRock": ["ZRock", "00", 0, "Rock", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZBug": ["ZBug", "00", 0, "Bug", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZGhost": ["ZGhost", "00", 0, "Ghost", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZSteel": ["ZSteel", "00", 0, "Steel", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZFire": ["ZFire", "00", 0, "Fire", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZWater": ["ZWater", "00", 0, "Water", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZGrass": ["ZGrass", "00", 0, "Grass", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZElectric": ["ZElectric", "00", 0, "Electric", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZPsychic": ["ZPsychic", "00", 0, "Psychic", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZIce": ["ZIce", "00", 0, "Ice", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZDragon": ["ZDragon", "00", 0, "Dragon", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZDark": ["ZDark", "00", 0, "Dark", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZFairy": ["ZFairy", "00", 0, "Fairy", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 0, 
+                ""],
+
+        "ZPikachu": ["ZPikachu", "00", 210, "Electric", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 1], "00", "Physical", 0, 
+                ""],
+
+        "Shore Up": ["Shore Up", "9D", 0, "Ground", 0, 5, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 3, 
+                ""],
+
+        "FirstMeeting": ["FirstMeeting", "00", 90, "Bug", 100, 10, 0, 
+                "Target", 2, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "PoisonBunker": ["PoisonBunker", "94", 0, "Poison", 0, 10, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "GhostShackle": ["GhostShackle", "6A", 80, "Ghost", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Dark Lariat": ["Dark Lariat", "00", 85, "Dark", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Sparkle Aria": ["Sparkle Aria", "AB", 90, "Water", 100, 10, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 16, 
+                ""],
+
+        "Ice Hammer": ["Ice Hammer", "14", 100, "Ice", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Floral Heal": ["Floral Heal", "9D", 0, "Fairy", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 1, 1, 0], "00", "Status", 6, 
+                ""],
+
+        "HiHorsepower": ["HiHorsepower", "00", 95, "Ground", 95, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Strength Sap": ["Strength Sap", "95", 0, "Grass", 100, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 1, 
+                ""],
+
+        "Solar Blade": ["Solar Blade", "00", 125, "Grass", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Leafage": ["Leafage", "00", 40, "Grass", 100, 40, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Spotlight": ["Spotlight", "AC", 0, "Normal", 0, 15, 0, 
+                "Target", 3, [0, 0, 0, 0, 0, 1, 1, 0], "00", "Status", 1, 
+                ""],
+
+        "Toxic Thread": ["Toxic Thread", "97", 0, "Poison", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 51, 
+                ""],
+
+        "Laser Focus": ["Laser Focus", "98", 0, "Normal", 0, 30, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Gear Up": ["Gear Up", "93", 0, "Steel", 0, 20, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 9, 
+                ""],
+
+        "Throat Chop": ["Throat Chop", "99", 80, "Dark", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 2, 
+                ""],
+
+        "Pollen Puff": ["Pollen Puff", "00", 90, "Bug", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Anchor Shot": ["Anchor Shot", "6A", 80, "Steel", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "PsychTerrain": ["PsychTerrain", "2C", 0, "Psychic", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 8, 
+                ""],
+
+        "Lunge": ["Lunge", "12", 80, "Bug", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Fire Lash": ["Fire Lash", "13", 80, "Fire", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Power Trip": ["Power Trip", "00", 20, "Dark", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "14", "Physical", 0, 
+                ""],
+
+        "Burn Up": ["Burn Up", "9B", 130, "Fire", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Speed Swap": ["Speed Swap", "45", 0, "Psychic", 0, 10, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 4, 
+                ""],
+
+        "Smart Strike": ["Smart Strike", "00", 70, "Steel", 0, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Purify": ["Purify", "A1", 0, "Poison", 0, 20, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Awaken Dance": ["Awaken Dance", "00", 90, "Normal", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Core Enforcer": ["Core Enforcer", "46", 100, "Dragon", 100, 10, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Trop Kick": ["Trop Kick", "12", 70, "Grass", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Instruct": ["Instruct", "A3", 0, "Psychic", 0, 15, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Beak Blast": ["Beak Blast", "A4", 100, "Flying", 100, 15, 0, 
+                "Target", 253, [0, 1, 1, 0, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Scale Clang": ["Scale Clang", "13", 110, "Dragon", 100, 5, 0, 
+                "FoeSide", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Dragon Hammer": ["Dragon Hammer", "00", 90, "Dragon", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Brutal Swing": ["Brutal Swing", "00", 60, "Dark", 100, 20, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Aurora Veil": ["Aurora Veil", "34", 0, "Ice", 0, 20, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "ZDecidueye": ["ZDecidueye", "00", 180, "Ghost", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "00", "Physical", 0, 
+                ""],
+
+        "ZIncineroar": ["ZIncineroar", "00", 180, "Dark", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "00", "Physical", 0, 
+                ""],
+
+        "ZPrimarina": ["ZPrimarina", "00", 195, "Water", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "00", "Special", 0, 
+                ""],
+
+        "ZGuardian": ["ZGuardian", "00", 0, "Fairy", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "99", "Special", 0, 
+                ""],
+
+        "ZMarshadow": ["ZMarshadow", "00", 195, "Ghost", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "00", "Physical", 0, 
+                ""],
+
+        "ZARaichu": ["ZARaichu", "06", 175, "Electric", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "00", "Special", 0, 
+                ""],
+
+        "ZSnorlax": ["ZSnorlax", "00", 210, "Normal", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 1], "00", "Physical", 0, 
+                ""],
+
+        "ZEevee": ["ZEevee", "92", 0, "Normal", 0, 0, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 31, 
+                ""],
+
+        "ZMew": ["ZMew", "2C", 185, "Psychic", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "00", "Special", 8, 
+                ""],
+
+        "Shell Trap": ["Shell Trap", "A6", 150, "Fire", 100, 5, 0, 
+                "FoeSide", 253, [0, 0, 1, 0, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Fleur Cannon": ["Fleur Cannon", "15", 130, "Fairy", 90, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 2, 
+                ""],
+
+        "Psychic Fangs": ["Psychic Fangs", "BA", 85, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "StompTantrum": ["StompTantrum", "00", 75, "Ground", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Shadow Bone": ["Shadow Bone", "13", 85, "Ghost", 100, 10, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 1, 
+                ""],
+
+        "Accelerock": ["Accelerock", "00", 40, "Rock", 100, 20, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Liquidation": ["Liquidation", "13", 85, "Water", 100, 10, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Prism Laser": ["Prism Laser", "50", 160, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "GhostlyThief": ["GhostlyThief", "A9", 90, "Ghost", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "SunsteelBash": ["SunsteelBash", "00", 100, "Steel", 100, 5, 0, 
+                "Target", 0, [1, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Moongeist": ["Moongeist", "00", 100, "Ghost", 100, 5, 0, 
+                "Target", 0, [1, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Tearful Look": ["Tearful Look", "8D", 0, "Normal", 0, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 0, 0], "00", "Status", 9, 
+                ""],
+
+        "Zing Zap": ["Zing Zap", "1F", 80, "Electric", 100, 10, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Nature Wrath": ["Nature Wrath", "00", 0, "Fairy", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "59", "Special", 0, 
+                ""],
+
+        "Multi-Attack": ["Multi-Attack", "00", 120, "Normal", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "ZCapPikachu": ["ZCapPikachu", "00", 195, "Electric", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "00", "Special", 0, 
+                ""],
+
+        "Mind Blown": ["Mind Blown", "AA", 150, "Fire", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 50, 
+                ""],
+
+        "Plasma Fists": ["Plasma Fists", "B9", 100, "Electric", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Photon Geyser": ["Photon Geyser", "00", 100, "Psychic", 100, 5, 0, 
+                "Target", 0, [1, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "ZUNecrozma": ["ZUNecrozma", "00", 200, "Psychic", 0, 0, 0, 
+                "Target", 0, [1, 0, 1, 0, 0, 0, 0, 0], "00", "Special", 0, 
+                ""],
+
+        "ZSNecrozma": ["ZSNecrozma", "00", 200, "Steel", 0, 0, 0, 
+                "Target", 0, [1, 0, 1, 0, 0, 0, 0, 1], "00", "Physical", 0, 
+                ""],
+
+        "ZLNecrozma": ["ZLNecrozma", "00", 200, "Ghost", 0, 0, 0, 
+                "Target", 0, [1, 0, 1, 0, 0, 0, 0, 0], "00", "Special", 0, 
+                ""],
+
+        "ZMimikyu": ["ZMimikyu", "00", 190, "Fairy", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 1], "00", "Physical", 0, 
+                ""],
+
+        "ZLycanroc": ["ZLycanroc", "BD", 190, "Rock", 0, 0, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 0, 0], "00", "Physical", 0, 
+                ""],
+
+        "ZKommo-o": ["ZKommo-o", "8C", 185, "Dragon", 0, 0, 0, 
+                "FoeSide", 0, [0, 1, 1, 0, 0, 0, 0, 0], "00", "Special", 31, 
+                ""],
+
+        "Zippy Zap": ["Zippy Zap", "00", 50, "Electric", 100, 15, 0, 
+                "Target", 2, [0, 0, 0, 0, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "SplishSplash": ["SplishSplash", "06", 90, "Water", 100, 15, 30, 
+                "FoeSide", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Floaty Fall": ["Floaty Fall", "1F", 90, "Flying", 95, 15, 30, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Pika Papow": ["Pika Papow", "00", 0, "Electric", 0, 20, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 1, 0], "02", "Special", 0, 
+                ""],
+
+        "Bouncy Bubble": ["Bouncy Bubble", "03", 90, "Water", 100, 15, 0, 
+                "FoeSide", 0, [0, 0, 1, 0, 0, 0, 1, 0], "00", "Special", 50, 
+                ""],
+
+        "Sizzly Slide": ["Sizzly Slide", "04", 90, "Fire", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Glitzy Glow": ["Glitzy Glow", "23", 90, "Psychic", 100, 15, 0, 
+                "Target", 0, [0, 1, 1, 0, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Baddy Bad": ["Baddy Bad", "41", 90, "Dark", 100, 15, 0, 
+                "Target", 0, [0, 1, 1, 0, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Sappy Seed": ["Sappy Seed", "54", 90, "Grass", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 1, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Freezy Frost": ["Freezy Frost", "19", 90, "Ice", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Sparkly Swirl": ["Sparkly Swirl", "66", 90, "Fairy", 100, 15, 0, 
+                "Target", 0, [0, 1, 1, 0, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Veevee Volley": ["Veevee Volley", "00", 0, "Normal", 0, 20, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 1, 1], "02", "Physical", 0, 
+                ""],
+
+        "DoublePanzer": ["DoublePanzer", "1D", 60, "Steel", 100, 5, 30, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 1], "00", "Physical", 2, 
+                ""],
+
+        "Max Guard": ["Max Guard", "4E", 0, "Normal", 0, 0, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "DynamaxCanon": ["DynamaxCanon", "00", 100, "Dragon", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Snipe Shot": ["Snipe Shot", "00", 80, "Water", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Jaw Lock": ["Jaw Lock", "6A", 80, "Dark", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Stuff Cheeks": ["Stuff Cheeks", "C1", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "No Retreat": ["No Retreat", "C6", 0, "Fighting", 0, 5, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 31, 
+                ""],
+
+        "Tar Shot": ["Tar Shot", "C7", 0, "Rock", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Magic Powder": ["Magic Powder", "65", 0, "Psychic", 100, 20, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 14, 
+                ""],
+
+        "Dragon Darts": ["Dragon Darts", "00", 50, "Dragon", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Teatime": ["Teatime", "C8", 0, "Normal", 0, 10, 0, 
+                "Everyone", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Octolock": ["Octolock", "CA", 0, "Fighting", 100, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Bolt Beak": ["Bolt Beak", "00", 85, "Electric", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Fishious Rend": ["Fishious Rend", "00", 85, "Water", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Court Change": ["Court Change", "CB", 0, "Normal", 100, 10, 0, 
+                "User", 0, [0, 0, 0, 1, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Max Flare": ["Max Flare", "73", 0, "Fire", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 4, 
+                ""],
+
+        "Max Lightning": ["Max Lightning", "2C", 0, "Electric", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 2, 
+                ""],
+
+        "Max Knuckle": ["Max Knuckle", "CD", 0, "Fighting", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 1, 1, 0, 0, 0, 0, 0], "0C", "Physical", 1, 
+                ""],
+
+        "Max Phantasm": ["Max Phantasm", "CC", 0, "Ghost", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 2, 
+                ""],
+
+        "Max Hailstorm": ["Max Hailstorm", "73", 0, "Ice", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 8, 
+                ""],
+
+        "Max Ooze": ["Max Ooze", "CD", 0, "Poison", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 1, 1, 0, 0, 0, 0, 0], "0C", "Physical", 8, 
+                ""],
+
+        "Max Geyser": ["Max Geyser", "73", 0, "Water", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 1, 
+                ""],
+
+        "Max Airstream": ["Max Airstream", "CD", 0, "Flying", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 1, 1, 0, 0, 0, 0, 0], "0C", "Physical", 4, 
+                ""],
+
+        "Max Starfall": ["Max Starfall", "2C", 0, "Fairy", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 4, 
+                ""],
+
+        "Max Wyrmwind": ["Max Wyrmwind", "CC", 0, "Dragon", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 1, 
+                ""],
+
+        "Max Mindstorm": ["Max Mindstorm", "2C", 0, "Psychic", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 8, 
+                ""],
+
+        "Max Rockfall": ["Max Rockfall", "73", 0, "Rock", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 2, 
+                ""],
+
+        "Max Quake": ["Max Quake", "CD", 0, "Ground", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 1, 1, 0, 0, 0, 0, 0], "0C", "Physical", 16, 
+                ""],
+
+        "Max Darkness": ["Max Darkness", "CC", 0, "Dark", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 16, 
+                ""],
+
+        "Max Overgrow": ["Max Overgrow", "2C", 0, "Grass", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 0, 1, 0, 0, 0, 0, 0], "0C", "Physical", 1, 
+                ""],
+
+        "MaxSteelspyk": ["MaxSteelspyk", "CD", 0, "Steel", 0, 0, 0, 
+                "TargetOrPartner", 0, [0, 1, 1, 0, 0, 0, 0, 0], "0C", "Physical", 2, 
+                ""],
+
+        "Clanging Soul": ["Clanging Soul", "CE", 0, "Dragon", 0, 5, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 31, 
+                ""],
+
+        "Body Press": ["Body Press", "00", 80, "Fighting", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Decorate": ["Decorate", "92", 0, "Fairy", 0, 15, 0, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 9, 
+                ""],
+
+        "Drum Beating": ["Drum Beating", "14", 80, "Grass", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 1, 
+                ""],
+
+        "Snap Trap": ["Snap Trap", "2A", 35, "Grass", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Pyro Ball": ["Pyro Ball", "7D", 120, "Fire", 90, 5, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "BehemothCut": ["BehemothCut", "00", 100, "Steel", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Behemoth Bash": ["Behemoth Bash", "00", 100, "Steel", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "AuraWheel": ["AuraWheel", "0C", 110, "Electric", 100, 10, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Physical", 1, 
+                ""],
+
+        "Break Swipe": ["Break Swipe", "12", 60, "Dragon", 100, 15, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Branch Poke": ["Branch Poke", "00", 40, "Grass", 100, 40, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Overdrive": ["Overdrive", "00", 80, "Electric", 100, 10, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Apple Acid": ["Apple Acid", "16", 80, "Grass", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Grav Apple": ["Grav Apple", "16", 80, "Grass", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 1, 
+                ""],
+
+        "Spirit Break": ["Spirit Break", "15", 75, "Fairy", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Strange Steam": ["Strange Steam", "31", 90, "Fairy", 95, 10, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Life Dew": ["Life Dew", "9D", 0, "Water", 0, 10, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 7, 
+                ""],
+
+        "Obstruct": ["Obstruct", "D0", 0, "Normal", 0, 0, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "FalseRetreat": ["FalseRetreat", "00", 80, "Dark", 0, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Star Assault": ["Star Assault", "50", 150, "Fighting", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Eternabeam": ["Eternabeam", "50", 160, "Dragon", 90, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Steel Beam": ["Steel Beam", "AA", 140, "Steel", 95, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 50, 
+                ""],
+
+        "Expand Force": ["Expand Force", "00", 80, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Steel Roller": ["Steel Roller", "BD", 130, "Steel", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Scale Shot": ["Scale Shot", "1D", 25, "Dragon", 90, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 21, 
+                ""],
+
+        "Meteor Beam": ["Meteor Beam", "00", 120, "Rock", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "ShellSideArm": ["ShellSideArm", "02", 90, "Poison", 100, 10, 20, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Misty Blast": ["Misty Blast", "07", 100, "Fairy", 100, 5, 0, 
+                "AllButUser", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Grassy Glide": ["Grassy Glide", "00", 55, "Grass", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Voltage Rise": ["Voltage Rise", "00", 70, "Electric", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Terrain Pulse": ["Terrain Pulse", "00", 50, "Normal", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Skitter Smack": ["Skitter Smack", "15", 70, "Bug", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Burning Envy": ["Burning Envy", "88", 70, "Fire", 100, 5, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 16, 
+                ""],
+
+        "Lash Out": ["Lash Out", "00", 75, "Dark", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Poltergeist": ["Poltergeist", "00", 110, "Ghost", 90, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Corrosive Gas": ["Corrosive Gas", "BC", 0, "Poison", 100, 40, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Coaching": ["Coaching", "90", 0, "Fighting", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 3, 
+                ""],
+
+        "Flip Turn": ["Flip Turn", "1C", 60, "Water", 100, 20, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Triple Axel": ["Triple Axel", "00", 20, "Ice", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "1B", "Physical", 0, 
+                ""],
+
+        "Dual Wingbeat": ["Dual Wingbeat", "1D", 40, "Flying", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 2, 
+                ""],
+
+        "BurningSands": ["BurningSands", "7D", 70, "Ground", 100, 10, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Jungle Heal": ["Jungle Heal", "D6", 0, "Grass", 0, 10, 0, 
+                "MySide", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 7, 
+                ""],
+
+        "Wicked Blow": ["Wicked Blow", "00", 75, "Dark", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "SurgeStrikes": ["SurgeStrikes", "1D", 25, "Water", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 3, 
+                ""],
+
+        "Thunder Cage": ["Thunder Cage", "2A", 80, "Electric", 90, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Dragon Energy": ["Dragon Energy", "00", 150, "Dragon", 100, 5, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "03", "Special", 0, 
+                ""],
+
+        "Freeze Glare": ["Freeze Glare", "05", 90, "Psychic", 100, 10, 10, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Fiery Wrath": ["Fiery Wrath", "1F", 90, "Dark", 100, 10, 20, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Thunder Kick": ["Thunder Kick", "13", 90, "Fighting", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Glacial Lance": ["Glacial Lance", "00", 120, "Ice", 100, 5, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Astral Bit": ["Astral Bit", "00", 120, "Ghost", 100, 5, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Eerie Spell": ["Eerie Spell", "64", 80, "Psychic", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 3, 
+                ""],
+
+        "Dire Claw": ["Dire Claw", "24", 80, "Poison", 100, 15, 50, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 79, 
+                ""],
+
+        "Barrier Bash": ["Barrier Bash", "0B", 70, "Psychic", 90, 10, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Power Shift": ["Power Shift", "45", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 1, 0, 0, 0, 0], "00", "Status", 16, 
+                ""],
+
+        "Stone Axe": ["Stone Axe", "70", 65, "Rock", 90, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 2, 
+                ""],
+
+        "Spring Storm": ["Spring Storm", "12", 100, "Fairy", 80, 10, 30, 
+                "FoeSide", 0, [0, 0, 0, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Mystic Power": ["Mystic Power", "0D", 70, "Psychic", 90, 10, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Raging Fury": ["Raging Fury", "1B", 120, "Fire", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 3, 
+                ""],
+
+        "Wave Crash": ["Wave Crash", "30", 120, "Water", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 33, 
+                ""],
+
+        "Chloroblast": ["Chloroblast", "AA", 150, "Grass", 95, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 50, 
+                ""],
+
+        "Mountain Gale": ["Mountain Gale", "1F", 100, "Ice", 85, 10, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Victory Dance": ["Victory Dance", "8C", 0, "Fighting", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 7, 
+                ""],
+
+        "Headlong Rush": ["Headlong Rush", "8D", 120, "Ground", 100, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 18, 
+                ""],
+
+        "Barb Barrage": ["Barb Barrage", "02", 60, "Poison", 100, 10, 50, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Esper Wing": ["Esper Wing", "0C", 80, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 1, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Bitter Malice": ["Bitter Malice", "12", 75, "Ghost", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Shelter": ["Shelter", "0B", 0, "Steel", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 2, 
+                ""],
+
+        "Triple Arrows": ["Triple Arrows", "D7", 90, "Fighting", 100, 10, 50, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 2, 
+                ""],
+
+        "Fire Parade": ["Fire Parade", "04", 60, "Ghost", 100, 15, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Eternal Edge": ["Eternal Edge", "70", 65, "Dark", 90, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Chilly Winds": ["Chilly Winds", "14", 100, "Flying", 80, 10, 30, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "WildboltWind": ["WildboltWind", "06", 100, "Electric", 80, 10, 20, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "SandsearWind": ["SandsearWind", "04", 100, "Ground", 80, 10, 20, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "MoonBlessing": ["MoonBlessing", "D6", 0, "Psychic", 0, 5, 0, 
+                "MySide", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 7, 
+                ""],
+
+        "Take Heart": ["Take Heart", "D8", 0, "Psychic", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 24, 
+                ""],
+
+        "Tera Blast": ["Tera Blast", "00", 80, "Normal", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Silk Trap": ["Silk Trap", "D9", 0, "Bug", 0, 10, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Axe Kick": ["Axe Kick", "31", 120, "Fighting", 90, 10, 30, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Last Respects": ["Last Respects", "00", 50, "Ghost", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "C7", "Physical", 0, 
+                ""],
+
+        "Lumina Crash": ["Lumina Crash", "16", 80, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 2, 
+                ""],
+
+        "Order Up": ["Order Up", "00", 80, "Dragon", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Jet Punch": ["Jet Punch", "00", 60, "Water", 100, 15, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Spicy Extract": ["Spicy Extract", "DA", 0, "Grass", 0, 15, 0, 
+                "Target", 0, [0, 0, 0, 1, 0, 1, 1, 0], "00", "Status", 0, 
+                ""],
+
+        "Spin Out": ["Spin Out", "14", 100, "Steel", 100, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 2, 
+                ""],
+
+        "Proliferate": ["Proliferate", "1D", 20, "Normal", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 58, 
+                ""],
+
+        "Ice Spinner": ["Ice Spinner", "BD", 80, "Ice", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Glaive Rush": ["Glaive Rush", "DB", 120, "Dragon", 100, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Revival": ["Revival", "DC", 0, "Normal", 0, 1, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 1, 
+                ""],
+
+        "Salt Cure": ["Salt Cure", "DD", 40, "Rock", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Triple Dive": ["Triple Dive", "1D", 30, "Water", 95, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 3, 
+                ""],
+
+        "Mortal Spin": ["Mortal Spin", "DE", 30, "Poison", 100, 15, 0, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 8, 
+                ""],
+
+        "Doodle": ["Doodle", "B2", 0, "Normal", 100, 10, 0, 
+                "TargetOrPartner", 0, [0, 0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 1, 
+                ""],
+
+        "Fillet Away": ["Fillet Away", "DF", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 1, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Kowtow Cleave": ["Kowtow Cleave", "00", 85, "Dark", 0, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Flower Trick": ["Flower Trick", "00", 70, "Grass", 0, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Torch Song": ["Torch Song", "0D", 80, "Fire", 100, 10, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Aqua Step": ["Aqua Step", "0C", 80, "Water", 100, 10, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Raging Bull": ["Raging Bull", "BA", 90, "Normal", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Make It Rain": ["Make It Rain", "C4", 120, "Steel", 100, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 8, 
+                ""],
+
+        "Psyblade": ["Psyblade", "00", 80, "Psychic", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Hydro Steam": ["Hydro Steam", "00", 80, "Water", 100, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Ruination": ["Ruination", "00", 0, "Dark", 90, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "59", "Special", 0, 
+                ""],
+
+        "Collision": ["Collision", "00", 100, "Fighting", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Electro Drift": ["Electro Drift", "00", 100, "Electric", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Special", 0, 
+                ""],
+
+        "Shed Tail": ["Shed Tail", "A2", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "ColdGreeting": ["ColdGreeting", "9E", 0, "Ice", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 8, 
+                ""],
+
+        "Tidy Up": ["Tidy Up", "D1", 0, "Normal", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Snowscape": ["Snowscape", "73", 0, "Ice", 0, 10, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 32, 
+                ""],
+
+        "Pounce": ["Pounce", "14", 50, "Bug", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Trailblaze": ["Trailblaze", "0C", 50, "Grass", 100, 20, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 1], "00", "Physical", 1, 
+                ""],
+
+        "Chilly Water": ["Chilly Water", "12", 50, "Water", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 1, 
+                ""],
+
+        "Hyper Drill": ["Hyper Drill", "00", 100, "Normal", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 0, 1], "00", "Physical", 0, 
+                ""],
+
+        "Twin Beam": ["Twin Beam", "1D", 40, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 2, 
+                ""],
+
+        "Rage Fist": ["Rage Fist", "00", 50, "Ghost", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "D7", "Physical", 0, 
+                ""],
+
+        "Armor Cannon": ["Armor Cannon", "8D", 120, "Fire", 100, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Special", 18, 
+                ""],
+
+        "Bitter Blade": ["Bitter Blade", "03", 90, "Fire", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 50, 
+                ""],
+
+        "Double Shock": ["Double Shock", "08", 120, "Electric", 100, 5, 0, 
+                "Target", 0, [0, 1, 1, 1, 0, 0, 1, 0], "00", "Physical", 13, 
+                ""],
+
+        "Huge Hammer": ["Huge Hammer", "00", 160, "Steel", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Comeuppance": ["Comeuppance", "00", 0, "Dark", 100, 10, 0, 
+                "LastHitMe", 0, [0, 0, 1, 1, 0, 0, 1, 0], "8B", "Physical", 0, 
+                ""],
+
+        "Aqua Cutter": ["Aqua Cutter", "00", 70, "Water", 100, 20, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "BlazeTorque": ["BlazeTorque", "04", 80, "Fire", 100, 10, 30, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Wicked Torque": ["Wicked Torque", "01", 80, "Dark", 100, 10, 10, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "PoisonTorque": ["PoisonTorque", "02", 100, "Poison", 100, 10, 30, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Combat Torque": ["Combat Torque", "06", 100, "Fighting", 100, 10, 30, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Magic Torque": ["Magic Torque", "31", 100, "Fairy", 100, 10, 30, 
+                "Target", 0, [0, 0, 0, 0, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Blood Moon": ["Blood Moon", "00", 140, "Normal", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "MatchaGotcha": ["MatchaGotcha", "20", 80, "Grass", 90, 15, 20, 
+                "FoeSide", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Syrup Bomb": ["Syrup Bomb", "BE", 60, "Grass", 85, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 3, 
+                ""],
+
+        "Ivy Cudgel": ["Ivy Cudgel", "00", 100, "Grass", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Physical", 0, 
+                ""],
+
+        "Electro Shot": ["Electro Shot", "00", 130, "Electric", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "TeraStarbeam": ["TeraStarbeam", "00", 120, "Normal", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Fickle Beam": ["Fickle Beam", "00", 80, "Dragon", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "E7", "Special", 0, 
+                ""],
+
+        "Bulwark Burn": ["Bulwark Burn", "96", 0, "Fire", 0, 10, 0, 
+                "User", 4, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Thunderclap": ["Thunderclap", "00", 70, "Electric", 100, 5, 0, 
+                "Target", 1, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Mighty Cleave": ["Mighty Cleave", "00", 95, "Rock", 100, 5, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 0, 1], "00", "Physical", 0, 
+                ""],
+
+        "TachyonBlade": ["TachyonBlade", "1D", 50, "Steel", 0, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 2, 
+                ""],
+
+        "Hard Press": ["Hard Press", "00", 100, "Steel", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "13", "Physical", 0, 
+                ""],
+
+        "Dragon Cheer": ["Dragon Cheer", "8A", 0, "Dragon", 0, 15, 0, 
+                "User", 0, [0, 0, 0, 0, 0, 0, 0, 0], "00", "Status", 0, 
+                ""],
+
+        "Allure Voice": ["Allure Voice", "88", 80, "Fairy", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Temper Flare": ["Temper Flare", "00", 75, "Fire", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "F7", "Physical", 0, 
+                ""],
+
+        "SupercelSlam": ["SupercelSlam", "00", 100, "Electric", 95, 15, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Psychic Noise": ["Psychic Noise", "3D", 75, "Psychic", 100, 10, 0, 
+                "Target", 0, [0, 0, 1, 1, 0, 0, 1, 0], "00", "Special", 0, 
+                ""],
+
+        "Upper Hand": ["Upper Hand", "00", 65, "Fighting", 100, 15, 0, 
+                "Target", 3, [0, 0, 1, 1, 0, 0, 1, 1], "00", "Physical", 0, 
+                ""],
+
+        "Evil Chain": ["Evil Chain", "21", 100, "Poison", 100, 5, 50, 
+                "Target", 0, [0, 0, 1, 0, 0, 0, 1, 0], "00", "Special", 0, 
+                ""]}
+
+# ------------------------------------------------------------
+# Create Auto Fill Dictionary
+# ------------------------------------------------------------
+AutoFillList = {}
+Gen = 1
+for Move in PresetMoveList:
+    match Move:
+        case "Sketch":
+            Gen = 2
+        case "Fake Out":
+            Gen = 3
+        case "Roost":
+            Gen = 4
+        case "Hone Claws":
+            Gen = 5
+        case "Flying Press":
+            Gen = 6
+        case "Breakneck Blitz":
+            Gen = 7
+        case "Max Guard":
+            Gen = 8
+        case "Tera Blast":
+            Gen = 9
+            
+    AutoFillList[Move] = [Move, "Introduced in Generation {}".format(Gen)]
+                  
 # ------------------------------------------------------------
 # Script Argument Helper Dictionary - {Number : [Kind:Args]}
 # ------------------------------------------------------------
@@ -88,9 +3708,9 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "25":["MajorStatus", ["The Target will heal fully, but will\nbe inflicted with the {} Status.", 1]],
                          "26":["NoArgs", []],
                          "27":["Type", ["The Target's next Move will become {} Type."]],
-                         "28":["MajorStatus", ["If the Target has the {} Status\ntheir Attack, Sp. Attack, and Speed\ndrops by one Stat Stage.", 1]],
+                         "28":["StatStatus2", ["The Target's given Stats will rise by one\nif they have the given Status."]],
                          "29":["NoArgs", []],
-                         "2A":["Turns", [1,15]],
+                         "2A":["Turns", [4,15]],
                          "2B":["Turns", [1,15]],
                          "2C":["Custom", [1]],
                          "2D":["Custom", [2]],
@@ -98,8 +3718,8 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "2F":["NoArgs", []],
                          "30":["Percent", ["User", "take", "the damage dealt", "Recoil"]],
                          "31":["Turns", [1,15]],
-                         "32":["Turns", [1,15]],
-                         "33":["Percent", ["User", "take", "the damage dealt", "Recoil"]],
+                         "32":["Future", [1,15, "Future attack will happen"]],
+                         "33":["PercentStatus", ["the damage dealt"]],
                          "34":["Turns", [1,15]],
                          "35":["Turns", [1,15]],
                          "36":["Turns", [1,15]],
@@ -117,8 +3737,8 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "42":["Custom", [4]],
                          "43":["StageAmount", ["Random Stat", "increase"]],
                          "44":["NoArgs", []],
-                         "45":["TwoStats", ["The Target's raw {} and {}\nStats will be swapped."]],
-                         "46":["NoArgs", []],
+                         "45":["TwoStats", ["The {}'s raw {} and\n{} Stats will be swapped."]],
+                         "46":["Custom", [15]],
                          "47":["NoArgs", []],
                          "48":["NoArgs", []],
                          "49":["StatFlags", ["The selected Stat Stages will be swapped\nbetween the User and the Target."]],
@@ -135,11 +3755,11 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "54":["NoArgs", []],
                          "55":["StatFlags", ["The User's selected Stat Stages rise by two\nif the Target faints from this attack."]],
                          "56":["Turns", [1,15]],
-                         "57":["TwoStats", ["The User's and Target's {} and {} will\nbe averaged and set to the result."]],
+                         "57":["TwoStats", ["The {}'s {} and {} will\nbe averaged and set to the result."]],
                          "58":["Turns", [1,15]],
                          "59":["Turns", [1,15]],
                          "5A":["Turns", [1,15]],
-                         "5B":["NoArgs", []],
+                         "5B":["StatFlags", ["The Target's selected Stat Stages will rise by\none if they have the Plus or Minus Ability."]],
                          "5C":["Turns", [1,15]],
                          "5D":["NoArgs", []],
                          "5E":["NoArgs", []],
@@ -154,7 +3774,7 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "67":["NoArgs", []],
                          "68":["NoArgs", []],
                          "69":["Custom", [5]],
-                         "6A":["NoArgs", []],
+                         "6A":["TrapTarget", ["Trap"]],
                          "6B":["NoArgs", []],
                          "6C":["StageAmount", ["Evasion", "increase"]],
                          "6D":["NoArgs", []],
@@ -175,7 +3795,7 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "7C":["Turns", [1,15]],
                          "7D":["Custom", [6]],
                          "7E":["NoArgs", []],
-                         "7F":["Type", ["The Attack and Sp. Attack of all {}\nTypes will rise by one Stat Stage."]],
+                         "7F":["Type", ["The Target's Attack and Sp. Attack will rise by\none Stat Stage if they are {} Type."]],
                          "80":["StatFlags", ["The Target's selected Stat Stages will drop\nby two and the User will switch out."]],
                          "81":["NoArgs", []],
                          "82":["NoArgs", []],
@@ -184,9 +3804,9 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "85":["StatType", ["If the Target is {} Type, they will have\ntheir {} raised by one Stat Stage."]],
                          "86":["Turns", [1,15]],
                          "87":["NoArgs", []],
-                         "88":["NoArgs", []],
+                         "88":["MajorStatus", ["The Target will be inflicted with {} but\nonly if their Stat Stages raised this turn.", 1]],
                          "89":["NoArgs", []],
-                         "8A":["StatFlags", ["The Target's selected Stat Stages will drop by one if they are Poisoned."]],
+                         "8A":["NoArgs", []],
                          "8B":["Custom", [7]],
                          "8C":["StatFlags", ["The Target's selected Stat Stages will rise by one."]],
                          "8D":["StatFlags", ["The Target's selected Stat Stages will drop by one."]],
@@ -203,10 +3823,10 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "98":["Turns", [1,15]],
                          "99":["Turns", [1,15]],
                          "9A":["NoArgs", []],
-                         "9B":["NoArgs", []],
+                         "9B":["StatusType", ["If the Target is {} Type, they will be\ncured of {} and lose that Type."]],
                          "9C":["StageAmount", ["Defence", "increase"]],
                          "9D":["Custom", [9]],
-                         "9E":["StatFlags", ["The selected Raw Stats will be swapped between the User and the Target."]],
+                         "9E":["Weather", ["The Weather will become {} and\nthe Target will switch out.", 1]],
                          "9F":["Turns", [1,7]],
                          "A0":["NoArgs", []],
                          "A1":["NoArgs", []],
@@ -216,8 +3836,8 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "A5":["NoArgs", []],
                          "A6":["NoArgs", []],
                          "A7":["Custom", [10]],
-                         "A8":["NoArgs", []],
-                         "A9":["NoArgs", []],
+                         "A8":["StatFlags", ["The Target's given Stat Stages will drop\nby two and the User will faint."]],
+                         "A9":["Custom", [16]],
                          "AA":["Percent", ["User", "take", "their maximum HP", "Recoil"]],
                          "AB":["MajorStatus", ["The Target will be cured of the selected Status Conditions.", 0]],
                          "AC":["Custom", [11]],
@@ -227,30 +3847,30 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "B0":["Turns", [1,15]],
                          "B1":["NoArgs", []],
                          "B2":["Custom", [12]],
-                         "B3":["NoArgs", []],
+                         "B3":["Future", [1,15, "Wish will come true"]],
                          "B4":["NoArgs", []],
                          "B5":["NoArgs", []],
                          "B6":["NoArgs", []],
                          "B7":["Turns", [1,15]],
                          "B8":["NoArgs", []],
-                         "B9":["NoArgs", []],
+                         "B9":["Type", ["For the next turn, all Normal Type\nMoves become {} Type."]],
                          "BA":["NoArgs", []],
                          "BB":["NoArgs", []],
                          "BC":["NoArgs", []],
                          "BD":["NoArgs", []],
                          "BE":["Turns", [1,15]],
                          "BF":["NoArgs", []],
-                         "C0":["NoArgs", []],
+                         "C0":["Custom", [17]],
                          "C1":["StatFlags", ["The User eats their Held Berry and the selected Stat Stages rise by two."]],
-                         "C2":["NoArgs", []],
-                         "C3":["NoArgs", []],
-                         "C4":["NoArgs", []],
+                         "C2":["Turns", [1,15]],
+                         "C3":["Turns", [1,15]],
+                         "C4":["StatFlags", ["The Target's selected Stat Stages will drop by\none and the Player will earn money if they win."]],
                          "C5":["NoArgs", []],
                          "C6":["StatFlags", ["The Target's selected Stat Stages will rise by one and they will be Trapped."]],
-                         "C7":["NoArgs", []],
+                         "C7":["StatFlags", ["The Target's selected Stat Stages will drop by\none and the Tar Shot Flag will be set."]],
                          "C8":["NoArgs", []],
                          "C9":["Turns", [1,15]],
-                         "CA":["NoArgs", []],
+                         "CA":["TrapTarget", ["Octolock"]],
                          "CB":["NoArgs", []],
                          "CC":["StatFlags", ["The Target and their Partner's selected Stat Stages will rise by one."]],
                          "CD":["StatFlags", ["The Target and their Partner's selected Stat Stages will drop by one."]],
@@ -259,10 +3879,10 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "D0":["NoArgs", []],
                          "D1":["NoArgs", []],
                          "D2":["Turns", [1,15]],
-                         "D3":["MajorStatus", ["If the Target's Stat Stages were raised this turn,\nthey will be inflicted with the {} Status.", 1]],
+                         "D3":["StatFlags", ["The Target's Partner's selected Stat Stages will rise by one."]],
                          "D4":["StatFlags", ["The Target's Partner's selected Stat Stages will drop by one."]],
                          "D5":["NoArgs", []],
-                         "D6":["NoArgs", []],
+                         "D6":["Custom", [9]],
                          "D7":["StatFlags", ["The Target's selected Stat Stages will drop by\none, with a 30% chance of Flinching too."]],
                          "D8":["StatFlags", ["The Target's selected Stat Stages will rise by\none and they will be cured of Major Statuses."]],
                          "D9":["NoArgs", []],
@@ -272,12 +3892,12 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "DD":["NoArgs", []],
                          "DE":["MajorStatus", ["In addition to removing hazards from the User's side,\nthe Target will be given the {} Status.", 1]],
                          "DF":["StatFlags", ["The Target's HP will be cut in half and the selected Stat Stages will rise by two."]],
-                         "E0":["StatFlags", ["The Target's selected Stat Stages will drop by\none and the Player will earn money if they win."]],
+                         "E0":["NoArgs", []],
                          "E1":["NoArgs", []],
-                         "E2":["Weather", ["The Weather will become {} and\nthe Target will switch out.", 1]],
+                         "E2":["NoArgs", []],
                          "E3":["NoArgs", []],
                          "E4":["NoArgs", []],
-                         "E5":["StatFlags", ["The Target's selected Stat Stages will rise by\none if they have the Plus or Minus Ability."]],
+                         "E5":["NoArgs", []],
                          "E6":["NoArgs", []],
                          "E7":["NoArgs", []],
                          "E8":["NoArgs", []],
@@ -1014,7 +4634,9 @@ MoveScriptText = {
     "Script 4C":
     ["This script has the effect of inflicting the given Status",
     "onto the Target and causing them to Flinch if the User moved",
-    "first."],
+    "first.",
+     "The Status and Flinch effects both use the same Effect Chance",
+     "value, but are activated independently of each other."],
 
     "Script 4D":
     ["This script has the effect of setting the Trick Room Global",
@@ -1083,7 +4705,7 @@ MoveScriptText = {
 
     "Script 58":
     ["This script has the effect of setting the Wonder Room Global",
-    "Flag.",
+    "Flag for the given number of turns.",
     "The Wonder Room effect swaps the raw Defence and Sp. Defence",
     "of all Pokemon on the field."],
 
@@ -1100,9 +4722,9 @@ MoveScriptText = {
     "Moves other than the one they last used."],
 
     "Script 5B":
-    ["This script is for the Move Pain Split.",
-    "The Move Pain Split takes the average of the User and the",
-    "Target's HP and sets each of their HP equal to the result."],
+    ["This script has the effect of raising the given Stat Stages",
+    "by one for all Pokemon on the Target's side with either the",
+    "Plus or Minus Ability."],
 
     "Script 5C":
     ["This script has the effect of setting the Magic Room Flag",
@@ -1136,17 +4758,17 @@ MoveScriptText = {
 
     "Script 62":
     ["This script has the effect of setting the Destiny Bond Flag",
-    "on the Target.",
+    "on the Target for the given number of turns.",
     "The Destiny Bond effect makes it so that if the Target",
     "faints, the Pokemon who knocked them out will faint after",
     "them."],
 
     "Script 63":
-    ["This script has the effect of dealing damage to the Target's",
-    "Partner equal to 1/16th of their maximum HP, in addition to",
-    "any damage dealt to the Target.",
-    "If this is a Status Move, the damage to the Partner will",
-    "still occur."],
+    ["This script has the effect of dealing recoil damage to the",
+     "Target's Partner equal to the given percentage of their",
+     "maximum HP, in addition to any damage dealt to the Target.",
+     "If this is a Status Move, the damage to the Partner will",
+     "still occur."],
 
     "Script 64":
     ["This script has the effect of lowering the Power Points of",
@@ -1181,7 +4803,9 @@ MoveScriptText = {
 
     "Script 6A":
     ["This script has the effect of setting the Trap Flag on the",
-    "Target."],
+    "Target and any additional targets given.",
+    "The Flag will disappear when any of the affected Pokemon",
+    "switch out or faint."],
 
     "Script 6B":
     ["This script has the effect of setting the Nightmare Flag on",
@@ -1208,7 +4832,7 @@ MoveScriptText = {
 
     "Script 6E":
     ["This script is for the Move Echoed Voice.",
-    "The Move Echoed Voice does more damage when it is uses by at",
+    "The Move Echoed Voice does more damage when it is used by at",
     "least one Pokemon on the field per turn."],
 
     "Script 6F":
@@ -1301,9 +4925,9 @@ MoveScriptText = {
     "This includes Third Types."],
 
     "Script 7F":
-    ["This script has the effect of raising the given Stat Stages",
-    "by one for all Pokemon on the field who have the given Type",
-    "(Third Types count)."],
+    ["This script has the effect of raising the Attack and Sp.",
+     "Attack Stat Stages of the Target by one if they are the",
+     "given Type (Third Types count) and Grounded."],
 
     "Script 80":
     ["This script has the effect of lowering the Target's given",
@@ -1351,8 +4975,9 @@ MoveScriptText = {
     "Attack is lowered by one Stat Stage."],
 
     "Script 88":
-    ["This script has the effect of bypassing Protection Moves and",
-    "removing them from the Target's side in the process."],
+    ["This script has the effect of giving the Target the given",
+     "Major Status, but only if their Stat Stages were raised",
+     "during the current turn."],
 
     "Script 89":
     ["This script has the effect of setting the Spiky Shield Flag",
@@ -1362,8 +4987,11 @@ MoveScriptText = {
     "take damage equal to 1/8th of their maximum HP."],
 
     "Script 8A":
-    ["This script has the effect of lowering the given Stats of",
-    "the Target by one, but only if they are Poisoned."],
+    ["This script has the effect of setting the Dragon Cheer Flag",
+    "on the Target.",
+    "The Dragon Cheer effect raises the Target's Critical Hit",
+    "ratio.",
+    "This does not stack with Focus Energy."],
 
     "Script 8B":
     ["This script has the effect of displaying a string of text",
@@ -1415,12 +5043,15 @@ MoveScriptText = {
     "Script 95":
     ["This script has the effect of lowering the Target's given",
     "Stat Stage by one, then healing the User's HP by an amount",
-    "equal to the Target's effective Attack Stat (the raw Stat +",
+    "equal to the Target's effective given Stat (the raw Stat +",
     "Stat Stages)."],
 
     "Script 96":
-    ["This script has the effect of setting the Trap Flag on both",
-    "the User and the Target."],
+    ["This script has the effect of setting the Burning Bulwark",
+    "Flag on the Target.",
+    "The Burning Bulwark effect blocks Damaging Moves.",
+    "If the blocked Move would have made Direct Contact, the",
+    "attacker becomes Burned."],
 
     "Script 97":
     ["This script has the effect of lowering the given Stat Stage",
@@ -1442,9 +5073,9 @@ MoveScriptText = {
     "each party member on the User's team."],
 
     "Script 9B":
-    ["This script has the effect of thawing out the User if they",
-    "are a Fire Type, but at the cost of removing that Fire",
-    "Typing afterwards."],
+    ["This script has the effect of curing the User of the given",
+     "Major Status if they have the given Type, at the cost of",
+     "removing that Type from them afterwards."],
 
     "Script 9C":
     ["This script has the effect of raising the Target's Defence",
@@ -1458,8 +5089,8 @@ MoveScriptText = {
     "on the given formula."],
 
     "Script 9E":
-    ["This script has the effect of swapping the given raw Stats",
-    "between the User and the Target."],
+    ["This script has the effect of changing the Weather to the",
+    "given one and switching out the Target."],
 
     "Script 9F":
     ["This script has the effect of setting the Uproar Global Flag",
@@ -1477,11 +5108,12 @@ MoveScriptText = {
     "from the Target and healing up to 1/2 of their maximum HP."],
 
     "Script A2":
-    ["This script has the effect of nullifying the Target's",
-    "Ability if they moved before the User did."],
+    ["This script has the effect of creating a Substitute for the",
+    "Target and then switching them out, leaving the new Pokemon",
+    "with the Substitute."],
 
     "Script A3":
-    ["This script has the effect of making the User used the Move",
+    ["This script has the effect of making the User use the Move",
     "that the Target used most recently."],
 
     "Script A4":
@@ -1507,18 +5139,20 @@ MoveScriptText = {
 
     "Script A8":
     ["This script has the effect of causing the User to faint in",
-    "exchange for lowering the Target's Attack and Sp. Attack by",
-    "two each."],
+     "exchange for lowering the Target's given Stat Stages by two",
+     "each."],
 
     "Script A9":
-    ["This script has the effect of stealing the Target's positive",
-    "Stat Stages and transferring them to the User.",
+    ["This script has the effect of transferring either the",
+    "positive or negative Stat Stages from either User to Target",
+    "or Target to User.",
+    "The donor Target's Stat Stages will then be reset.",
     "If this is a Damaging Move, this effect will happen before",
     "dealing Damage."],
 
     "Script AA":
     ["This script has the effect of dealing recoil damage to the",
-    "User equal to 1/2 of their maximum HP."],
+    "User equal the given percentage of their maximum HP."],
 
     "Script AB":
     ["This script has the effect of curing the Target of the given",
@@ -1558,12 +5192,13 @@ MoveScriptText = {
 
     "Script B2":
     ["This script has the effect of copying the Target's Ability",
-    "to the User.",
-    "There is the option to copy the it to the User's Partner as",
-    "well."],
+     "to the User or vice versa.",
+     "There is also the option of copying the Ability to the",
+     "recipient's Partner too."],
 
     "Script B3":
-    ["This script is for the Move Wish.",
+    ["This script has the effect of causing the Wish effect to",
+     "happen in the given number of turns.",
     "The Move Wish heals the Target's HP at the end of the next",
     "turn."],
 
@@ -1596,9 +5231,9 @@ MoveScriptText = {
 
     "Script B9":
     ["This script has the effect of setting the Plasma Fists",
-    "Global Flag.",
-    "The Plasma Flag turns all Normal Type Moves into Electric",
-    "Type Moves for the remainder of the turn."],
+    "Global Flag with the given Type.",
+    "The Plasma Flag turns all Normal Type Moves into the",
+    "given Type Moves for the remainder of the turn."],
 
     "Script BA":
     ["This script has the effect of removing Screen effects (Light",
@@ -1632,9 +5267,9 @@ MoveScriptText = {
 
     "Script C0":
     ["This script has the effect of setting the Imprison Flag on",
-    "the Target.",
+    "the Target with the given Targets.",
     "The Imprison effect makes it so that other Pokemon cannot",
-    "select Moves that the User also knows."],
+    "select Moves that the given Targets also know."],
 
     "Script C1":
     ["This script has the effect of raising the Target's given",
@@ -1643,7 +5278,7 @@ MoveScriptText = {
 
     "Script C2":
     ["This script has the effect of setting the Grudge Flag on the",
-    "Target.",
+    "Target for the given number of turns.",
     "The Grudge effect makes it so that if the Target faints, the",
     "Pokemon who knocked them out will lose all the Power Points",
     "for the Move they used."],
@@ -1656,8 +5291,9 @@ MoveScriptText = {
     "themselves."],
 
     "Script C4":
-    ["This script has the effect of setting the Trap Flag for both",
-    "the User and the Target."],
+    ["This script has the effect of lowering the Target's given",
+    "Stat Stage by one and awarding them a certain amount of",
+    "money."],
 
     "Script C5":
     ["This script is for the Move Secret Power.",
@@ -1669,8 +5305,8 @@ MoveScriptText = {
     "Stat Stages by one and setting the Trap Flag for the User."],
 
     "Script C7":
-    ["This script has the effect of lowering the Target's Speed by",
-    "one Stat Stage and setting the Tar Shot Flag.",
+    ["This script has the effect of lowering the Target's given",
+    "Stat by one Stat Stage and setting the Tar Shot Flag.",
     "The Tar Shot effect doubles the effectiveness of Moves used",
     "against the Target."],
 
@@ -1698,11 +5334,15 @@ MoveScriptText = {
 
     "Script CC":
     ["This script has the effect of lowering both the Target's and",
-    "their Partner's given Stat Stage by one."],
+    "their Partner's given Stat Stage by one.",
+    "If the Move is a Damaging Move, only the Target will be",
+    "damaged, not their Partner."],
 
     "Script CD":
     ["This script has the effect of raising both the Target's and",
-    "their Partner's given Stat Stage by one."],
+    "their Partner's given Stat Stage by one.",
+    "If the Move is a Damaging Move, only the Target will be",
+    "damaged, not their Partner."],
 
     "Script CE":
     ["This script has the effect of raising the Target's given",
@@ -1722,10 +5362,9 @@ MoveScriptText = {
     "Defence will decrease by two Stat Stages."],
 
     "Script D1":
-    ["This script has the effect of raising the Target's Attack",
-    "and Speed Stat Stages by one.",
-    "This script also removes Substitutes and Entry Hazards from",
-    "all Pokemon."],
+    ["This script has the effect of raising the Target's given",
+    "Stat Stages by one and removes Substitutes and Entry Hazards",
+    "from all Pokemon (not just the Target)."],
 
     "Script D2":
     ["This script has the effect of setting the Water Sport Global",
@@ -1733,16 +5372,19 @@ MoveScriptText = {
     "The Water Sport effect weakens Fire Type Moves."],
 
     "Script D3":
-    ["This script has the effect of giving the Target the given",
-    "Major Status if their Stat Stages have been raised during",
-    "the current turn."],
+    ["This script has the effect of raising the Target's Partner's",
+    "given Stat Stages by one.",
+    "If the Move is a Damaging Move, only the Target will be",
+    "damaged, not their Partner."],
 
     "Script D4":
-    ["This script has the effect of lowering the Target's Partner's",
-    "given Stat Stages by one."],
+    ["This script has the effect of lowering the Target's",
+    "Partner's given Stat Stages by one.",
+    "If the Move is a Damaging Move, only the Target will be",
+    "damaged, not their Partner."],
 
     "Script D5":
-    ["This script has the effect of turning the User to a single",
+    ["This script has the effect of turning the Target to a single",
     "Type, which depends on the current Terrain."],
 
     "Script D6":
@@ -1781,7 +5423,7 @@ MoveScriptText = {
 
     "Script DC":
     ["This script has the effect of reviving a chosen Pokemon from",
-    "the User's party."],
+    "the Target's party."],
 
     "Script DD":
     ["This script has the effect of setting the Salt Cure Flag on",
@@ -1801,37 +5443,22 @@ MoveScriptText = {
     "Stat Stage by two at the cost of 1/2 of their maximum HP."],
 
     "Script E0":
-    ["This script has the effect of lowering the Target's given",
-    "Stat Stage by one and awarding them a certain amount of",
-    "money."],
+    ["This script is unused by default in ACE."],
 
     "Script E1":
-    ["This script has the effect of creating a Substitute for the",
-    "Target and then switching them out, leaving the new Pokemon",
-    "with the Substitute."],
+    ["This script is unused by default in ACE."],
 
     "Script E2":
-    ["This script has the effect of changing the Weather to the",
-    "given one and switching out the Target."],
+    ["This script is unused by default in ACE."],
 
     "Script E3":
-    ["This script has the effect of setting the Burning Bulwark",
-    "Flag on the Target.",
-    "The Burning Bulwark effect blocks Damaging Moves.",
-    "If the blocked Move would have made Direct Contact, the",
-    "attacker becomes Burned."],
+    ["This script is unused by default in ACE."],
 
     "Script E4":
-    ["This script has the effect of setting the Dragon Cheer Flag",
-    "on the Target.",
-    "The Dragon Cheer effect raises the Target's Critical Hit",
-    "ratio.",
-    "This does not stack with Focus Energy."],
+    ["This script is unused by default in ACE."],
 
     "Script E5":
-    ["This script has the effect of raising the given Stat Stages",
-    "by one for all Pokemon on the Target's side with either the",
-    "Plus or Minus Ability."],
+    ["This script is unused by default in ACE."],
 
     "Script E6":
     ["This script is unused by default in ACE."],
@@ -1910,6 +5537,290 @@ MoveScriptText = {
 
     "Script FF":
     ["This script is unused by default in ACE."]}
+
+# ------------------------------------------------------------
+# Move Script Tags - Used in the search bar
+# ------------------------------------------------------------
+
+MoveScriptTagsList = {"Script 00": ["base"],
+                      "Script 01": ["sleep"],
+                      "Script 02": ["poison"],
+                      "Script 03": ["absorb"],
+                      "Script 04": ["burn"],
+                      "Script 05": ["freeze"],
+                      "Script 06": ["paralysis"],
+                      "Script 07": ["explosion", "self-destruct", "faint"],
+                      "Script 08": ["double shock"],
+                      "Script 09": ["mirror move", "calling move"],
+                      "Script 0A": ["swords dance", "raise"],
+                      "Script 0B": ["iron defence", "harden", "raise"],
+                      "Script 0C": ["agility", "raise"],
+                      "Script 0D": ["raise"],
+                      "Script 0E": ["amnesia", "raise"],
+                      "Script 0F": ["raise"],
+                      "Script 10": ["double team", "raise"],
+                      "Script 11": ["gravity", "global"],
+                      "Script 12": ["lower"],
+                      "Script 13": ["lower"],
+                      "Script 14": ["string shot", "scary face", "lower"],
+                      "Script 15": ["lower"],
+                      "Script 16": ["lower"],
+                      "Script 17": ["smokescreen", "lower"],
+                      "Script 18": ["lower"],
+                      "Script 19": ["haze", "clear smog"],
+                      "Script 1A": ["bide"],
+                      "Script 1B": ["thrash", "outrage", "petal dance"],
+                      "Script 1C": ["whirlwind", "baton pass", "switch"],
+                      "Script 1D": ["multi hit", "multi-hit"],
+                      "Script 1E": ["conversion"],
+                      "Script 1F": ["flinch"],
+                      "Script 20": ["absorb", "matcha gotcha"],
+                      "Script 21": ["toxic"],
+                      "Script 22": ["pay day", "happy hour"],
+                      "Script 23": ["light screen", "team flag", "screen"],
+                      "Script 24": ["tri-attack", "tri attack"],
+                      "Script 25": ["rest", "restore"],
+                      "Script 26": ["shift gear", "raise"],
+                      "Script 27": ["electrify"],
+                      "Script 28": ["venom drench"],
+                      "Script 29": ["teleport"],
+                      "Script 2A": ["wrap", "bind", "fire spin", "whirlpool", "sand tomb"],
+                      "Script 2B": ["ion deluge", "global"],
+                      "Script 2C": ["grassy", "misty", "electric", "psychic"],
+                      "Script 2D": ["autotomise"],
+                      "Script 2E": ["mist", "team flag"],
+                      "Script 2F": ["focus energy"],
+                      "Script 30": ["take down", "double-edge"],
+                      "Script 31": ["confuse", "confusion", "teeter dance"],
+                      "Script 32": ["future sight", "doom desire"],
+                      "Script 33": ["volt tackle"],
+                      "Script 34": ["aurora veil", "team flag", "screen"],
+                      "Script 35": ["tailwind", "team flag"],
+                      "Script 36": ["quick guard", "team flag", "protect"],
+                      "Script 37": ["wide guard", "team flag", "protect"],
+                      "Script 38": ["mat block", "team flag", "protect"],
+                      "Script 39": ["transform"],
+                      "Script 3A": ["lucky chant", "team flag"],
+                      "Script 3B": ["trick or treat", "forest's curse", "add type"],
+                      "Script 3C": ["embargo", "ban items"],
+                      "Script 3D": ["heal block", "ban healing"],
+                      "Script 3E": ["roost", "restore"],
+                      "Script 3F": ["miracle eye"],
+                      "Script 40": ["feint", "hyperspace hole"],
+                      "Script 41": ["reflect"],
+                      "Script 42": ["bug bite", "pluck", "incinerate"],
+                      "Script 43": ["acupressure"],
+                      "Script 44": ["psycho shift"],
+                      "Script 45": ["power trick", "power shift", "speed swap"],
+                      "Script 46": ["gastro acid"],
+                      "Script 47": ["me first"],
+                      "Script 48": ["copycat", "calling move"],
+                      "Script 49": ["power swap", "guard swap", "heart swap"],
+                      "Script 4A": ["worry seed", "simple beam", "entrainment"],
+                      "Script 4B": ["magnet rise"],
+                      "Script 4C": ["ice fang", "fire fang", "thunder fang"],
+                      "Script 4D": ["trick room", "turn order", "global"],
+                      "Script 4E": ["max guard", "protect"],
+                      "Script 4F": ["substitute"],
+                      "Script 50": ["hyper beam"],
+                      "Script 51": ["rage"],
+                      "Script 52": ["mimic", "alter moves"],
+                      "Script 53": ["metronome", "calling move"],
+                      "Script 54": ["leech seed"],
+                      "Script 55": ["fell stinger"],
+                      "Script 56": ["disable"],
+                      "Script 57": ["power split", "guard split"],
+                      "Script 58": ["wonder room", "global"],
+                      "Script 59": ["telekinesis"],
+                      "Script 5A": ["encore"],
+                      "Script 5B": ["pain split"],
+                      "Script 5C": ["magic room", "ban items", "global"],
+                      "Script 5D": ["conversion 2"],
+                      "Script 5E": ["Lock-On"],
+                      "Script 5F": ["sketch", "alter moves"],
+                      "Script 60": ["smack down", "thousand arrows", "grounded"],
+                      "Script 61": ["sleep talk", "calling move"],
+                      "Script 62": ["destiny bond"],
+                      "Script 63": ["flame burst", "recoil"],
+                      "Script 64": ["spite"],
+                      "Script 65": ["soak", "magic powder"],
+                      "Script 66": ["aromatherapy", "heal bell"],
+                      "Script 67": ["after you", "turn order"],
+                      "Script 68": ["round", "turn order"],
+                      "Script 69": ["thief", "bestow"],
+                      "Script 6A": ["mean look", "block"],
+                      "Script 6B": ["nightmare", "sleep"],
+                      "Script 6C": ["minimise", "miminize", "raise"],
+                      "Script 6D": ["curse", "raise", "ghost", "lower"],
+                      "Script 6E": ["echoed voice", "formula"],
+                      "Script 6F": ["protect", "detect"],
+                      "Script 70": ["spikes", "toxic spikes", "stealth rock", "sticky web", "steelsurge"],
+                      "Script 71": ["foresight"],
+                      "Script 72": ["perish song"],
+                      "Script 73": ["weather", "sunny day", "rain dance", "sandstorm", "hail"],
+                      "Script 74": ["endure", "protect"],
+                      "Script 75": ["rollout", "ice ball", "formula"],
+                      "Script 76": ["raise", "confuse", "confusion", "swagger", "flatter"],
+                      "Script 77": ["fury cutter"],
+                      "Script 78": ["infatuate", "infatuation", "attract"],
+                      "Script 79": ["ally switch", "team flag", "redirection"],
+                      "Script 7A": ["raise", "shell smash", "lower"],
+                      "Script 7B": ["quash", "turn order"],
+                      "Script 7C": ["safeguard", "team flag"],
+                      "Script 7D": ["flame wheel", "scald"],
+                      "Script 7E": ["reflect type"],
+                      "Script 7F": ["rototiller", "raise"],
+                      "Script 80": ["parting shot", "lower", "switch"],
+                      "Script 81": ["rapid spin"],
+                      "Script 82": ["defog", "lower"],
+                      "Script 83": ["topsy turvy"],
+                      "Script 84": ["crafty shield", "protect", "team flag"],
+                      "Script 85": ["flower shield", "raise"],
+                      "Script 86": ["fairy lock", "global"],
+                      "Script 87": ["king's shield", "protect"],
+                      "Script 88": ["alluring voice", "burning jealousy"],
+                      "Script 89": ["spiky shield", "protect"],
+                      "Script 8A": ["dragon cheer"],
+                      "Script 8B": ["splash", "celebrate", "hold hands"],
+                      "Script 8C": ["raise", "ancientpower"],
+                      "Script 8D": ["lower"],
+                      "Script 8E": ["belly drum", "raise"],
+                      "Script 8F": ["psych up"],
+                      "Script 90": ["aromatic mist", "coaching"],
+                      "Script 91": ["powder"],
+                      "Script 92": ["raise"],
+                      "Script 93": ["lower"],
+                      "Script 94": ["baneful bunker", "protect"],
+                      "Script 95": ["strength sap", "restore"],
+                      "Script 96": ["burning bulwark", "protect"],
+                      "Script 97": ["toxic thread"],
+                      "Script 98": ["laser focus"],
+                      "Script 99": ["throat chop"],
+                      "Script 9A": ["beat up", "multi-hit", "multi hit"],
+                      "Script 9B": ["burn up", "restore"],
+                      "Script 9C": ["defence curl", "raise"],
+                      "Script 9D": ["recover", "restore"],
+                      "Script 9E": ["chilly reception", "weather", "switch"],
+                      "Script 9F": ["uproar", "global"],
+                      "Script A0": ["stockpile"],
+                      "Script A1": ["purify", "restore"],
+                      "Script A2": ["shed tail", "switch"],
+                      "Script A3": ["instruct", "calling move"],
+                      "Script A4": ["beak blast"],
+                      "Script A5": ["torment"],
+                      "Script A6": ["shell trap"],
+                      "Script A7": ["healing wish", "lunar dance", "faint", "restore"],
+                      "Script A8": ["memento", "faint", "lower"],
+                      "Script A9": ["spectral thief"],
+                      "Script AA": ["mind blown", "steel beam", "chloroblast", "recoil"],
+                      "Script AB": ["smellingsalts", "refresh", "wake-up slap", "sparkling aria"],
+                      "Script AC": ["follow me", "spotlight", "rage powder", "redirection"],
+                      "Script AD": ["nature power", "calling move"],
+                      "Script AE": ["charge"],
+                      "Script AF": ["taunt"],
+                      "Script B0": ["helping hand", "double battle"],
+                      "Script B1": ["trick", "swap"],
+                      "Script B2": ["role play", "doodle"],
+                      "Script B3": ["wish", "restore", "future"],
+                      "Script B4": ["assist", "calling move"],
+                      "Script B5": ["ingrain"],
+                      "Script B6": ["aqua ring"],
+                      "Script B7": ["magic coat"],
+                      "Script B8": ["recycle"],
+                      "Script B9": ["plasma fists"],
+                      "Script BA": ["brick break", "psychic fangs", "raging bull"],
+                      "Script BB": ["drowsy"],
+                      "Script BC": ["knock off"],
+                      "Script BD": ["steel roller", "ice spinner"],
+                      "Script BE": ["syrup bomb"],
+                      "Script BF": ["skill swap"],
+                      "Script C0": ["imprison"],
+                      "Script C1": ["stuff cheeks"],
+                      "Script C2": ["grudge"],
+                      "Script C3": ["snatch"],
+                      "Script C4": ["make it rain"],
+                      "Script C5": ["secret power"],
+                      "Script C6": ["no retreat"],
+                      "Script C7": ["tar shot"],
+                      "Script C8": ["teatime"],
+                      "Script C9": ["mud sport", "global"],
+                      "Script CA": ["octolock"],
+                      "Script CB": ["court change"],
+                      "Script CC": ["max phantasm", "lower", "double battle"],
+                      "Script CD": ["max knuckle", "raise", "double battle"],
+                      "Script CE": ["clangorous soul", "raise"],
+                      "Script CF": ["growth", "raise"],
+                      "Script D0": ["obstruct", "protect"],
+                      "Script D1": ["tidy up"],
+                      "Script D2": ["water spot", "global"],
+                      "Script D3": ["raise", "double battle"],
+                      "Script D4": ["lower", "double battle"],
+                      "Script D5": ["camouflage"],
+                      "Script D6": ["jungle healing", "lunar blessing", "restore"],
+                      "Script D7": ["triple arrows", "lower"],
+                      "Script D8": ["take heart", "raise"],
+                      "Script D9": ["silk trap", "protect"],
+                      "Script DA": ["spicy extract"],
+                      "Script DB": ["glaive rush"],
+                      "Script DC": ["revival blessing"],
+                      "Script DD": ["salt cure"],
+                      "Script DE": ["mortal spin"],
+                      "Script DF": ["fillet away"],
+                      "Script E0": [""],
+                      "Script E1": [""],
+                      "Script E2": [""],
+                      "Script E3": [""],
+                      "Script E4": [""],
+                      "Script E5": [""],
+                      "Script E6": [""],
+                      "Script E7": [""],
+                      "Script E8": [""],
+                      "Script E9": [""],
+                      "Script EA": [""],
+                      "Script EB": [""],
+                      "Script EC": [""],
+                      "Script ED": [""],
+                      "Script EE": [""],
+                      "Script EF": [""],
+                      "Script F0": [""],
+                      "Script F1": [""],
+                      "Script F2": [""],
+                      "Script F3": [""],
+                      "Script F4": [""],
+                      "Script F5": [""],
+                      "Script F6": [""],
+                      "Script F7": [""],
+                      "Script F8": [""],
+                      "Script F9": [""],
+                      "Script FA": [""],
+                      "Script FB": [""],
+                      "Script FC": [""],
+                      "Script FD": [""],
+                      "Script FE": [""],
+                      "Script FF": [""]}
+
+DamageFormulaTagsList = {"Formula 00": ["base"],
+                         "Formula 01": ["set damage", "level", "night shade", "seismic toss"],
+                         "Formula 02": ["return", "frustration"],
+                         "Formula 03": ["eruption", "water spout", "flail", "reversal",
+                                        "wring out", "crush grip", "hard press"],
+                         "Formula 04": ["dragon rage", "sonicboom"],
+                         "Formula 05": ["low kick", "grass knot", "heat crash", "heavy slam"],
+                         "Formula 06": ["gyro ball", "electro ball"],
+                         "Formula 07": ["psywave", "magnitude", "triple kick", "rollout",
+                                        "fury cutter", "present", "beat up", "spit up",
+                                        "endeavour", "trump card", "round", "echoed voice",
+                                        "last respects", "rage fist", "fickle beam", "temper flare"],
+                         "Formula 08": ["punishment", "stored power"],
+                         "Formula 09": ["super fang", "guardian of alola", "nature's madness",
+                                        "final gambit", "ruination"],
+                         "Formula 0A": ["fling", "natural gift"],
+                         "Formula 0B": ["counter", "mirror coat", "metal burst", "comeuppance",
+                                        "bide"],
+                         "Formula 0C": ["z move", "max move"],
+                         "Formula 0D": [""],
+                         "Formula 0E": [""],
+                         "Formula 0F": [""]}
 
 # ------------------------------------------------------------
 # Damage Formula Text - Same as for Move Scripts
@@ -2239,6 +6150,9 @@ def MakeInfoBox(Root, Title, Header, Text):
     Top = tk.Toplevel(Root)
     Top.title(Title)
     Top.configure(bg = "Black")
+    Top.resizable(False, False)
+    Top.attributes('-topmost',True)
+    Top.attributes('-topmost',False)
 
     # Put the new window on top left corner of the old one
     x,y = (int(s) for s in Root.geometry().split("+")[1:])
@@ -2276,6 +6190,9 @@ def MakeYesNoBox(Root, Title, Header, Var, Text):
     Top = tk.Toplevel(Root)
     Top.title(Title)
     Top.configure(bg = "Black")
+    Top.resizable(False, False)
+    Top.attributes('-topmost',True)
+    Top.attributes('-topmost',False)
 
     # Put the new window on top left corner of the old one
     x,y = (int(s) for s in Root.geometry().split("+")[1:])
@@ -2321,6 +6238,9 @@ def MakeEntryBox(Root, Title, Header, Var, Type, Text):
     Top = tk.Toplevel(Root)
     Top.title(Title)
     Top.configure(bg = "Black")
+    Top.resizable(False, False)
+    Top.attributes('-topmost',True)
+    Top.attributes('-topmost',False)
 
     # Put the new window on top left corner of the old one
     x,y = (int(s) for s in Root.geometry().split("+")[1:])
@@ -2379,6 +6299,9 @@ def MakeAddressEntryBox(Root, Title, Header, Var, Text):
     Top = tk.Toplevel(Root)
     Top.title(Title)
     Top.configure(bg = "Black")
+    Top.resizable(False, False)
+    Top.attributes('-topmost',True)
+    Top.attributes('-topmost',False)
 
     # Put the new window on top left corner of the old one
     x,y = (int(s) for s in Root.geometry().split("+")[1:])
@@ -2441,17 +6364,21 @@ def MakeAddressEntryBox(Root, Title, Header, Var, Text):
     Top.wait_window()
     
 #------------------------------------------------------------
-# Make Info Box With Menu - This has a menu to choose text
+# Make Info Box With Menu And Search Bar - Display text through combobox, search bar included
 #------------------------------------------------------------
-def MakeInfoBoxWithMenu(Root, Title, Header, Text, MenuText, Var = None, Initial = None, Width = 20):
+def MakeInfoBoxMenuSearch(Root, Title, Header, Text, MenuText, Var = None, Initial = None, TagsList = None):
     Top = tk.Toplevel(Root)
     Top.title(Title)
     Top.configure(bg = "Black")
+    Top.resizable(False, False)
+    Top.attributes('-topmost',True)
+    Top.attributes('-topmost',False)
 
     # Put the new window on top left corner of the old one
     x,y = (int(s) for s in Root.geometry().split("+")[1:])
     Top.geometry(f"+{x}+{y}")
 
+    # Make Frames
     HeaderTextFrame = tk.Frame(Top, bg = "Black")
     HeaderTextFrame.pack(fill = "x", pady = 10)
 
@@ -2459,152 +6386,113 @@ def MakeInfoBoxWithMenu(Root, Title, Header, Text, MenuText, Var = None, Initial
     InfoTextFrame.pack(fill = "x", pady = 10)
 
     MenuTextFrame = tk.Frame(Top, bg = "Black")
-    MenuTextFrame.pack(fill = "x", pady = 10)
-
-    MenuFrame = tk.Frame(Top, bg = "Black")
-    MenuFrame.pack(fill = "x", pady = 10)
-    
-    OkayFrame = tk.Frame(Top, bg = "Black")
-    OkayFrame.pack(fill = "x", pady = 10)
-
-    ttk.Label(HeaderTextFrame, text = Header, font = ("Courier", int(SmallSize*1.5))).pack()
-
-    N = 0
-    for i, Line in enumerate(Text):
-        N = i+1
-        ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = "w")
-
-    DoLine = ttk.Label(MenuTextFrame, text = "-----", font = ("Courier", SmallSize))
-    DoLine.pack()
-
-    Values = []
-    for Key in MenuText:
-        Values.append(Key)
-
-    Option = tk.StringVar()
-
-    if Initial is None:
-        Option.set("-")
-    else:
-        Option.set(Initial)
-    
-    def ChangeText():
-        List = MenuText[Option.get()]
-
-        for Widget in MenuTextFrame.winfo_children():
-            Widget.destroy()
-
-        ttk.Label(MenuTextFrame, text = "-----\n", font = ("Courier", SmallSize)).pack()
-
-        for Line in List:
-            ttk.Label(MenuTextFrame, text = Line, font = ("Courier", SmallSize)).pack()
-
-    MenuDropDown = ttk.Combobox(MenuFrame, textvariable = Option, width = Width, values = Values, font = ("Courier", SmallSize))      
-    MenuDropDown.bind("<<ComboboxSelected>>", lambda _: ChangeText())
-    MenuDropDown.pack()
-    ChangeText()
-
-    def QuitBox(Event = None):
-        if Var is not None:
-            Var.set(Option.get())
-        Top.destroy()
-
-    OkayButton = ttk.Button(OkayFrame, text = "Done", command = QuitBox)
-    OkayButton.pack()
-
-    Top.bind("<Return>", QuitBox)
-    Top.wait_window()
-    
-#------------------------------------------------------------
-# Make Info Box With Menu And Search Bar - Like above, but lets you search text
-#------------------------------------------------------------
-def MakeInfoBoxMenuSearch(Root, Title, Header, Text, MenuText, Var = None, Initial = None):
-    Top = tk.Toplevel(Root)
-    Top.title(Title)
-    Top.configure(bg = "Black")
-
-    # Put the new window on top left corner of the old one
-    x,y = (int(s) for s in Root.geometry().split("+")[1:])
-    Top.geometry(f"+{x}+{y}")
-
-    HeaderTextFrame = tk.Frame(Top, bg = "Black")
-    HeaderTextFrame.pack(fill = "x", pady = 10)
-
-    InfoTextFrame = tk.Frame(Top, bg = "Black")
-    InfoTextFrame.pack(fill = "x", pady = 10)
-
-    MenuTextFrame = tk.Frame(Top, bg = "Black")
-    MenuTextFrame.pack(fill = "x", pady = 10)
+    MenuTextFrame.pack(fill = "none", pady = 10)
 
     SearchFrame = tk.Frame(Top, bg = "Black")
-    SearchFrame.pack(pady = 10)
+    SearchFrame.pack(pady = 5)
 
     MenuFrame = tk.Frame(Top, bg = "Black")
-    MenuFrame.pack(fill = "x", pady = 10)
+    MenuFrame.pack(fill = "x", pady = 5)
     
     OkayFrame = tk.Frame(Top, bg = "Black")
-    OkayFrame.pack(fill = "x", pady = 10)
+    OkayFrame.pack(fill = "x", pady = 5)
 
+    # Make Header + Text
     ttk.Label(HeaderTextFrame, text = Header, font = ("Courier", int(SmallSize*1.5))).pack()
+    for Line in Text:
+        ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).pack()
+    ttk.Label(MenuTextFrame, text = "You can press the up/down arrow Keys to navigate the menu.").pack()
 
-    N = 0
-    for i, Line in enumerate(Text):
-        N = i+1
-        ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = "w")
-
-    DoLine = ttk.Label(MenuTextFrame, text = "-----", font = ("Courier", SmallSize))
-    DoLine.pack()
-
+    # Create Values list
     Values = []
     for Key in MenuText:
         Values.append(Key)
 
+    # Define Tkinter Variables
     Option = tk.StringVar()
+    CurrentOption = tk.IntVar(value = 0)
 
+    # Set initial value if given
     if Initial is None:
-        Option.set("Script 00")
+        Option.set(list(MenuText.keys())[0])
+        CurrentOption.set(0)
     else:
         Option.set(Initial)
+        CurrentOption.set(list(MenuText.keys()).index(Option.get()))
 
-    for i in range(4):
-        ttk.Label(MenuTextFrame, text = "", font = ("Courier", SmallSize)).pack()
+    # Make Tag Display Label
+    TagLabel = ttk.Label(MenuTextFrame, text = "Tags", font = ("Courier", SmallSize, "bold"))
 
+    # Make Menu + Text Box
     def ChangeText():
         List = MenuText[Option.get()]
+        CurrentOption.set(MenuDropDown.cget('values').index(Option.get()))
 
-        for Widget in MenuTextFrame.winfo_children():
-            Widget.destroy()
-
-        ttk.Label(MenuTextFrame, text = "-----\n", font = ("Courier", SmallSize)).pack()
-
+        MenuTextString = ""
         for Line in List:
-            ttk.Label(MenuTextFrame, text = Line, font = ("Courier", SmallSize)).pack()
+            MenuTextString += Line + "\n"
 
+        MenuTextBox.configure(state = "normal")
+        MenuTextBox.delete(1.0, "end-1c")
+        MenuTextBox.insert(1.0, MenuTextString.strip())
+        MenuTextBox.configure(state = "disabled")
+
+        if TagsList:
+            Tags = TagsList[Option.get()]
+
+            TagString = ""
+            for Tag in Tags:
+                TagString += Tag + ", "
+
+            TagString = TagString.strip()[:-1]
+            TagsTextBox.configure(state = "normal")
+            TagsTextBox.delete(1.0, "end-1c")
+            TagsTextBox.insert(1.0, TagString)
+            TagsTextBox.configure(state = "disabled")
+
+    MenuTextBox = stxt.ScrolledText(MenuTextFrame, width = 60, height = 4, state = "disabled", font = ("Courier", SmallSize))
+    TagsTextBox = stxt.ScrolledText(MenuTextFrame, width = 55, height = 4, state = "disabled", bg = "Black", fg = "White", wra = "word", font = ("Courier", SmallSize))
     MenuDropDown = ttk.Combobox(MenuFrame, textvariable = Option, width = 20, values = Values, font = ("Courier", SmallSize))      
     MenuDropDown.bind("<<ComboboxSelected>>", lambda _: ChangeText())
-    MenuDropDown.pack()
     ChangeText()
+    
+    # Make Frame For Search Bar
+    BarFrame = tk.Frame(SearchFrame, bg = "Black")
 
-    def ProcessEntry(Text):
+    # Make Search Bar Entry Widget
+    def ProcessEntry(Text):        
         Values = []
         for Key in MenuText:
             if Text.lower() in " ".join(MenuText[Key]).lower():
                 Values.append(Key)
 
+            if TagsList:
+                if Text.lower() in " ".join(TagsList[Key]).lower():
+                    if Key not in Values:
+                        Values.append(Key)
+
         MenuDropDown.configure(values = Values)
 
         if Text == "":
-            ResultsLabel.configure(text = "")
+            ResultsLabel.configure(text = "--")
         else:
             ResultsLabel.configure(text = "Found {} results".format(len(Values)))
-        
-        if len(Values) > 0:
-            Option.set(Values[0])
-        else:
-            Option.set("Script 00")
+
+        if Option.get() not in Values:
+            CurrentOption.set(0)
+            
+            if Values:
+                Option.set(Values[0])
+            else:
+                MenuDropDown.configure(values = [Initial])
+                Option.set(Initial)
             
         ChangeText()
 
+    SearchBar = tk.Text(BarFrame, width = 20, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
+    SearchBar.bind("<KeyRelease>", (lambda _: ProcessEntry(SearchBar.get(1.0, "end-1c"))))
+
+    # Make Clear Search Bar Button
     Cleared = tk.IntVar()
     Cleared.set(0)
     def ClearSearch():
@@ -2616,39 +6504,73 @@ def MakeInfoBoxMenuSearch(Root, Title, Header, Text, MenuText, Var = None, Initi
             Values.append(Key)
 
         MenuDropDown.configure(values = Values)
-        ResultsLabel.configure(text = "")
-        Option.set(Values[0])
+        ResultsLabel.configure(text = "--")
+        CurrentOption.set(MenuDropDown.cget('values').index(Option.get()))
 
-    ResultsLabel = ttk.Label(SearchFrame, text = "", font = ("Courier", SmallSize))
-    ResultsLabel.pack()
-
-    BarFrame = tk.Frame(SearchFrame, bg = "Black")
-    BarFrame.pack(pady = 5)
-    
-    SearchBar = tk.Text(BarFrame, width = 20, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
-    SearchBar.bind("<KeyRelease>", (lambda _: ProcessEntry(SearchBar.get(1.0, "end-1c"))))
     SearchClear = ttk.Checkbutton(BarFrame, text = "X", variable = Cleared, command = ClearSearch)
-    SearchClear.pack(side = "left", padx = 5)
-    SearchBar.pack(side = "left")
     
+    # Make Results Label
+    ResultsLabel = ttk.Label(SearchFrame, text = "--", font = ("Courier", SmallSize))
+
+    # Make Okay Button
     def QuitBox(Event = None):
         if Var is not None:
             Var.set(Option.get())
         Top.destroy()
 
     OkayButton = ttk.Button(OkayFrame, text = "Done", command = QuitBox)
+
+    # Pack Everything
+    MenuTextBox.pack(pady = 5)
+    TagLabel.pack()
+    TagsTextBox.pack(pady = 5)
+    BarFrame.pack(pady = 5)
+    SearchClear.pack(side = "left", padx = 5)
+    SearchBar.pack(side = "left")
+    ResultsLabel.pack()
+    MenuDropDown.pack()
     OkayButton.pack()
 
+    # Make HotKeys
+    def MoveUp():
+        CurrentOption.set(CurrentOption.get() - 1)
+        Option.set(MenuDropDown.cget('values')[CurrentOption.get()])
+        ChangeText()
+
+    def MoveDown():
+        CurrentOption.set(CurrentOption.get() + 1)
+        Option.set(MenuDropDown.cget('values')[CurrentOption.get()])
+        ChangeText()
+
+    def HotKeyManager(Event):
+        Key = Event.keysym
+        Shift = Event.state & 1
+
+        if OnAMac:
+            Command = Event.state & 8
+        else:
+            Command = Event.state & 4
+
+        if Key == "Up" and CurrentOption.get() > 0:
+            MoveUp()
+
+        if Key == "Down" and CurrentOption.get() < len(MenuDropDown.cget('values')) - 1:
+            MoveDown()        
+
     Top.bind("<Return>", QuitBox)
+    Top.bind("<KeyPress>", HotKeyManager)
     Top.wait_window()
 
 #------------------------------------------------------------
 # Make Multi-Choice Box - Allows you to choose from many options
 #------------------------------------------------------------
-def MakeMultiChoiceBox(Root, Title, Header, Var, Text, MenuText, InitialOption = "-"):
+def MakeMultiChoiceBox(Root, Title, Header, Var, Text, MenuText, InitialOption = None):
     Top = tk.Toplevel(Root)
     Top.title(Title)
     Top.configure(bg = "Black")
+    Top.resizable(False, False)
+    Top.attributes('-topmost',True)
+    Top.attributes('-topmost',False)
 
     # Put the new window on top left corner of the old one
     x,y = (int(s) for s in Root.geometry().split("+")[1:])
@@ -2669,24 +6591,35 @@ def MakeMultiChoiceBox(Root, Title, Header, Var, Text, MenuText, InitialOption =
     OkayFrame = tk.Frame(Top, bg = "Black")
     OkayFrame.pack(fill = "x", pady = 10)
 
+    # Make Header + Text
     ttk.Label(HeaderTextFrame, text = Header, font = ("Courier", int(SmallSize*1.5))).pack()
+    for Line in Text:
+        ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).pack()
+    ttk.Label(MenuTextFrame, text = "You can press the up/down arrow Keys to navigate the menu.").pack()
 
-    N = 0
-    for i, Line in enumerate(Text):
-        N = i+1
-        ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = "w")
-
-    DoLine = ttk.Label(MenuTextFrame, text = "-----", font = ("Courier", SmallSize))
-    DoLine.pack()
-
+    # Create Values list
     Values = []
     for Key in MenuText:
         Values.append(Key)
 
+    # Define Option variable
     Option = tk.StringVar()
-    
+
+    # Define current option number
+    CurrentOption = tk.IntVar(value = 0)
+
+    # Set initial value if given
+    if InitialOption is None:
+        Option.set(list(MenuText.keys())[0])
+        CurrentOption.set(0)
+    else:
+        Option.set(InitialOption)
+        CurrentOption.set(list(MenuText.keys()).index(Option.get()))
+
+    # Change Text Function
     def ChangeText():
         List = MenuText[Option.get()]
+        CurrentOption.set(MenuDropDown.cget('values').index(Option.get()))
 
         for Widget in MenuTextFrame.winfo_children():
             Widget.destroy()
@@ -2696,13 +6629,10 @@ def MakeMultiChoiceBox(Root, Title, Header, Var, Text, MenuText, InitialOption =
         for Line in List:
             ttk.Label(MenuTextFrame, text = Line, font = ("Courier", SmallSize)).pack()
 
-    if InitialOption in MenuText:
-        Option.set(InitialOption)
-        ChangeText()
-
     MenuDropDown = ttk.Combobox(MenuFrame, textvariable = Option, width = 20, values = Values, font = ("Courier", SmallSize))      
     MenuDropDown.bind("<<ComboboxSelected>>", lambda _: ChangeText())
     MenuDropDown.pack()
+    ChangeText()
 
     def QuitBox(Event = None):
         Var.set(Option.get())
@@ -2711,9 +6641,35 @@ def MakeMultiChoiceBox(Root, Title, Header, Var, Text, MenuText, InitialOption =
     OkayButton = ttk.Button(OkayFrame, text = "Okay", command = QuitBox)
     OkayButton.pack()
 
-    Top.bind("<Return>", QuitBox)
-    Top.wait_window()
+    def MoveUp():
+        CurrentOption.set(CurrentOption.get() - 1)
+        Option.set(MenuDropDown.cget('values')[CurrentOption.get()])
+        ChangeText()
 
+    def MoveDown():
+        CurrentOption.set(CurrentOption.get() + 1)
+        Option.set(MenuDropDown.cget('values')[CurrentOption.get()])
+        ChangeText()
+
+    def HotKeyManager(Event):
+        Key = Event.keysym
+        Shift = Event.state & 1
+
+        if OnAMac:
+            Command = Event.state & 8
+        else:
+            Command = Event.state & 4
+
+        if Key == "Up" and CurrentOption.get() > 0:
+            MoveUp()
+
+        if Key == "Down" and CurrentOption.get() < len(MenuDropDown.cget('values')) - 1:
+            MoveDown()
+
+    Top.bind("<Return>", QuitBox)
+    Top.bind("<KeyPress>", HotKeyManager)
+    Top.wait_window()
+    
 """
 ================================================================================================
 TABLE FUCNTIONS - Contains functions related to the different operations on a table, like converting
@@ -2758,10 +6714,9 @@ TypeConversion = {"Normal":"00", "Fighting":"01", "Flying":"02",
                   "Grass":"0C", "Electric":"0D", "Psychic":"0E",
                   "Ice":"0F", "Dragon":"10", "Dark":"11"}
 
-RangeConversion = {"User":"11", "Target":"1E", "User + Partner":"13",
-                   "Target + Partner":"1C", "My Side":"23",
-                   "Foe Side":"2C", "All But User":"2E", "Everyone":"2F",
-                   "Random":"80", "Last Attacker":"40"}
+RangeConversion = {"User":"11", "Partner":"12", "Target":"1E", "User + Partner":"13",
+                   "Target + Partner":"1C", "My Side":"23", "Foe Side":"2C",
+                   "All But User":"2E", "Everyone":"2F", "Random":"80", "Last Attacker":"40"}
 
 KindConversion = {"Physical":"00", "Special":"01", "Status":"02"}
 
@@ -3016,7 +6971,7 @@ def MakeTableFromText(FileStuff, Error):
         for i, Line in enumerate(Entry):
             if i == MoveNameIndex:
                 try:
-                    TableLine.append(Line.split("-")[0].strip()[0:12]) # Truncate at 12
+                    TableLine.append(Line.split("%")[0].strip()[0:12]) # Truncate at 12, anything after % is ignored
                 except Exception as e:
                     PrintError(e)
                     TableLine.append("Move Name")
@@ -3024,7 +6979,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == MoveScriptIndex:
                 try:
-                    TableLine.append(Line.split(")")[1].replace(",", "").strip()[2:])
+                    TableLine.append(Line.split("%")[0].split(")")[1].replace(",", "").strip()[2:])
                 except Exception as e:
                     PrintError(e)
                     TableLine.append("00")
@@ -3032,7 +6987,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == BasePowerIndex:
                 try:
-                    TableLine.append(int(Line.split(")")[1].replace(",", "").strip()))
+                    TableLine.append(int(Line.split("%")[0].split(")")[1].replace(",", "").strip()))
                 except Exception as e:
                     PrintError(e)
                     TableLine.append(0)
@@ -3040,7 +6995,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == TypeIndex:
                 try:
-                    TableLine.append(Line.split(")")[1].replace(",", "").strip())
+                    TableLine.append(Line.split("%")[0].split(")")[1].replace(",", "").strip())
                 except Exception as e:
                     PrintError(e)
                     TableLine.append("Normal")
@@ -3048,7 +7003,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == AccuracyIndex:
                 try:
-                    TableLine.append(int(Line.split(")")[1].replace(",", "").strip()))
+                    TableLine.append(int(Line.split("%")[0].split(")")[1].replace(",", "").strip()))
                 except Exception as e:
                     PrintError(e)
                     TableLine.append(0)
@@ -3056,7 +7011,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == PowerPointIndex:
                 try:
-                    TableLine.append(int(Line.split(")")[1].replace(",", "").strip()))
+                    TableLine.append(int(Line.split("%")[0].split(")")[1].replace(",", "").strip()))
                 except Exception as e:
                     PrintError(e)
                     TableLine.append(0)
@@ -3064,7 +7019,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == EffectChanceIndex:
                 try:
-                    TableLine.append(int(Line.split(")")[1].replace(",", "").strip()))
+                    TableLine.append(int(Line.split("%")[0].split(")")[1].replace(",", "").strip()))
                 except Exception as e:
                     PrintError(e)
                     TableLine.append(0)
@@ -3072,7 +7027,7 @@ def MakeTableFromText(FileStuff, Error):
                 
             elif i == RangeIndex:
                 try:
-                    Range = Line.split(")")[1].replace(",", "").strip()
+                    Range = Line.split("%")[0].split(")")[1].replace(",", "").strip()
 
                     C = {"MySide":"My Side", "FoeSide":"Foe Side",
                          "AllButUser":"All But User", "UserOrPartner":"User + Partner",
@@ -3091,7 +7046,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == PriorityIndex:
                 try:
-                    P = int(Line.split(")")[1].replace(",", "").strip())
+                    P = int(Line.split("%")[0].split(")")[1].replace(",", "").strip())
 
                     if P > 127:
                         P = 256 - P
@@ -3105,7 +7060,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == MoveFlagIndex:
                 try:
-                    F = Line.split(")")[1].replace(",", "").strip()
+                    F = Line.split("%")[0].split(")")[1].replace(",", "").strip()
                     MoveFlags = [0,0,0,0,0,0,0,0]
 
                     for i, Flag in enumerate(F.split("+")):
@@ -3122,7 +7077,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == DamageFormulaIndex:
                 try:
-                    TableLine.append(Line.split(")")[1].replace(",", "").strip()[2:])
+                    TableLine.append(Line.split("%")[0].split(")")[1].replace(",", "").strip()[2:])
                 except Exception as e:
                     PrintError(e)
                     TableLine.append("00")
@@ -3130,7 +7085,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == MoveKindIndex:
                 try:
-                    TableLine.append(Line.split(")")[1].replace(",", "").strip())
+                    TableLine.append(Line.split("%")[0].split(")")[1].replace(",", "").strip())
                 except Exception as e:
                     PrintError(e)
                     TableLine.append("Status")
@@ -3138,7 +7093,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == ScriptArgIndex:
                 try:
-                    TableLine.append(int(Line.split(")")[1].replace(",", "").strip()))
+                    TableLine.append(int(Line.split("%")[0].split(")")[1].replace(",", "").strip()))
                 except Exception as e:
                     PrintError(e)
                     TableLine.append(0)
@@ -3146,7 +7101,7 @@ def MakeTableFromText(FileStuff, Error):
 
             elif i == DescriptionIndex: # Includes a Move Description Line
                 try:
-                    Text = Line.split(")")[1].replace(",","").strip()
+                    Text = Line.split("%")[0].split(")")[1].replace(",","").strip()
                     if Text != "":
                         TableLine.append(FormatDescription(Text))
                     else:
@@ -3249,11 +7204,13 @@ def ProcessTable(Root, Table):
             match j:
                 case Index if Index == MoveNameIndex:
                     if type(Line) != str or Line == "":
+                        print(Line)
                         Table[i][j] = "Move Name"
                         Error += "X"
                         
                 case Index if Index == MoveScriptIndex: # Move Script
                     if Line.upper() not in HexBytes:
+                        print(Line)
                         Table[i][j] = "00"
                         Error += "0"
                     else:
@@ -3261,51 +7218,61 @@ def ProcessTable(Root, Table):
 
                 case Index if Index == BasePowerIndex: # Base Power
                     if type(Line) != int:
+                        print(Line)
                         Table[i][j] = 0
                         Error += "1"
 
                 case Index if Index == TypeIndex: # Type
                     if Line not in TypeConversion:
+                        print(Line)
                         Table[i][j] = "Normal"
                         Error += "2"
 
                 case Index if Index == AccuracyIndex: # Accuracy
                     if type(Line) != int:
+                        print(Line)
                         Table[i][j] = 0
                         Error += "3"
 
                 case Index if Index == PowerPointIndex: # Power Point
                     if type(Line) != int:
+                        print(Line)
                         Table[i][j] = 0
                         Error += "4"
 
                 case Index if Index == EffectChanceIndex: # Effect Chance
                     if type(Line) != int:
+                        print(Line)
                         Table[i][j] = 0
                         Error += "5"
 
                 case Index if Index == RangeIndex: # Move Range
                     if Line not in RangeConversion:
+                        print(Line)
                         Table[i][j] = "Target"
                         Error += "6"
 
                 case Index if Index == PriorityIndex: # Priority
                     if type(Line) != int:
+                        print(Line)
                         Table[i][j] = 0
                         Error += "7"
 
                 case Index if Index == MoveFlagIndex: # Move Flags
                     if len(Line) != 8:
+                        print(Line)
                         Table[i][j] = [0,0,0,0,0,0,0,0]
                         Error += "8"
                         
                     else:
-                        if not all(y in (0,1) for y in Line): 
+                        if not all(y in (0,1) for y in Line):
+                            print(Line)
                             Table[i][j] = Line
                             Error += "8"
 
                 case Index if Index == DamageFormulaIndex: # Damage Formula
                     if Line.upper() not in HexBytes:
+                        print(Line)
                         Table[i][j] = "00"
                         Error += "9"
                     else:
@@ -3313,18 +7280,21 @@ def ProcessTable(Root, Table):
 
                 case Index if Index == MoveKindIndex: # Move Kind
                     if Line != "Physical" and Line != "Special" and Line != "Status":
+                        print(Line)
                         Table[i][j] = "Status"
                         Error += "A"
 
                 case Index if Index == ScriptArgIndex: # Move Script
                     if type(Line) != int:
+                        print(Line)
                         Table[i][j] = 0
                         Error += "B"
 
                 case Index if Index == DescriptionIndex: # Move Description
                     if type(Line) != str:
+                        print(Line)
                         Table[i][j] = ""
-                        Error += "C"                    
+                        Error += "C"                   
 
     if Error != "":
         MakeInfoBox(Root, "Error!", "Table has errors",
@@ -4150,6 +8120,109 @@ def SingleComboBox(WidgetFrame, String, LabelText, List, FinalValue, Changed, St
     VarPicker.pack(side = "left", padx = 5)
 
 #------------------------------------------------------------
+# Two Combo Boxes + One Flag
+#------------------------------------------------------------
+"""
+-------------------------------------------------------------
+This function is for helpers which use two combo boxes and
+one Flag
+-------------------------------------------------------------
+"""
+def TwoComboBoxesOneFlag(WidgetFrame, FlagLabel, LabelTextA, LabelTextB, ListA, ListB, FinalValue, Changed, StringList, Width = 13, FlagBits = [56, 7, 3, 6]):
+    FrameA = tk.Frame(WidgetFrame, bg = "Black")
+    FrameB = tk.Frame(WidgetFrame, bg = "Black")
+    FrameC = tk.Frame(WidgetFrame, bg = "Black")
+    FrameD = tk.Frame(WidgetFrame, bg = "Black")
+
+    VarA = tk.StringVar()
+    VarA.set(ListA[0])
+
+    VarB = tk.StringVar()
+    VarB.set(ListB[0])
+
+    FlagBitA = FlagBits[0] # Combo Box A = Bottom Part of Value
+    FlagBitB = FlagBits[1] # Combo Box B = Top Part of Value
+    FlagShift = FlagBits[2]
+    FlagBit = FlagBits[3] # This is for the Flag
+
+    StringA = StringList[0]
+    StringB = StringList[1]
+
+    Flag = tk.IntVar()
+    Flag.set(0)
+
+    TextNormal = StringA.format(VarA.get(), VarB.get()) 
+    TextLabel = ttk.Label(FrameA, text = TextNormal, font = ("Courier", SmallSize))
+
+    def SwitchText(Var, List):
+        for i, Name in enumerate(List):
+            if Var.get() == Name:
+                if Flag.get() == 1:
+                    TextLabel.configure(text = StringB.format(VarA.get(), VarB.get()))
+                else:
+                    TextLabel.configure(text = StringA.format(VarA.get(), VarB.get()))
+
+                break
+
+        return i
+
+    def SwitchTextII():
+        if Flag.get() == 1:
+            TextLabel.configure(text = StringB.format(VarA.get(), VarB.get()))
+        else:
+            TextLabel.configure(text = StringA.format(VarA.get(), VarB.get()))
+
+    # Define Checkbutton
+    def SetFlag():
+        SwitchTextII()
+        FinalValue.set(FinalValue.get() | (1 << FlagBit)) # Set the flag
+
+        if Flag.get() == 0: # Reset Flag
+            FinalValue.set(FinalValue.get() ^ (1 << FlagBit)) # Reset the flag now that it's set
+        
+        FinalValueLabel.configure(text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())))
+        Changed.set(True)
+
+    FlagButton = ttk.Checkbutton(FrameB, text = FlagLabel, var = Flag, command = SetFlag)
+
+    # Define Comboboxes
+    def SetVariableA():
+        i = SwitchText(VarA, ListA)
+        TopHalf = FinalValue.get() & FlagBitA
+        FinalValue.set((Flag.get() << FlagBit) | TopHalf | i)
+        FinalValueLabel.configure(text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())))
+        Changed.set(True)
+
+    def SetVariableB():
+        i = SwitchText(VarB, ListB)
+        BottomHalf = FinalValue.get() & FlagBitB
+        FinalValue.set((Flag.get() << FlagBit) | (i << FlagShift) | BottomHalf)
+        FinalValueLabel.configure(text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())))
+        Changed.set(True)
+
+    VarLabelA = ttk.Label(FrameC, text = LabelTextA, font = ("Courier", SmallSize))
+    VarPickerA = ttk.Combobox(FrameC, textvariable = VarA, width = Width, values = ListA, font = ("Courier", SmallSize))
+    VarPickerA.bind("<<ComboboxSelected>>", lambda _: SetVariableA())
+
+    VarLabelB = ttk.Label(FrameD, text = LabelTextB, font = ("Courier", SmallSize))
+    VarPickerB = ttk.Combobox(FrameD, textvariable = VarB, width = Width, values = ListB, font = ("Courier", SmallSize))
+    VarPickerB.bind("<<ComboboxSelected>>", lambda _: SetVariableB())
+
+    FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
+
+    FrameA.pack()
+    FrameB.pack(pady = 5)
+    FrameC.pack(pady = 5)
+    FrameD.pack(pady = 5)
+    FinalValueLabel.pack(pady = (0,10))
+    TextLabel.pack(pady = 10)
+    FlagButton.pack()
+    VarLabelA.pack(side = "left", padx = 5)
+    VarPickerA.pack(side = "left", padx = 5)
+    VarLabelB.pack(side = "left", padx = 5)
+    VarPickerB.pack(side = "left", padx = 5)
+
+#------------------------------------------------------------
 # Two Combo Boxes
 #------------------------------------------------------------
 """
@@ -4223,7 +8296,7 @@ def TwoComboBoxes(WidgetFrame, String, LabelTextA, LabelTextB, ListA, ListB, Fin
     VarLabelA.pack(side = "left", padx = 5)
     VarPickerA.pack(side = "left", padx = 5)
     VarLabelB.pack(side = "left", padx = 5)
-    VarPickerB.pack(side = "left", padx = 5)  
+    VarPickerB.pack(side = "left", padx = 5)
 
 #------------------------------------------------------------
 # Combo Box + Search Bar
@@ -4235,15 +8308,20 @@ lot of entries, so a search bar is included to find a
 specific entry more easily.
 -------------------------------------------------------------
 """
-def SingleComboBoxWithSearch(WidgetFrame, String, LabelText, List, FinalValue, Changed, StringList = None, Width = 13):
+def SingleComboBoxWithSearch(WidgetFrame, String, LabelText, List, FinalValue, Changed, StringList = None, Width = 13, AddOne = True):
+    # Create Frames
     FrameA = tk.Frame(WidgetFrame, bg = "Black")
     FrameB = tk.Frame(WidgetFrame, bg = "Black")
     FrameC = tk.Frame(WidgetFrame, bg = "Black")
     FrameD = tk.Frame(WidgetFrame, bg = "Black")
 
+    # Create Tkinter Variables
     Var = tk.StringVar()
     Var.set(List[0])
 
+    CurrentOption = tk.IntVar(value = 0)
+
+    # Make Text Label
     if StringList is None:
         TextNormal = String.format(Var.get())
     else:
@@ -4251,29 +8329,38 @@ def SingleComboBoxWithSearch(WidgetFrame, String, LabelText, List, FinalValue, C
         
     TextLabel = ttk.Label(FrameA, text = TextNormal, font = ("Courier", SmallSize))
 
-    ResultsLabel = ttk.Label(FrameC, text = "", font = ("Courier", SmallSize))
+    # Make Results Label
+    ResultsLabel = ttk.Label(FrameC, text = "--", font = ("Courier", SmallSize))
 
+    # Make Search Bar Entry Widget
     def ProcessEntry(Text):
         Values = []
         for Name in List:
             if Text.lower() in Name.lower():
-                Values.append(Name)       
+                Values.append(Name)
 
         VarPicker.configure(values = Values)
 
         if Text == "":
-            ResultsLabel.configure(text = "")
+            ResultsLabel.configure(text = "--")
         else:
             ResultsLabel.configure(text = "Found {} results".format(len(Values)))
-        
-        if len(Values) > 0:
-            Var.set(Values[0])
-        else:
-            Var.set("None")
+
+        if Var.get() not in Values:
+            CurrentOption.set(0)
+            
+            if Values:
+                Var.set(Values[0])
+            else:
+                VarPicker.configure(values = ["None"])
+                Var.set("None")
+
+        SetVariable()
     
     SearchBar = tk.Text(FrameB, width = 20, height = 1, bg = "White", fg = "Black", font = ("Courier", SmallSize))
     SearchBar.bind("<KeyRelease>", (lambda _: ProcessEntry(SearchBar.get(1.0, "end-1c"))))
 
+    # Make Clear Search Bar Button
     Cleared = tk.IntVar()
     Cleared.set(0)
     def ClearSearch():
@@ -4285,12 +8372,20 @@ def SingleComboBoxWithSearch(WidgetFrame, String, LabelText, List, FinalValue, C
             Values.append(Key)
 
         VarPicker.configure(values = Values)
-        ResultsLabel.configure(text = "")
-        Var.set(Values[0])
+        ResultsLabel.configure(text = "--")
+        CurrentOption.set(VarPicker.cget('values').index(Var.get()))
     
     SearchClear = ttk.Checkbutton(FrameB, text = "X", variable = Cleared, command = ClearSearch)  
 
-    def SetVariable():       
+    # Create Menu
+    def SetVariable():
+        if AddOne:
+            N = 1
+        else:
+            N = 0
+
+        CurrentOption.set(VarPicker.cget('values').index(Var.get()))
+            
         for i, Name in enumerate(List):
             if Var.get() == Name:
                 if StringList is None:
@@ -4298,7 +8393,7 @@ def SingleComboBoxWithSearch(WidgetFrame, String, LabelText, List, FinalValue, C
                 else:
                     TextLabel.configure(text = String + "\n" + StringList[i])
             
-                FinalValue.set(i)
+                FinalValue.set(i + N)
                 break
             
         FinalValueLabel.configure(text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())))
@@ -4308,8 +8403,11 @@ def SingleComboBoxWithSearch(WidgetFrame, String, LabelText, List, FinalValue, C
     VarPicker = ttk.Combobox(FrameD, textvariable = Var, width = Width, values = List, font = ("Courier", SmallSize))
     VarPicker.bind("<<ComboboxSelected>>", lambda _: SetVariable())
 
+    # Make Final Value Display Label
     FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
+    SetVariable()
 
+    # Pack Everything
     FrameA.pack()
     FrameB.pack()
     FrameC.pack()
@@ -4320,7 +8418,35 @@ def SingleComboBoxWithSearch(WidgetFrame, String, LabelText, List, FinalValue, C
     SearchBar.pack(side = "left")
     ResultsLabel.pack()
     VarLabel.pack(side = "left", padx = 5)
-    VarPicker.pack(side = "left", padx = 5)    
+    VarPicker.pack(side = "left", padx = 5)
+
+    # Make HotKeys
+    def MoveUp():
+        CurrentOption.set(CurrentOption.get() - 1)
+        Var.set(VarPicker.cget('values')[CurrentOption.get()])
+        SetVariable()
+
+    def MoveDown():
+        CurrentOption.set(CurrentOption.get() + 1)
+        Var.set(VarPicker.cget('values')[CurrentOption.get()])
+        SetVariable()
+
+    def HotKeyManager(Event):
+        Key = Event.keysym
+        Shift = Event.state & 1
+
+        if OnAMac:
+            Command = Event.state & 8
+        else:
+            Command = Event.state & 4
+
+        if Key == "Up" and CurrentOption.get() > 0:
+            MoveUp()
+
+        if Key == "Down" and CurrentOption.get() < len(VarPicker.cget('values')) - 1:
+            MoveDown()
+
+    WidgetFrame.bind("<KeyPress>", HotKeyManager)
 
 #------------------------------------------------------------
 # Entry + One Combo Box
@@ -4331,7 +8457,7 @@ This function is for helpers which have an entry box and one
 combobox.
 -------------------------------------------------------------
 """
-def AmountEntryOneComboBox(WidgetFrame, List, StringA, StringB, LabelTextA, LabelTextB, StringFlags, Low, High, WidthA, WidthB, FinalValue, Changed):
+def AmountEntryOneComboBox(WidgetFrame, List, StringA, StringB, LabelTextA, LabelTextB, StringFlags, Low, High, WidthA, WidthB, FinalValue, Changed, FlagList = [240, 15, 4]):
     FrameA = tk.Frame(WidgetFrame, bg = "Black")
     FrameB = tk.Frame(WidgetFrame, bg = "Black")
     FrameC = tk.Frame(WidgetFrame, bg = "Black")
@@ -4344,6 +8470,12 @@ def AmountEntryOneComboBox(WidgetFrame, List, StringA, StringB, LabelTextA, Labe
 
     Var = tk.StringVar()
     Var.set(List[0])
+
+    TopBits = FlagList[0]
+    LowBits = FlagList[1]
+    ShiftBit = FlagList[2]
+
+    print(TopBits, LowBits)
 
     TextNormal = StringA.format(Amount.get(), Var.get())
     TextLabel = ttk.Label(FrameA, text = TextNormal, font = ("Courier", SmallSize))
@@ -4370,7 +8502,7 @@ def AmountEntryOneComboBox(WidgetFrame, List, StringA, StringB, LabelTextA, Labe
                 X = High
 
             Amount.set(X)
-            TopHalf = FinalValue.get() & 240 # Get top half of byte
+            TopHalf = FinalValue.get() & TopBits # Get top half of byte
             FinalValue.set(TopHalf | X)
             
             SwitchText()
@@ -4388,8 +8520,8 @@ def AmountEntryOneComboBox(WidgetFrame, List, StringA, StringB, LabelTextA, Labe
     def SetVariable():        
         for i, Name in enumerate(List):
             if Var.get() == Name:
-                BottomHalf = FinalValue.get() & 15 # Get bottom half of byte
-                TopHalf = i << 4
+                BottomHalf = FinalValue.get() & LowBits # Get bottom half of byte
+                TopHalf = i << ShiftBit
                 StringFlag.set(i)
                 FinalValue.set(TopHalf | BottomHalf)
                 break
@@ -4439,7 +8571,7 @@ def AmountEntryOneFlag(WidgetFrame, StringA, StringB, FlagBit, LabelText, Button
     Flag = tk.IntVar()
     Flag.set(0)
 
-    TextNormal = StringA.format(Amount.get())
+    TextNormal = StringB.format(Amount.get())
     TextLabel = ttk.Label(FrameA, text = TextNormal, font = ("Courier", SmallSize))
 
     ttk.Label(FrameA, text = "Valid values range between {} and {}".format(Low, High), font = ("Courier", SmallSize, "underline")).pack(pady = (0,10))
@@ -4629,8 +8761,77 @@ def AmountEntryTwoFlags(WidgetFrame, StringList, LabelText, FinalValue, Changed,
     TextLabel.pack(pady = 10)
     AmountLabel.pack(side = "left", padx = 5)
     AmountEntry.pack(side = "left", padx = 5)
-    FlagButtonA.pack(side = "left", padx = 5)
-    FlagButtonB.pack(side = "left", padx = 5)
+    FlagButtonA.pack(side = "left", padx = 5, pady = 10)
+    FlagButtonB.pack(side = "left", padx = 5, pady = 10)
+
+#------------------------------------------------------------
+# Two Flags
+#------------------------------------------------------------
+"""
+-------------------------------------------------------------
+This function is for helpers which have two Flags.
+-------------------------------------------------------------
+"""
+def MakeTwoFlags(WidgetFrame, StringList, FinalValue, Changed, FlagList, FlagBits):
+    FrameA = tk.Frame(WidgetFrame, bg = "Black")
+    FrameB = tk.Frame(WidgetFrame, bg = "Black")
+    FrameC = tk.Frame(WidgetFrame, bg = "Black")
+
+    FlagA = tk.IntVar()
+    FlagA.set(0)
+
+    FlagB = tk.IntVar()
+    FlagB.set(0)
+
+    StringA = StringList[0]
+    StringB = StringList[1]
+    StringC = StringList[2]
+    StringD = StringList[3]
+
+    FlagTextA = FlagList[0]
+    FlagTextB = FlagList[1]
+
+    FlagBitA = FlagBits[0]
+    FlagBitB = FlagBits[1]
+
+    TextNormal = StringA
+    TextLabel = ttk.Label(FrameA, text = TextNormal, font = ("Courier", SmallSize))
+
+    def SwitchText():
+        match FlagA.get(), FlagB.get():
+            case 0, 0:
+                T = StringA
+            case 0, 1:
+                T = StringC
+            case 1, 0:
+                T = StringB
+            case 1, 1:
+                T = StringD
+            
+        TextLabel.configure(text = T)
+        FinalValueLabel.configure(text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())))
+        Changed.set(True)
+
+    def SetFlag(FlagBit, Flag):
+        FinalValue.set(FinalValue.get() | (1 << FlagBit)) # Set the flag
+
+        if Flag.get() == 0: # Reset the Flag
+            FinalValue.set(FinalValue.get() ^ (1 << FlagBit)) # Reset the flag now that it's set
+
+        SwitchText()
+
+    FlagButtonA = ttk.Checkbutton(FrameC, text = FlagTextA, variable = FlagA, command = lambda: SetFlag(FlagBitA, FlagA))
+    FlagButtonB = ttk.Checkbutton(FrameC, text = FlagTextB, variable = FlagB, command = lambda: SetFlag(FlagBitB, FlagB))
+
+    FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
+
+    FrameA.pack()
+    FrameB.pack()
+    FrameC.pack()
+    FinalValueLabel.pack(pady = (0,10))
+    TextLabel.pack(pady = 10)
+    FlagButtonA.pack(pady = 10)
+    FlagButtonB.pack(pady = 10)
 
 #------------------------------------------------------------
 # Multi-Flag List
@@ -4679,6 +8880,151 @@ def MultiFlagList(WidgetFrame, String, FlagList, LabelText, FinalValue, Changed)
             
         C = i % 4
         ttk.Checkbutton(FrameC, text = FlagList[i], variable = FlagVars[i], command = lambda i = i: SetFlag(i, FlagVars[i])).grid(row = R, column = C, padx = 10, pady = 5, sticky = "w")
+
+#------------------------------------------------------------
+# Two Sets Of Flags
+#------------------------------------------------------------
+"""
+-------------------------------------------------------------
+This function is for helpers which use two different sets of
+Flags.
+-------------------------------------------------------------
+"""
+def TwoSetsOfFlags(WidgetFrame, String, FlagListA, FlagListB, LabelTextA, LabelTextB, FinalValue, Changed, FlagShift = 4):
+    FrameA = tk.Frame(WidgetFrame, bg = "Black")
+    FrameB = tk.Frame(WidgetFrame, bg = "Black")
+    FrameC = tk.Frame(WidgetFrame, bg = "Black")
+    FrameD = tk.Frame(WidgetFrame, bg = "Black")
+    FrameE = tk.Frame(WidgetFrame, bg = "Black")
+
+    FrameA.pack()
+    FrameB.pack(pady = (10,0))
+    FrameC.pack()
+    FrameD.pack()
+    FrameE.pack()
+
+    FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
+    FinalValueLabel.pack(side = "top")
+
+    FlagVarsA = [tk.IntVar(value = 0) for i in range(len(FlagListA))]
+    FlagVarsB = [tk.IntVar(value = 0) for i in range(len(FlagListB))]
+
+    TextNormal = String
+    TextLabel = ttk.Label(FrameA, text = TextNormal, font = ("Courier", SmallSize))
+    TextLabel.pack()
+
+    FlagLabelA = ttk.Label(FrameB, text = LabelTextA, font = ("Courier", SmallSize))
+    FlagLabelA.pack()
+
+    def SetFlagA(N, Var):
+        FinalValue.set(FinalValue.get() | (1 << N))
+
+        if Var.get() == 0:
+            FinalValue.set(FinalValue.get() ^ (1 << N))
+
+        FinalValueLabel.configure(text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())))
+        Changed.set(True)
+
+    for i, Var in enumerate(FlagVarsA):
+        if i < 4:
+            R = 0
+        else:
+            R = 1
+            
+        C = i % 4
+        ttk.Checkbutton(FrameC, text = FlagListA[i], variable = FlagVarsA[i], command = lambda i = i: SetFlagA(i, FlagVarsA[i])).grid(row = R, column = C, padx = 10, pady = 5, sticky = "w")
+
+    FlagLabelB = ttk.Label(FrameD, text = LabelTextB, font = ("Courier", SmallSize))
+    FlagLabelB.pack()
+
+    def SetFlagB(N, Var):
+        FinalValue.set(FinalValue.get() | (1 << N) << FlagShift)
+
+        if Var.get() == 0:
+            FinalValue.set(FinalValue.get() ^ (1 << N) << FlagShift)
+
+        FinalValueLabel.configure(text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())))
+        Changed.set(True)
+
+    for i, Var in enumerate(FlagVarsB):
+        if i < 4:
+            R = 0
+        else:
+            R = 1
+            
+        C = i % 4
+        ttk.Checkbutton(FrameE, text = FlagListB[i], variable = FlagVarsB[i], command = lambda i = i: SetFlagB(i, FlagVarsB[i])).grid(row = R, column = C, padx = 10, pady = 5, sticky = "w")
+
+#------------------------------------------------------------
+# Multi-Flag + Combobox
+#------------------------------------------------------------
+"""
+-------------------------------------------------------------
+This function is for helpers which have multiple Flags that
+the user can select any number of, plus one combobox.
+-------------------------------------------------------------
+"""
+def MultiFlagOneBox(WidgetFrame, String, FlagList, FlagLabel, LabelText, BoxList, FlagShift, FinalValue, Changed, Width = 13):
+    FrameA = tk.Frame(WidgetFrame, bg = "Black")
+    FrameB = tk.Frame(WidgetFrame, bg = "Black")
+    FrameC = tk.Frame(WidgetFrame, bg = "Black")
+    FrameD = tk.Frame(WidgetFrame, bg = "Black")
+
+    FrameA.pack()
+    FrameB.pack(pady = (10,0))
+    FrameC.pack()
+    FrameD.pack()
+
+    FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
+    FinalValueLabel.pack(side = "top")
+
+    FlagVars = [tk.IntVar(value = 0) for i in range(len(FlagList))]
+
+    BoxVar = tk.StringVar()
+    BoxVar.set(BoxList[0])
+
+    TextNormal = String
+    TextLabel = ttk.Label(FrameA, text = TextNormal, font = ("Courier", SmallSize))
+    TextLabel.pack()
+
+    FlagLabel = ttk.Label(FrameB, text = LabelText, font = ("Courier", SmallSize))
+    FlagLabel.pack()
+
+    def SetFlag(N, Var):
+        FinalValue.set(FinalValue.get() | (1 << N))
+
+        if Var.get() == 0:
+            FinalValue.set(FinalValue.get() ^ (1 << N))
+
+        FinalValueLabel.configure(text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())))
+        Changed.set(True)
+
+    for i, Var in enumerate(FlagVars):
+        if i < 4:
+            R = 0
+        else:
+            R = 1
+            
+        C = i % 4
+        ttk.Checkbutton(FrameC, text = FlagList[i], variable = FlagVars[i], command = lambda i = i: SetFlag(i, FlagVars[i])).grid(row = R, column = C, padx = 10, pady = 5, sticky = "w")
+
+    def SetVariable():
+        for i, Name in enumerate(BoxList):
+            if BoxVar.get() == Name:
+                BottomHalf = ~ ((255 >> FlagShift) << FlagShift) & FinalValue.get()
+                FinalValue.set(i << FlagShift | BottomHalf)
+
+                break
+
+        FinalValueLabel.configure(text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())))
+        Changed.set(True)
+
+    VarLabel = ttk.Label(FrameD, text = LabelText, font = ("Courier", SmallSize)) 
+    VarPicker = ttk.Combobox(FrameD, textvariable = BoxVar, width = Width, values = BoxList, font = ("Courier", SmallSize))
+    VarPicker.bind("<<ComboboxSelected>>", lambda _: SetVariable())
+
+    VarLabel.pack(side = "left")
+    VarPicker.pack(side = "left")
 
 #------------------------------------------------------------
 # One Flag Switch Text
@@ -4736,6 +9082,14 @@ def TurnsFunction(WidgetFrame, Args, FinalValue, Changed):
     AmountEntryOneFlag(WidgetFrame, StringA, StringB, 4, "Turns:", "Random?", Args[0], Args[1], 3, FinalValue, Changed)
 
 #------------------------------------------------------------
+# Future Turns
+#------------------------------------------------------------
+def FutureTurnsFunction(WidgetFrame, Args, FinalValue, Changed):
+    StringA = "The {} in {}-{} turns, including this one.".format(Args[2], Args[0], "{}")
+    StringB = "The {} in {} turns, including this one.".format(Args[2], "{}")
+    AmountEntryOneFlag(WidgetFrame, StringA, StringB, 4, "Turns:", "Random?", Args[0], Args[1], 3, FinalValue, Changed)
+
+#------------------------------------------------------------
 # Percentage Helper
 #------------------------------------------------------------
 def PercentValue(WidgetFrame, Args, FinalValue, Changed):
@@ -4747,8 +9101,7 @@ def PercentValue(WidgetFrame, Args, FinalValue, Changed):
 #------------------------------------------------------------
 def TypeArgument(WidgetFrame, Args, FinalValue, Changed):
     Types = list(TypeConversion.keys())
-    Type = tk.StringVar()
-    SingleComboBox(WidgetFrame, Args[0], "Type:", Types, Type, FinalValue, Changed)
+    SingleComboBox(WidgetFrame, Args[0], "Type:", Types, FinalValue, Changed)
 
 #------------------------------------------------------------
 # Stat Stage Amount Helper
@@ -4763,13 +9116,20 @@ def StatStageAmount(WidgetFrame, Args, FinalValue, Changed):
 def MajorStatusArgument(WidgetFrame, Args, FinalValue, Changed):
     String = Args[0]
     Statuses = ["Sleep", "Poison", "Burn", "Freeze", "Paralysis", "Bad Poison", "Confusion", "Infatuation"]
-    Status = tk.StringVar()
 
     if Args[1] == 0: # Use Flags
         MultiFlagList(WidgetFrame, String, Statuses, "Options:", FinalValue, Changed)
         
     if Args[1] == 1: # Use Single Combo box
-        SingleComboBox(WidgetFrame, String, "Status:", Statuses, Status, FinalValue, Changed)
+        SingleComboBox(WidgetFrame, String, "Status:", Statuses, FinalValue, Changed)
+
+#------------------------------------------------------------
+# Major Status + Recoil Helper
+#------------------------------------------------------------
+def RecoilStatusArgument(WidgetFrame, Args, FinalValue, Changed):
+    Text = "The User will take 1/{} of {} as Recoil\nand give the Target the {} Status.".format({}, Args[0], {})
+    Statuses = ["Sleep", "Poison", "Burn", "Freeze", "Paralysis", "Bad Poison", "Confusion", "Infatuation"]
+    AmountEntryOneComboBox(WidgetFrame, Statuses, Text, Text, "Status:", "Denominator:", [], 1, 31, 13, 2, FinalValue, Changed, FlagList = [224, 31, 5])
 
 #------------------------------------------------------------
 # Multiple Stat Stages Helper
@@ -4791,8 +9151,7 @@ def WeatherArgument(WidgetFrame, Args, FinalValue, Changed):
         
     if Args[1] == 1: # Use Single Combo box
         Weathers = ["Clear", "Rain", "Sandstorm", "Sunshine", "Hail", "Fog", "Snow"]
-        Weather = tk.StringVar()
-        SingleComboBox(WidgetFrame, String, "Weather:", Weathers, Weather, FinalValue, Changed)
+        SingleComboBox(WidgetFrame, String, "Weather:", Weathers, FinalValue, Changed)
 
 #------------------------------------------------------------
 # Multi-Hit Move Helper
@@ -4880,11 +9239,15 @@ def CustomHelper(WidgetFrame, Args, FinalValue, Changed):
             SingleComboBox(WidgetFrame, String, "Flags:", Flags, FinalValue, Changed)
 
         case 12: # Role Play
-            String = "The {} will have their Ability\nreplaced with the Target's."
-            Options = ["User", "User + Partner"]
-            SingleComboBox(WidgetFrame, String, "Options:", Options, FinalValue, Changed)
+            StringList = ["The User will copy the Target's Ability.",
+                          "The User and their Partner will copy the Target's Ability.",
+                          "The Target will copy the User's Ability.",
+                          "The Target and their Partner will copy the User's Ability."]
+            FlagList = ["Use Partner Too", "Switch Order"]
+            FlagBits = [0, 1]
+            MakeTwoFlags(WidgetFrame, StringList, FinalValue, Changed, FlagList, FlagBits)
 
-        case 13: # Ability Replace'
+        case 13: # Ability Replace
             String = "The Target's Ability will be replaced with {}."
             SingleComboBoxWithSearch(WidgetFrame, String, "Ability:", list(AbilityList.keys()), FinalValue, Changed)
 
@@ -4893,6 +9256,30 @@ def CustomHelper(WidgetFrame, Args, FinalValue, Changed):
             Options = ["A Random", "A Chosen", "All"]
             SingleComboBox(WidgetFrame, String, "Options:", Options, FinalValue, Changed)
 
+        case 15: # Script 46
+            StringList = ["The Target will have their Ability nullified for {} turns.",
+                          "The Target will have their Ability nullified for {} turns\nif the User moved before them.",
+                          "The Target will have their Ability nullified for between\n1-{} turns.",
+                          "The Target will have their Ability nullified for between\n1-{} turns if the User moved before them."]
+            FlagList = ["User Moved First?", "Random?"]
+            FlagBits = [4, 5]
+            AmountEntryTwoFlags(WidgetFrame, StringList, "Turns:", FinalValue, Changed, FlagList, FlagBits, 1, 15, 3)
+
+        case 16: # Script A9
+            StringList = ["The User will steal the Target's positive Stat Stages.",
+                          "The User will steal the Target's negative Stat Stages.",
+                          "The Target will steal the User's positive Stat Stages.",
+                          "The Target will steal the User's negative Stat Stages."]
+            FlagList = ["Negative", "Switch Order"]
+            FlagBits = [0, 1]
+            MakeTwoFlags(WidgetFrame, StringList, FinalValue, Changed, FlagList, FlagBits)
+
+        case 17: # Imprison
+            String = "The Target will be Imprisoned by the following Pokemon."
+            Targets = ["User", "User's Partner", "Target's Partner"]
+            MultiFlagList(WidgetFrame, String, Targets, "Target Options:", FinalValue, Changed)
+    
+    
 #------------------------------------------------------------
 # Power Points Helper
 #------------------------------------------------------------
@@ -4921,9 +9308,9 @@ as an argument.
 -------------------------------------------------------------
 """
 def TwoStatsAtOnce(WidgetFrame, Args, FinalValue, Changed):
-    String = Args[0]
+    StringList = [Args[0].format("User and Target", "{}", "{}"), Args[0].format("Target", "{}", "{}")]
     Stats = ["HP", "Attack", "Defence", "Sp. Attack", "Sp. Defence", "Speed"]
-    TwoComboBoxes(WidgetFrame, String, "Stat 1:", "Stat 2:", Stats, Stats, FinalValue, Changed)
+    TwoComboBoxesOneFlag(WidgetFrame, "User = Target?", "Stat 1:", "Stat 2:", Stats, Stats, FinalValue, Changed, StringList, Width = 13, FlagBits = [56, 7, 3, 6])
 
 #------------------------------------------------------------
 # Stats + Type
@@ -4941,7 +9328,23 @@ def StatAndType(WidgetFrame, Args, FinalValue, Changed):
     TwoComboBoxes(WidgetFrame, String, "Type:", "Stat:", Types, Stats, FinalValue, Changed, StringList = None, Width = 13, FlagBits = [224, 31, 5])
 
 #------------------------------------------------------------
-# Stats + Type
+# Status + Type
+#------------------------------------------------------------
+"""
+-------------------------------------------------------------
+This helper is for Move Scripts which take a Type and a
+Major Status as an argument.
+-------------------------------------------------------------
+"""
+def StatusAndType(WidgetFrame, Args, FinalValue, Changed):
+    String = Args[0]
+    Types = list(TypeConversion.keys())
+    Statuses = ["Sleep", "Poison", "Burn", "Freeze", "Paralysis", "Bad Poison", "Confusion", "Infatuation"]
+    TwoComboBoxes(WidgetFrame, String, "Type:", "Stat:", Types, Statuses, FinalValue, Changed, StringList = None, Width = 13, FlagBits = [224, 31, 5])
+
+
+#------------------------------------------------------------
+# Stats + Status
 #------------------------------------------------------------
 """
 -------------------------------------------------------------
@@ -4954,6 +9357,34 @@ def StatAndStatus(WidgetFrame, Args, FinalValue, Changed):
     Statuses = ["Sleep", "Poison", "Burn", "Freeze", "Paralysis", "Bad Poison", "Confusion", "Infatuation"]
     Stats = ["Attack", "Defence", "Speed", "Sp. Attack", "Sp. Defence", "Accuracy", "Evasion"]
     TwoComboBoxes(WidgetFrame, String, "Status:", "Stat:", Statuses, Stats, FinalValue, Changed)
+
+#------------------------------------------------------------
+# Stats + Status II
+#------------------------------------------------------------
+"""
+-------------------------------------------------------------
+This helper is for Move Scripts which take a Type and a Stat
+as an argument.
+-------------------------------------------------------------
+"""
+def StatAndStatusII(WidgetFrame, Args, FinalValue, Changed):
+    String = Args[0]
+    Statuses = ["Sleep", "Poison", "Burn", "Freeze", "Paralysis", "Bad Poison", "Confusion", "Infatuation"]
+    Stats = ["Attack", "Defence", "Speed", "Sp. Attack", "Sp. Defence"]
+    MultiFlagOneBox(WidgetFrame, String, Stats, "Stats", "Status:", Statuses, 5, FinalValue, Changed)
+
+#------------------------------------------------------------
+# Trap Flags
+#------------------------------------------------------------
+"""
+-------------------------------------------------------------
+This helper is for Trap Flag scripts.
+-------------------------------------------------------------
+"""
+def TrapFlagTargets(WidgetFrame, Args, FinalValue, Changed):
+    String = "The {} Flag will be set on the Target\nand on the other given targets.\nIt will disappear when any of them leave the field.".format(Args[0])
+    Targets = ["User", "User's Partner", "Target's Partner"]
+    MultiFlagList(WidgetFrame, String, Targets, "Target Options:", FinalValue, Changed)
     
 #------------------------------------------------------------
 # Make Script Arg Helper Box
@@ -5011,6 +9442,9 @@ def MakeScriptArgHelperBox(Root, Title, Header, Text, Option = None, Args = None
             case "Turns": # Create Script Turn Helper
                 TurnsFunction(WidgetFrame, Args, FinalValue, Changed)
 
+            case "Future": # Future effect helper
+                FutureTurnsFunction(WidgetFrame, Args, FinalValue, Changed)
+
             case "Percent": # Create Script Percentage Helper
                 PercentValue(WidgetFrame, Args, FinalValue, Changed)
 
@@ -5046,6 +9480,18 @@ def MakeScriptArgHelperBox(Root, Title, Header, Text, Option = None, Args = None
 
             case "StatStatus":
                 StatAndStatus(WidgetFrame, Args, FinalValue, Changed)
+
+            case "StatStatus2":
+                StatAndStatusII(WidgetFrame, Args, FinalValue, Changed)
+
+            case "PercentStatus":
+                RecoilStatusArgument(WidgetFrame, Args, FinalValue, Changed)
+
+            case "TrapTarget":
+                TrapFlagTargets(WidgetFrame, Args, FinalValue, Changed)
+
+            case "StatusType":
+                StatusAndType(WidgetFrame, Args, FinalValue, Changed)
 
             case _:
                 NoArguments(WidgetFrame)
@@ -5135,7 +9581,7 @@ def LoadCustomMoveNames():
     if NamesFile == "": # Cancelled
         return
 
-    NamesFile = open(NamesFile, "r")
+    NamesFile = open(NamesFile, "r", encoding = "utf-8")
     InitialFolder = os.path.dirname(os.path.realpath(NamesFile.name))
 
     NewNames = 0
@@ -5501,7 +9947,7 @@ ShowHelpButton = ttk.Checkbutton(MoveFinderFrame, text = "?", variable = ShowHel
 #------------------------------------------------------------
 # Make the Move Menu - Jump to a particular Move
 #------------------------------------------------------------
-def JumpToMove(self):
+def JumpToMove():
     # Gets the Move Number
     MoveNumber = int(CurrentMove.get().split("-")[0].strip()) - 1
 
@@ -5521,8 +9967,17 @@ def JumpToMove(self):
         
     Refresh()
 
+def ProcessEntry():
+    for i, Entry in enumerate(Table):
+        Name = Entry[0].lower()
+        if CurrentMove.get().lower() == Name:
+            CurrentMove.set("{} - {}".format(ConvertToThree(i + 1), Name))
+            JumpToMove()
+            break            
+
 MoveFinder = ttk.Combobox(MoveFinderFrame, textvariable = CurrentMove, width = 18, values = MoveNameList, font = ("Courier", SmallSize))
-MoveFinder.bind("<<ComboboxSelected>>", JumpToMove)
+MoveFinder.bind("<<ComboboxSelected>>", lambda _: JumpToMove())
+MoveFinder.bind("<Return>", lambda _: ProcessEntry())
 
 #------------------------------------------------------------
 # Edit Table Functions Block
@@ -5546,10 +10001,10 @@ def OpenTableFunctions():
                        "Contact Flag is set.",
                        "This is a type of auto-DPSS."]}
 
-    MakeInfoBoxWithMenu(Root, "Table Functions", "Choose A Function",
+    MakeMultiChoiceBox(Root, "Table Functions", "Choose A Function", Function,
                         ["You can run a function on the whole table",
                          "by choosing one from the menu below."],
-                        TableFunctions, Function, "Randomise Move Names", 30)
+                        TableFunctions, "Randomise Move Names")
 
     if Function.get() != "None":
         match Function.get():
@@ -5611,6 +10066,34 @@ def MoveNameHelp():
 MoveNameHelpButton = ttk.Checkbutton(MoveNameFrame, text = "?", variable = NameHelp, command = MoveNameHelp)
 
 #------------------------------------------------------------
+# Auto Move Filler Block
+#------------------------------------------------------------
+AutoFillMoveFrame = tk.Frame(EditorFrame, bg = "Black")
+
+def AutoFillMove():
+    PickedMove = tk.StringVar()
+    PickedMove.set("None")
+    MakeInfoBoxMenuSearch(Root, "Auto-Filler", "Auto-Fill Moves",
+                        ["You may pick a Move from the dropdown list",
+                         "and the program will automatically fill in the",
+                         "current entry in the table with its values.",
+                         "NOTE: Some newer Moves have names longer than",
+                         "12 characters, so those Moves have a default",
+                         "shorter name that will be filled in instead."],
+                        AutoFillList, PickedMove, "None")
+
+    if PickedMove.get() != "None":
+        global Table
+        Table[CurrentMoveNumber.get()] = PresetMoveList[PickedMove.get()]
+
+        Refresh()
+
+        if AutoSave:
+            SaveFile(Table, CurrentOpenFile, True)
+
+AutoFillMoveButton = ttk.Button(AutoFillMoveFrame, text = "Move Auto-Filler", command = AutoFillMove)
+
+#------------------------------------------------------------
 # Edit Move Script Block
 #------------------------------------------------------------
 MoveScriptFrame = tk.Frame(EditorFrame, bg = "Black")
@@ -5658,7 +10141,7 @@ def MoveScriptHelp():
                          "executed by a Move when it is selected in battle.",
                          "Select a script from the dropdown menu to see what it does.",
                          "Note: these are the defaults for ACE, your scripts may vary."],
-                        MoveScriptText, NewValue, "Script {}".format(MoveScript.get()))
+                        MoveScriptText, NewValue, "Script {}".format(MoveScript.get()), MoveScriptTagsList)
 
     if NewValue.get() != "None":
         MoveScript.set(NewValue.get().replace("Script", "").strip())
@@ -5893,7 +10376,7 @@ EffectChanceHelpButton = ttk.Checkbutton(EffectChanceFrame, text = "?", variable
 #------------------------------------------------------------
 # Edit Attack Range Block
 #------------------------------------------------------------
-RangeList = ["Target", "User", "Foe Side", "My Side", "All But User", "Everyone", "Random", "Last Attacker", "User + Partner", "Target + Partner"]
+RangeList = ["Target", "User", "Partner", "Foe Side", "My Side", "All But User", "Everyone", "Random", "Last Attacker", "User + Partner", "Target + Partner"]
 
 RangeFrame = tk.Frame(EditorFrame, bg = "Black")
 
@@ -6115,13 +10598,13 @@ def DamageFormulaHelp():
 
     NewValue = tk.StringVar()
     NewValue.set("-")
-    MakeInfoBoxWithMenu(Root, "Help", "Damage Formula",
+    MakeInfoBoxMenuSearch(Root, "Help", "Damage Formula",
                         ["The damage formula is used to determine the Base Power",
                          "the of the Move.",
                          "If this is set to anything other than zero, then the",
                          "game will run an additional routine to find the true",
                          "Base Power, which may use the Base Power given here."],
-                        DamageFormulaText, NewValue, "Formula {}".format(DamageFormula.get()))
+                        DamageFormulaText, NewValue, "Formula {}".format(DamageFormula.get()), DamageFormulaTagsList)
     
     if NewValue.get() != "-":
         DamageFormula.set(NewValue.get().replace("Formula", "").strip())
@@ -6346,21 +10829,21 @@ def ProcessText(Text):
         Line3 = Lines[2]
         Line4 = Lines[3]
 
-        if len(Line1) > 19: # bleeds into the next line        
-            Line2 = Line1[19:] + Line2
-            Line1 = Line1[0:19]
+        if len(Line1) > 20: # bleeds into the next line        
+            Line2 = Line1[20:] + Line2
+            Line1 = Line1[0:20]
 
-        if len(Line2) > 19:
-            Line3 = Line2[19:] + Line3
-            Line2 = Line2[0:19]
+        if len(Line2) > 20:
+            Line3 = Line2[20:] + Line3
+            Line2 = Line2[0:20]
 
-        if len(Line3) > 19:
-            Line4 = Line3[19:] + Line4
-            Line3 = Line3[0:19]
+        if len(Line3) > 20:
+            Line4 = Line3[20:] + Line4
+            Line3 = Line3[0:20]
 
-        if len(Line4) > 19:
-            Line4 = Line4[0:19]
-            Lines.append(Line4[19:])
+        if len(Line4) > 20:
+            Line4 = Line4[0:20]
+            Lines.append(Line4[20:])
 
         Lines[0] = Line1
         Lines[1] = Line2
@@ -6378,7 +10861,7 @@ def ProcessText(Text):
             SaveFile(Table, CurrentOpenFile, True)
 
 TextBoxFrame = tk.Frame(EditorFrame, bg = "Black")
-DescriptionBox = tk.Text(TextBoxFrame, width = 19, height = 4, bg = "White", fg = "Black", font = ("Courier", SmallSize))
+DescriptionBox = tk.Text(TextBoxFrame, width = 20, height = 4, bg = "White", fg = "Black", font = ("Courier", SmallSize))
 DescriptionBox.bind("<KeyRelease>", (lambda _: SanitiseDescription(DescriptionBox.get(1.0, "end-1c"))))
 DescriptionBox.bind(Paste, (lambda _: SanitiseDescription(DescriptionBox.get(1.0, "end-1c"))))
 
@@ -6390,7 +10873,7 @@ def DescriptionHelp():
     DHelp.set(0)
     MakeInfoBox(Root, "Help", "Move Description",
                 ["This is the description of the Move seen in the Move Viewer in game.",
-                 "This can be up to four lines long, with 19 characters per line.",
+                 "This can be up to four lines long, with 20 characters per line.",
                  "The Move Description is compiled into a separate table."])
 
 DescriptionHelpButton = ttk.Checkbutton(DescriptionLabelFrame, text = "?", variable = DHelp, command = DescriptionHelp)
@@ -6664,7 +11147,7 @@ def CreateNewFile():
             NamesFile = fd.askopenfilename(title = "Open Name File", initialdir = InitialFolder, filetypes = [("text files", "*.txt")])
 
             if NamesFile != "": # Cancelled
-                NamesFile = open(NamesFile, "r")
+                NamesFile = open(NamesFile, "r", encoding = "utf-8")
 
                 InitialFolder = os.path.dirname(os.path.realpath(NamesFile.name))
                 
@@ -6704,7 +11187,7 @@ def OpenFile():
     Option = tk.StringVar()
     Option.set("None")
     MakeMultiChoiceBox(Root, "Pick A Choice", "Which type of table?", Option,
-                       ["You may open a human-readable or a compiled table."
+                       ["You may open a human-readable or a compiled table.",
                         "Please select one."], MenuText, "Human-Readable")
 
     if Option.get() == "Compiled":
@@ -6719,16 +11202,29 @@ def OpenFile():
     if NewFile != "":
         if Option.get() == "Compiled": # Make new file
             FileName = NewFile.replace(".bin", " Opened.txt")
-            open(FileName, "w").close()
+            open(FileName, "w", encoding = "utf-8").close()
             NewFile = open(NewFile, "rb")
             
         else:
             FileName = NewFile
-            NewFile = open(FileName, "r")
-            
+            NewFile = open(FileName, "r", encoding = "utf-8")
+
         CurrentOpenFile = os.path.realpath(FileName)
         InitialFolder = os.path.dirname(CurrentOpenFile)
         CurrentLabel.configure(text = "Open File: {}".format(os.path.basename(FileName)))
+
+        Sure = tk.BooleanVar()
+        Sure.set(False)
+        MakeYesNoBox(Root, "Make Backup?", "Back up the table?", Sure,
+                     ["Would you like to make a backup of the table you are opening?",
+                      "This is recommended to do in case the table accidentally",
+                      "becomes corrupted while editing."])
+
+        if Sure.get():
+            BackupFileName = "BACKUP " + os.path.basename(FileName)
+            BackupFile = os.path.join(InitialFolder, BackupFileName)
+            OriginalFile = os.path.join(InitialFolder, FileName)
+            shutil.copy(OriginalFile, BackupFile)
         
         global Table
         Table = []
@@ -6856,7 +11352,7 @@ def SaveFile(Table, FileName, Silent = False):
                 Item = Item.strip().replace("\n", " | ")
                 TableText += "(Description) {}\n\n".format(Item.strip())
 
-    NewFile = open(FileName, "w")
+    NewFile = open(FileName, "w", encoding = "utf-8")
     NewFile.write(TableText.strip())
     NewFile.close()
 
@@ -6901,8 +11397,6 @@ SaveAsButton = ttk.Button(ButtonFrame, text = "Save Table As", command = SaveFil
 #------------------------------------------------------------
 def CompileTable(Table):
     global InitialFolder
-    Option = tk.StringVar()
-
     MenuText = {"Attack Data Table": ["This is the main Attack Data Table.",
                                       "This can be completely compiled without needing an address."],
                 "Move Name Table": ["This is the table of pointers for Move Names",
@@ -6910,9 +11404,11 @@ def CompileTable(Table):
                 "Move Description Table": ["This is the table of pointers for Move Descriptions",
                                     "This requires an address beforehand."]}
 
+    Option = tk.StringVar()
+    Option.set("None")
     MakeMultiChoiceBox(Root, "Pick A Choice", "Which table should be compiled?", Option,
-                       ["There are three possible tables which could be compiled."
-                        "Please select one."], MenuText)
+                       ["There are three possible tables which could be compiled.",
+                        "Please select one."], MenuText, "Attack Data Table")
 
     if Option.get() == "Attack Data Table":
         NewFile = fd.asksaveasfile(initialdir = InitialFolder, initialfile = "Compiled ADT", defaultextension = ".bin")
@@ -6955,7 +11451,7 @@ def CompileTable(Table):
             MakeInfoBox(Root, "Success", "Compilation complete!",
                         ["The table was compiled to a file successfully!"])
 
-    else:
+    elif Option.get() == "Move Name Table" or Option.get() == "Move Description Table":
         if Option.get() == "Move Name Table":
             SplitPoint = 13
             FileName = "Compiled Names"
@@ -7035,6 +11531,9 @@ def CompileTable(Table):
             NewFile.close()
             MakeInfoBox(Root, "Success", "Compilation complete!",
                         ["The table was compiled to a file successfully!"])
+
+    else:
+        return
 
 CompileButton = ttk.Button(ButtonFrame, text = "Compile Table", command = lambda: CompileTable(Table))
 
@@ -7165,7 +11664,7 @@ def ConvertTable():
                      
             NamesList = ("Move Name\n"*Length).split("\n")[0:-1]
             NamesFile = fd.askopenfilename(title = "Open Table", initialdir = InitialFolder, filetypes = [("text files", "*.txt")])
-            NamesFile = open(NamesFile, "r")
+            NamesFile = open(NamesFile, "r", encoding = "utf-8")
 
             InitialFolder = os.path.dirname(os.path.realpath(NamesFile.name))
             
@@ -7193,7 +11692,7 @@ def ConvertTable():
 
         if OpenNew.get():
             global Table, CurrentOpenFile
-            NewFile = open(NewText, "r")
+            NewFile = open(NewText, "r", encoding = "utf-8")
             CurrentOpenFile = os.path.realpath(NewText)
             InitialFolder = os.path.dirname(CurrentOpenFile)
             CurrentLabel.configure(text = "Open File: {}".format(os.path.basename(NewText)))
@@ -7407,6 +11906,7 @@ def DisableEverything():
     MoveFinder.configure(state = "disabled")
     ParityButton.configure(state = "disabled")
     TableFunctionButton.configure(state = "disabled")
+    AutoFillMoveButton.configure(state = "disabled")
 
 #------------------------------------------------------------
 # Enable Widgets Function
@@ -7464,6 +11964,7 @@ def EnableEverything():
     MoveFinder.configure(state = "normal")
     ParityButton.configure(state = "normal")
     TableFunctionButton.configure(state = "normal")
+    AutoFillMoveButton.configure(state = "normal")
 
     if len(Table) > 1:
         ForwardButton.configure(state = "normal")
@@ -7511,6 +12012,9 @@ MoveNameFrame.grid(row = 0, column = 1, padx = 15, pady = 5, sticky = "w")
 MoveNameHelpButton.pack(side = "left")
 MoveNameLabel.pack(side = "left", padx = (0,5))
 MoveNameEntry.pack(side = "left")
+
+AutoFillMoveFrame.grid(row = 0, column = 2, padx = 15, pady = 5, sticky = "w")
+AutoFillMoveButton.pack(padx = 20)
 
 MoveScriptFrame.grid(row = 1, column = 0, padx = 15, pady = 5, sticky = "w")
 MoveScriptHelpButton.pack(side = "left")
@@ -7616,67 +12120,40 @@ DescriptionBox.pack()
 #------------------------------------------------------------
 # Make Shortcuts
 #------------------------------------------------------------
-def HotKeyManager(Event):
-    Key = Event.keysym
-    Shift = Event.state & 1
+if OnAMac:
+    Command = "Command"
+else:
+    Command = "Control"
 
-    if OnAMac:
-        Command = Event.state & 8
-    else:
-        Command = Event.state & 4
+# Shortcuts
+ShortcutSave = "<{}-s>".format(Command)
+ShortcutSaveAs = "<{}-Shift-S>".format(Command)
+ShortcutOpen = "<{}-o>".format(Command)
+ShortcutNew = "<{}-n>".format(Command)
+ShortcutCompile = "<{}-Shift-C>".format(Command)
+ShortcutConvert = "<{}-Shift-X>".format(Command)
+ShortcutForward = "<{}-Right>".format(Command)
+ShortcutBackward = "<{}-Left>".format(Command)
+ShortcutHelp = "<{}-h>".format(Command)
+ShortcutAdd = "<{}-Shift-A>".format(Command)
+ShortcutDelete = "<{}-Shift-D>".format(Command)
+ShortcutDebug = "<{}-d>".format(Command)
+ShortcutQuit = "<{}-q>".format(Command)
 
-    # Save File
-    if Command and Key == "s":
-        SaveFile(Table, CurrentOpenFile)
-
-    # Save File As
-    if Command and Shift and Key == "S":
-        SaveFileAs()
-
-    # Open File
-    if Command and Key == "o":
-        OpenFile()
-
-    # New File
-    if Command and Key == "n":
-        CreateNewFile()
-
-    # Compile Table
-    if Command and Shift and Key == "C":
-        CompileTable(Table)
-
-    # Convert Table
-    if Command and Shift and Key == "X":
-        ConvertTable()
-
-    # Move Forward
-    if Command and Key == "Right":
-        GoForward()
-
-    # Move Backward
-    if Command and Key == "Left":
-        GoBackward()
-
-    # Help Menu
-    if Command and Key == "h":
-        ShowHelpMenu()
-
-    # Add Move
-    if Command and Shift and Key == "A":
-        AddMoves()
-
-    # Delete Move
-    if Command and Shift and Key == "D":
-        DeleteMove()
-
-    # Debug menu
-    if Command and Key == "d":
-        OpenFileDirectory()
-
-    if Command and Key == "q":
-        Root.destroy()
-
-Root.bind_all("<KeyPress>", HotKeyManager)
+# Bind to Root window
+Root.bind(ShortcutSave, lambda _: SaveFile(Table, CurrentOpenFile))
+Root.bind(ShortcutSaveAs, lambda _: SaveFileAs())
+Root.bind(ShortcutOpen, lambda _: OpenFile())
+Root.bind(ShortcutNew, lambda _: CreateNewFile())
+Root.bind(ShortcutCompile, lambda _: CompileTable(Table))
+Root.bind(ShortcutConvert, lambda _: ConvertTable())
+Root.bind(ShortcutForward, lambda _: GoForward())
+Root.bind(ShortcutBackward, lambda _: GoBackward())
+Root.bind(ShortcutHelp, lambda _: ShowHelpMenu())
+Root.bind(ShortcutAdd, lambda _: AddMoves())
+Root.bind(ShortcutDelete, lambda _: DeleteMove())
+Root.bind(ShortcutDebug, lambda _: OpenFileDirectory())
+Root.bind(ShortcutQuit, lambda _: Root.destroy())
 
 #------------------------------------------------------------
 # Main Loop
