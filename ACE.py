@@ -33,16 +33,16 @@ def PlayChime(Option):
     else:
         match Option:
             case "success":
-                playsound.playsound("Success.mp3")
+                playsound.playsound(GetPath("Success.mp3"))
 
             case "info":
-                playsound.playsound("Info.mp3")
+                playsound.playsound(GetPath("Info.mp3"))
 
             case "warning":
-                playsound.playsound("Warning.mp3")
+                playsound.playsound(GetPath("Warning.mp3"))
 
             case "error":
-                playsound.playsound("Error.mp3")
+                playsound.playsound(GetPath("Error.mp3"))
 
 # ------------------------------------------------------------
 # Set Platform Variable
