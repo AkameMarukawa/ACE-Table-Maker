@@ -1,5 +1,6 @@
 import os
 import sys
+import playsound
 import platform
 import shutil
 import tkinter as tk
@@ -11,12 +12,37 @@ from subprocess import call, Popen
 from random import randint
 from math import modf
 
-# Set the Version Number
-VerNum = "2.1.0"
+# Set the Version Number - put b after for beta version
+VerNum = "2.1.1"
 AutoSave = True
+Mute = False
 
+# ------------------------------------------------------------
+# Define Print Error Function
+# ------------------------------------------------------------
 def PrintError(Error):
     print(Error)
+
+# ------------------------------------------------------------
+# Define Sound Effects Function
+# ------------------------------------------------------------
+def PlayChime(Option):
+    if Mute:
+        return
+
+    else:
+        match Option:
+            case "success":
+                playsound.playsound("Success.mp3")
+
+            case "info":
+                playsound.playsound("Info.mp3")
+
+            case "warning":
+                playsound.playsound("Warning.mp3")
+
+            case "error":
+                playsound.playsound("Error.mp3")
 
 # ------------------------------------------------------------
 # Set Platform Variable
@@ -40,6 +66,16 @@ else:
         InitialFolder = os.getcwd()
 
 SmallSize = 16
+HPadding = 10
+VPadding = 10
+HSPadding = 5
+VSPadding = 5
+HBPadding = 15
+VBPadding = 15
+BulbaTop = 6
+BulbaBottom = 5
+TableTop = 2
+TableBottom = 4
 
 """
 ================================================================================================
@@ -3717,7 +3753,7 @@ ScriptArgumentHelpers = {"00":["NoArgs", []],
                          "2E":["Turns", [1,15]],
                          "2F":["NoArgs", []],
                          "30":["Percent", ["User", "take", "the damage dealt", "Recoil"]],
-                         "31":["Turns", [1,15]],
+                         "31":["Turns", [2,7]],
                          "32":["Future", [1,15, "Future attack will happen"]],
                          "33":["PercentStatus", ["the damage dealt"]],
                          "34":["Turns", [1,15]],
@@ -4363,10 +4399,10 @@ MoveScriptText = {
     "Script 1C":
     ["This script forces the Target to switch out if they are able",
     "to.",
-    "Stat Stages and other effects may be passed on.",
-    "If the Self-effect Flag is set, the Target can choose who to",
-    "switch to.",
-    "If it is not, then it will be randomly chosen."],
+    "The Pokemon to switch to may be random or chosen.",
+     "Stat Stages and other effects may be passed on.",
+     "There is the option to end the battle if a Wild Pokemon uses",
+     "a Move with this script."],
 
     "Script 1D":
     ["This script has the effect of allowing the Move to hit the",
@@ -4657,15 +4693,15 @@ MoveScriptText = {
 
     "Script 50":
     ["This script has the effect of setting the Recharge Flag on",
-    "the User.",
-    "The Recharge effect makes the User skip their next turn",
+    "the Target.",
+    "The Recharge effect makes the Target skip their next turn",
     "after using the Move."],
 
     "Script 51":
     ["This script has the effect of setting the Rage Flag on the",
-    "User.",
-    "The Rage effect causes the User's Attack Stat Stages to rise",
-    "by one every time they are hit when they use the Move",
+    "Target.",
+    "The Rage effect causes the Target's Attack Stat Stages to",
+    "rise by one every time they are hit when they use the Move",
     "multiple times in a row."],
 
     "Script 52":
@@ -5636,7 +5672,7 @@ MoveScriptTagsList = {"Script 00": ["base"],
                       "Script 5B": ["pain split"],
                       "Script 5C": ["magic room", "ban items", "global"],
                       "Script 5D": ["conversion 2"],
-                      "Script 5E": ["Lock-On"],
+                      "Script 5E": ["Lock-On", "Mind Reader"],
                       "Script 5F": ["sketch", "alter moves"],
                       "Script 60": ["smack down", "thousand arrows", "grounded"],
                       "Script 61": ["sleep talk", "calling move"],
@@ -6155,24 +6191,25 @@ def MakeInfoBox(Root, Title, Header, Text):
     Top.attributes('-topmost',False)
 
     # Put the new window on top left corner of the old one
+    print(Root.geometry().split("+"))
     x,y = (int(s) for s in Root.geometry().split("+")[1:])
     Top.geometry(f"+{x}+{y}")
 
     HeaderTextFrame = tk.Frame(Top, bg = "Black")
-    HeaderTextFrame.pack(fill = "x", pady = 10)
+    HeaderTextFrame.pack(fill = "x", pady = VPadding)
 
     InfoTextFrame = tk.Frame(Top, bg = "Black")
-    InfoTextFrame.pack(fill = "x", pady = 10)
+    InfoTextFrame.pack(fill = "x", pady = VPadding)
     
     OkayFrame = tk.Frame(Top, bg = "Black")
-    OkayFrame.pack(fill = "x", pady = 10)
+    OkayFrame.pack(fill = "x", pady = VPadding)
 
     ttk.Label(HeaderTextFrame, text = Header, font = ("Courier", int(SmallSize*1.5))).pack()
 
     N = 0
     for i, Line in enumerate(Text):
         N = i+1
-        ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = "w")
+        ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = HSPadding, pady = 1, sticky = "w")
 
     def QuitBox(Event = None):
         Top.destroy()
@@ -6199,20 +6236,20 @@ def MakeYesNoBox(Root, Title, Header, Var, Text):
     Top.geometry(f"+{x}+{y}")
 
     HeaderTextFrame = tk.Frame(Top, bg = "Black")
-    HeaderTextFrame.pack(fill = "x", pady = 10)
+    HeaderTextFrame.pack(fill = "x", pady = VPadding)
 
     InfoTextFrame = tk.Frame(Top, bg = "Black")
-    InfoTextFrame.pack(fill = "x", pady = 10)
+    InfoTextFrame.pack(fill = "x", pady = VPadding)
     
     OkayFrame = tk.Frame(Top, bg = "Black")
-    OkayFrame.pack(fill = "x", pady = 10)
+    OkayFrame.pack(fill = "x", pady = VPadding)
 
     ttk.Label(HeaderTextFrame, text = Header, font = ("Arial", int(SmallSize*1.5))).pack()
 
     N = 0
     for i, Line in enumerate(Text):
         N = i+1
-        ttk.Label(InfoTextFrame, text = Line, font = ("Arial", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = "w")
+        ttk.Label(InfoTextFrame, text = Line, font = ("Arial", SmallSize)).grid(row = N, column = 0, padx = HSPadding, pady = 1, sticky = "w")
 
     def SetYes(Event = None):
         Var.set(True)
@@ -6247,23 +6284,23 @@ def MakeEntryBox(Root, Title, Header, Var, Type, Text):
     Top.geometry(f"+{x}+{y}")
 
     HeaderTextFrame = tk.Frame(Top, bg = "Black")
-    HeaderTextFrame.pack(fill = "x", pady = 10)
+    HeaderTextFrame.pack(fill = "x", pady = VPadding)
 
     InfoTextFrame = tk.Frame(Top, bg = "Black")
-    InfoTextFrame.pack(fill = "x", pady = 10)
+    InfoTextFrame.pack(fill = "x", pady = VPadding)
 
     PromptFrame = tk.Frame(Top, bg = "Black")
-    PromptFrame.pack(fill = "x", pady = 10)
+    PromptFrame.pack(fill = "x", pady = VPadding)
     
     OkayFrame = tk.Frame(Top, bg = "Black")
-    OkayFrame.pack(fill = "x", pady = 10)
+    OkayFrame.pack(fill = "x", pady = VPadding)
 
     ttk.Label(HeaderTextFrame, text = Header, font = ("Arial", int(SmallSize*1.5))).pack()
 
     N = 0
     for i, Line in enumerate(Text):
         N = i+1
-        ttk.Label(InfoTextFrame, text = Line, font = ("Arial", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = "w")
+        ttk.Label(InfoTextFrame, text = Line, font = ("Arial", SmallSize)).grid(row = N, column = 0, padx = HSPadding, pady = 1, sticky = "w")
     
     def ProcessEntry(Text):
         try:
@@ -6308,23 +6345,23 @@ def MakeAddressEntryBox(Root, Title, Header, Var, Text):
     Top.geometry(f"+{x}+{y}")
 
     HeaderTextFrame = tk.Frame(Top, bg = "Black")
-    HeaderTextFrame.pack(fill = "x", pady = 10)
+    HeaderTextFrame.pack(fill = "x", pady = VPadding)
 
     InfoTextFrame = tk.Frame(Top, bg = "Black")
-    InfoTextFrame.pack(fill = "x", pady = 10)
+    InfoTextFrame.pack(fill = "x", pady = VPadding)
 
     PromptFrame = tk.Frame(Top, bg = "Black")
-    PromptFrame.pack(fill = "x", pady = 10)
+    PromptFrame.pack(fill = "x", pady = VPadding)
     
     OkayFrame = tk.Frame(Top, bg = "Black")
-    OkayFrame.pack(fill = "x", pady = 10)
+    OkayFrame.pack(fill = "x", pady = VPadding)
 
     ttk.Label(HeaderTextFrame, text = Header, font = ("Arial", int(SmallSize*1.5))).pack()
 
     N = 0
     for i, Line in enumerate(Text):
         N = i+1
-        ttk.Label(InfoTextFrame, text = Line, font = ("Arial", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = "w")
+        ttk.Label(InfoTextFrame, text = Line, font = ("Arial", SmallSize)).grid(row = N, column = 0, padx = HSPadding, pady = 1, sticky = "w")
 
     def ProcessEntry(Text):
         Text = Text.upper()
@@ -6380,22 +6417,22 @@ def MakeInfoBoxMenuSearch(Root, Title, Header, Text, MenuText, Var = None, Initi
 
     # Make Frames
     HeaderTextFrame = tk.Frame(Top, bg = "Black")
-    HeaderTextFrame.pack(fill = "x", pady = 10)
+    HeaderTextFrame.pack(fill = "x", pady = VPadding)
 
     InfoTextFrame = tk.Frame(Top, bg = "Black")
-    InfoTextFrame.pack(fill = "x", pady = 10)
+    InfoTextFrame.pack(fill = "x", pady = VPadding)
 
     MenuTextFrame = tk.Frame(Top, bg = "Black")
-    MenuTextFrame.pack(fill = "none", pady = 10)
+    MenuTextFrame.pack(fill = "none", pady = VPadding)
 
     SearchFrame = tk.Frame(Top, bg = "Black")
-    SearchFrame.pack(pady = 5)
+    SearchFrame.pack(pady = VSPadding)
 
     MenuFrame = tk.Frame(Top, bg = "Black")
-    MenuFrame.pack(fill = "x", pady = 5)
+    MenuFrame.pack(fill = "x", pady = VSPadding)
     
     OkayFrame = tk.Frame(Top, bg = "Black")
-    OkayFrame.pack(fill = "x", pady = 5)
+    OkayFrame.pack(fill = "x", pady = VSPadding)
 
     # Make Header + Text
     ttk.Label(HeaderTextFrame, text = Header, font = ("Courier", int(SmallSize*1.5))).pack()
@@ -6521,11 +6558,11 @@ def MakeInfoBoxMenuSearch(Root, Title, Header, Text, MenuText, Var = None, Initi
     OkayButton = ttk.Button(OkayFrame, text = "Done", command = QuitBox)
 
     # Pack Everything
-    MenuTextBox.pack(pady = 5)
+    MenuTextBox.pack(pady = VSPadding)
     TagLabel.pack()
-    TagsTextBox.pack(pady = 5)
-    BarFrame.pack(pady = 5)
-    SearchClear.pack(side = "left", padx = 5)
+    TagsTextBox.pack(pady = VSPadding)
+    BarFrame.pack(pady = VSPadding)
+    SearchClear.pack(side = "left", padx = HSPadding)
     SearchBar.pack(side = "left")
     ResultsLabel.pack()
     MenuDropDown.pack()
@@ -6577,19 +6614,19 @@ def MakeMultiChoiceBox(Root, Title, Header, Var, Text, MenuText, InitialOption =
     Top.geometry(f"+{x}+{y}")
 
     HeaderTextFrame = tk.Frame(Top, bg = "Black")
-    HeaderTextFrame.pack(fill = "x", pady = 10)
+    HeaderTextFrame.pack(fill = "x", pady = VPadding)
 
     InfoTextFrame = tk.Frame(Top, bg = "Black")
-    InfoTextFrame.pack(fill = "x", pady = 10)
+    InfoTextFrame.pack(fill = "x", pady = VPadding)
 
     MenuTextFrame = tk.Frame(Top, bg = "Black")
-    MenuTextFrame.pack(fill = "x", pady = 10)
+    MenuTextFrame.pack(fill = "x", pady = VPadding)
 
     MenuFrame = tk.Frame(Top, bg = "Black")
-    MenuFrame.pack(fill = "x", pady = 10)
+    MenuFrame.pack(fill = "x", pady = VPadding)
     
     OkayFrame = tk.Frame(Top, bg = "Black")
-    OkayFrame.pack(fill = "x", pady = 10)
+    OkayFrame.pack(fill = "x", pady = VPadding)
 
     # Make Header + Text
     ttk.Label(HeaderTextFrame, text = Header, font = ("Courier", int(SmallSize*1.5))).pack()
@@ -7375,12 +7412,12 @@ def TargetSetDamage(WidgetFrame, Args, FinalValue, Changed):
     
     FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
 
-    FrameA.pack(pady = 10)
-    FrameB.pack(pady = 10)
+    FrameA.pack(pady = VPadding)
+    FrameB.pack(pady = VPadding)
     FinalValueLabel.pack(pady = (0,10))
     TextLabel.pack()
-    TargetLabel.pack(side = "left", padx = 5)
-    TargetPicker.pack(side = "left", padx = 5)
+    TargetLabel.pack(side = "left", padx = HSPadding)
+    TargetPicker.pack(side = "left", padx = HSPadding)
 
 #------------------------------------------------------------
 # Direct Or Inverse
@@ -7474,16 +7511,16 @@ def RelationshipArgument(WidgetFrame, Args, FinalValue, Changed):
 
     FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
 
-    FrameA.pack(pady = 10)
-    FrameB.pack(pady = 10)
+    FrameA.pack(pady = VPadding)
+    FrameB.pack(pady = VPadding)
     FinalValueLabel.pack(pady = (0,10))
     TextLabel.pack()
-    TargetLabel.pack(side = "left", padx = 5)
-    TargetPicker.pack(side = "left", padx = 5)
+    TargetLabel.pack(side = "left", padx = HSPadding)
+    TargetPicker.pack(side = "left", padx = HSPadding)
 
-    FrameC.pack(pady = 5)
-    RelationPicker.pack(pady = 5)
-    ComparisonPicker.pack(pady = 5)
+    FrameC.pack(pady = VSPadding)
+    RelationPicker.pack(pady = VSPadding)
+    ComparisonPicker.pack(pady = VSPadding)
 
 #------------------------------------------------------------
 # Set Damage Multiple
@@ -7516,12 +7553,12 @@ def SetDamageMultiple(WidgetFrame, FinalValue, Changed):
     
     FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
 
-    FrameA.pack(pady = 10)
-    FrameB.pack(pady = 10)
+    FrameA.pack(pady = VPadding)
+    FrameB.pack(pady = VPadding)
     FinalValueLabel.pack(pady = (0,10))
     TextLabel.pack()
-    MultipleLabel.pack(side = "left", padx = 5)
-    MultipleSlider.pack(side = "left", padx = 5)
+    MultipleLabel.pack(side = "left", padx = HSPadding)
+    MultipleSlider.pack(side = "left", padx = HSPadding)
 
 #------------------------------------------------------------
 # Set Custom Base Power
@@ -7561,12 +7598,12 @@ def SetCustomFormula(WidgetFrame, Args, FinalValue, Changed):
     
     FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
 
-    FrameA.pack(pady = 10)
-    FrameB.pack(pady = 10)
+    FrameA.pack(pady = VPadding)
+    FrameB.pack(pady = VPadding)
     FinalValueLabel.pack(pady = (0,10))
     TextLabel.pack()
-    OptionLabel.pack(side = "left", padx = 5)
-    OptionPicker.pack(side = "left", padx = 5)
+    OptionLabel.pack(side = "left", padx = HSPadding)
+    OptionPicker.pack(side = "left", padx = HSPadding)
 
 #------------------------------------------------------------
 # Direct Or Inverse (Stat Stages)
@@ -7655,16 +7692,16 @@ def RelationshipStatStages(WidgetFrame, FinalValue, Changed):
 
     FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
 
-    FrameA.pack(pady = 10)
-    FrameB.pack(pady = 10)
+    FrameA.pack(pady = VPadding)
+    FrameB.pack(pady = VPadding)
     FinalValueLabel.pack(pady = (0,10))
     TextLabel.pack()
-    TargetLabel.pack(side = "left", padx = 5)
-    TargetPicker.pack(side = "left", padx = 5)
+    TargetLabel.pack(side = "left", padx = HSPadding)
+    TargetPicker.pack(side = "left", padx = HSPadding)
 
-    FrameC.pack(pady = 5)
-    RelationPicker.pack(pady = 5)
-    ParityPicker.pack(pady = 5)
+    FrameC.pack(pady = VSPadding)
+    RelationPicker.pack(pady = VSPadding)
+    ParityPicker.pack(pady = VSPadding)
 
 #------------------------------------------------------------
 # Percent Set Damage Helpers
@@ -7739,15 +7776,15 @@ def SetDamagePercent(WidgetFrame, Args, FinalValue, Changed):
 
     FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
 
-    FrameA.pack(pady = 10)
-    FrameB.pack(pady = 10)
-    FrameC.pack(pady = 10)
+    FrameA.pack(pady = VPadding)
+    FrameB.pack(pady = VPadding)
+    FrameC.pack(pady = VPadding)
     FinalValueLabel.pack(pady = (0,10))
     TextLabel.pack()
-    TargetLabel.pack(side = "left", padx = 5)
-    TargetPicker.pack(side = "left", padx = 5)
-    PercentLabel.pack(side = "left", padx = 5)
-    PercentPicker.pack(side = "left", padx = 5)
+    TargetLabel.pack(side = "left", padx = HSPadding)
+    TargetPicker.pack(side = "left", padx = HSPadding)
+    PercentLabel.pack(side = "left", padx = HSPadding)
+    PercentPicker.pack(side = "left", padx = HSPadding)
 
 #------------------------------------------------------------
 # Held Item Damage Formula
@@ -7817,15 +7854,15 @@ def HeldItem(WidgetFrame, FinalValue, Changed):
 
     FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
 
-    FrameA.pack(pady = 10)
-    FrameB.pack(pady = 10)
-    FrameC.pack(pady = 10)
+    FrameA.pack(pady = VPadding)
+    FrameB.pack(pady = VPadding)
+    FrameC.pack(pady = VPadding)
     FinalValueLabel.pack(pady = (0,10))
     TextLabel.pack()
-    TargetLabel.pack(side = "left", padx = 5)
-    TargetPicker.pack(side = "left", padx = 5)
-    OptionLabel.pack(side = "left", padx = 5)
-    OptionPicker.pack(side = "left", padx = 5)
+    TargetLabel.pack(side = "left", padx = HSPadding)
+    TargetPicker.pack(side = "left", padx = HSPadding)
+    OptionLabel.pack(side = "left", padx = HSPadding)
+    OptionPicker.pack(side = "left", padx = HSPadding)
 
 #------------------------------------------------------------
 # Counter Helper
@@ -7900,15 +7937,15 @@ def DamageKind(WidgetFrame, FinalValue, Changed):
 
     FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
 
-    FrameA.pack(pady = 10)
-    FrameB.pack(pady = 10)
-    FrameC.pack(pady = 10)
+    FrameA.pack(pady = VPadding)
+    FrameB.pack(pady = VPadding)
+    FrameC.pack(pady = VPadding)
     FinalValueLabel.pack(pady = (0,10))
     TextLabel.pack()
-    TargetLabel.pack(side = "left", padx = 5)
-    TargetPicker.pack(side = "left", padx = 5)
-    OptionLabel.pack(side = "left", padx = 5)
-    OptionPicker.pack(side = "left", padx = 5)
+    TargetLabel.pack(side = "left", padx = HSPadding)
+    TargetPicker.pack(side = "left", padx = HSPadding)
+    OptionLabel.pack(side = "left", padx = HSPadding)
+    OptionPicker.pack(side = "left", padx = HSPadding)
     
 #------------------------------------------------------------
 # Make Formula Arg Helper Box
@@ -7927,28 +7964,35 @@ def MakeFormulaArgHelperBox(Root, Title, Header, Text, Option = None, Args = Non
     Top = tk.Toplevel(Root)
     Top.title(Title)
     Top.configure(bg = "Black")
+    Top.resizable(False, False)
+    Top.attributes('-topmost',True)
+    Top.attributes('-topmost',False)
+
+    # Put the new window on top left corner of the old one
+    x,y = (int(s) for s in Root.geometry().split("+")[1:])
+    Top.geometry(f"+{x}+{y}")
 
     HeaderTextFrame = tk.Frame(Top, bg = "Black")
-    HeaderTextFrame.pack(fill = "x", pady = 10)
+    HeaderTextFrame.pack(fill = "x", pady = VPadding)
 
     InfoTextFrame = tk.Frame(Top, bg = "Black")
-    InfoTextFrame.pack(fill = "x", pady = 10)
+    InfoTextFrame.pack(fill = "x", pady = VPadding)
 
     MenuTextFrame = tk.Frame(Top, bg = "Black")
-    MenuTextFrame.pack(fill = "x", pady = 10)
+    MenuTextFrame.pack(fill = "x", pady = VPadding)
 
     WidgetFrame = tk.Frame(Top, bg = "Black")
-    WidgetFrame.pack(fill = "both", pady = 10)
+    WidgetFrame.pack(fill = "both", pady = VPadding)
     
     OkayFrame = tk.Frame(Top, bg = "Black")
-    OkayFrame.pack(fill = "x", pady = 10)
+    OkayFrame.pack(fill = "x", pady = VPadding)
 
     ttk.Label(HeaderTextFrame, text = Header, font = ("Courier", int(SmallSize*1.5))).pack()
 
     N = 0
     for i, Line in enumerate(Text):
         N = i+1
-        ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = "w")
+        ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = HSPadding, pady = 1, sticky = "w")
 
     DoLine = ttk.Label(MenuTextFrame, text = "-----", font = ("Courier", SmallSize))
     DoLine.pack()
@@ -8065,9 +8109,9 @@ def AmountEntry(WidgetFrame, String, LabelText, Low, High, Width, FinalValue, Ch
     FrameA.pack()
     FrameB.pack()
     FinalValueLabel.pack(pady = (0,10))
-    TextLabel.pack(pady = 10)
-    AmountLabel.pack(side = "left", padx = 5)
-    AmountEntry.pack(side = "left", padx = 5)
+    TextLabel.pack(pady = VPadding)
+    AmountLabel.pack(side = "left", padx = HSPadding)
+    AmountEntry.pack(side = "left", padx = HSPadding)
 
 #------------------------------------------------------------
 # Single Combo Box Helper
@@ -8115,9 +8159,9 @@ def SingleComboBox(WidgetFrame, String, LabelText, List, FinalValue, Changed, St
     FrameA.pack()
     FrameB.pack()
     FinalValueLabel.pack(pady = (0,10))
-    TextLabel.pack(pady = 10)
-    VarLabel.pack(side = "left", padx = 5)
-    VarPicker.pack(side = "left", padx = 5)
+    TextLabel.pack(pady = VPadding)
+    VarLabel.pack(side = "left", padx = HSPadding)
+    VarPicker.pack(side = "left", padx = HSPadding)
 
 #------------------------------------------------------------
 # Two Combo Boxes + One Flag
@@ -8211,16 +8255,16 @@ def TwoComboBoxesOneFlag(WidgetFrame, FlagLabel, LabelTextA, LabelTextB, ListA, 
     FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
 
     FrameA.pack()
-    FrameB.pack(pady = 5)
-    FrameC.pack(pady = 5)
-    FrameD.pack(pady = 5)
+    FrameB.pack(pady = VSPadding)
+    FrameC.pack(pady = VSPadding)
+    FrameD.pack(pady = VSPadding)
     FinalValueLabel.pack(pady = (0,10))
-    TextLabel.pack(pady = 10)
+    TextLabel.pack(pady = VPadding)
     FlagButton.pack()
-    VarLabelA.pack(side = "left", padx = 5)
-    VarPickerA.pack(side = "left", padx = 5)
-    VarLabelB.pack(side = "left", padx = 5)
-    VarPickerB.pack(side = "left", padx = 5)
+    VarLabelA.pack(side = "left", padx = HSPadding)
+    VarPickerA.pack(side = "left", padx = HSPadding)
+    VarLabelB.pack(side = "left", padx = HSPadding)
+    VarPickerB.pack(side = "left", padx = HSPadding)
 
 #------------------------------------------------------------
 # Two Combo Boxes
@@ -8289,14 +8333,14 @@ def TwoComboBoxes(WidgetFrame, String, LabelTextA, LabelTextB, ListA, ListB, Fin
     FinalValueLabel = ttk.Label(FrameA, text = "Argument Value: {} ({})".format(FinalValue.get(), hex(FinalValue.get())), font = ("Courier", SmallSize, "bold"))
 
     FrameA.pack()
-    FrameB.pack(pady = 5)
-    FrameC.pack(pady = 5)
+    FrameB.pack(pady = VSPadding)
+    FrameC.pack(pady = VSPadding)
     FinalValueLabel.pack(pady = (0,10))
-    TextLabel.pack(pady = 10)
-    VarLabelA.pack(side = "left", padx = 5)
-    VarPickerA.pack(side = "left", padx = 5)
-    VarLabelB.pack(side = "left", padx = 5)
-    VarPickerB.pack(side = "left", padx = 5)
+    TextLabel.pack(pady = VPadding)
+    VarLabelA.pack(side = "left", padx = HSPadding)
+    VarPickerA.pack(side = "left", padx = HSPadding)
+    VarLabelB.pack(side = "left", padx = HSPadding)
+    VarPickerB.pack(side = "left", padx = HSPadding)
 
 #------------------------------------------------------------
 # Combo Box + Search Bar
@@ -8413,12 +8457,12 @@ def SingleComboBoxWithSearch(WidgetFrame, String, LabelText, List, FinalValue, C
     FrameC.pack()
     FrameD.pack()
     FinalValueLabel.pack(pady = (0,10))
-    TextLabel.pack(pady = 10)
-    SearchClear.pack(side = "left", padx = 5)
+    TextLabel.pack(pady = VPadding)
+    SearchClear.pack(side = "left", padx = HSPadding)
     SearchBar.pack(side = "left")
     ResultsLabel.pack()
-    VarLabel.pack(side = "left", padx = 5)
-    VarPicker.pack(side = "left", padx = 5)
+    VarLabel.pack(side = "left", padx = HSPadding)
+    VarPicker.pack(side = "left", padx = HSPadding)
 
     # Make HotKeys
     def MoveUp():
@@ -8544,13 +8588,13 @@ def AmountEntryOneComboBox(WidgetFrame, List, StringA, StringB, LabelTextA, Labe
 
     FrameA.pack()
     FrameB.pack()
-    FrameC.pack(pady = 10)
+    FrameC.pack(pady = VPadding)
     FinalValueLabel.pack(pady = (0,10))
-    TextLabel.pack(pady = 10)
-    AmountLabel.pack(side = "left", padx = 5)
-    AmountEntry.pack(side = "left", padx = 5)
-    VarLabel.pack(side = "left", padx = 5)
-    VarPicker.pack(side = "left", padx = 5)
+    TextLabel.pack(pady = VPadding)
+    AmountLabel.pack(side = "left", padx = HSPadding)
+    AmountEntry.pack(side = "left", padx = HSPadding)
+    VarLabel.pack(side = "left", padx = HSPadding)
+    VarPicker.pack(side = "left", padx = HSPadding)
 
 #------------------------------------------------------------
 # Entry + One Flag
@@ -8633,10 +8677,10 @@ def AmountEntryOneFlag(WidgetFrame, StringA, StringB, FlagBit, LabelText, Button
     FrameA.pack()
     FrameB.pack()
     FinalValueLabel.pack(pady = (0,10))
-    TextLabel.pack(pady = 10)
-    FlagButton.pack(side = "left", padx = 5)
-    AmountLabel.pack(side = "left", padx = 5)
-    AmountEntry.pack(side = "left", padx = 5)
+    TextLabel.pack(pady = VPadding)
+    FlagButton.pack(side = "left", padx = HSPadding)
+    AmountLabel.pack(side = "left", padx = HSPadding)
+    AmountEntry.pack(side = "left", padx = HSPadding)
 
 #------------------------------------------------------------
 # Entry + Two Flags
@@ -8758,11 +8802,11 @@ def AmountEntryTwoFlags(WidgetFrame, StringList, LabelText, FinalValue, Changed,
     FrameB.pack()
     FrameC.pack()
     FinalValueLabel.pack(pady = (0,10))
-    TextLabel.pack(pady = 10)
-    AmountLabel.pack(side = "left", padx = 5)
-    AmountEntry.pack(side = "left", padx = 5)
-    FlagButtonA.pack(side = "left", padx = 5, pady = 10)
-    FlagButtonB.pack(side = "left", padx = 5, pady = 10)
+    TextLabel.pack(pady = VPadding)
+    AmountLabel.pack(side = "left", padx = HSPadding)
+    AmountEntry.pack(side = "left", padx = HSPadding)
+    FlagButtonA.pack(side = "left", padx = HSPadding, pady = VPadding)
+    FlagButtonB.pack(side = "left", padx = HSPadding, pady = VPadding)
 
 #------------------------------------------------------------
 # Two Flags
@@ -8829,9 +8873,9 @@ def MakeTwoFlags(WidgetFrame, StringList, FinalValue, Changed, FlagList, FlagBit
     FrameB.pack()
     FrameC.pack()
     FinalValueLabel.pack(pady = (0,10))
-    TextLabel.pack(pady = 10)
-    FlagButtonA.pack(pady = 10)
-    FlagButtonB.pack(pady = 10)
+    TextLabel.pack(pady = VPadding)
+    FlagButtonA.pack(pady = VPadding)
+    FlagButtonB.pack(pady = VPadding)
 
 #------------------------------------------------------------
 # Multi-Flag List
@@ -8842,7 +8886,7 @@ This function is for helpers which have multiple Flags that
 the user can select any number of.
 -------------------------------------------------------------
 """
-def MultiFlagList(WidgetFrame, String, FlagList, LabelText, FinalValue, Changed):
+def MultiFlagList(WidgetFrame, String, FlagList, LabelText, FinalValue, Changed, StringList = None):
     FrameA = tk.Frame(WidgetFrame, bg = "Black")
     FrameB = tk.Frame(WidgetFrame, bg = "Black")
     FrameC = tk.Frame(WidgetFrame, bg = "Black")
@@ -8856,7 +8900,24 @@ def MultiFlagList(WidgetFrame, String, FlagList, LabelText, FinalValue, Changed)
 
     FlagVars = [tk.IntVar(value = 0) for i in range(len(FlagList))]
 
-    TextNormal = String
+    TextList = []
+
+    if StringList is not None:
+        TextList.append(StringList[0])
+
+        for i, Strings in enumerate(StringList):
+            if i == 0:
+                continue
+            TextList.append(Strings[0])
+
+    else:
+        TextList = [String]
+
+    TextNormal = "" 
+    for Text in TextList:
+        TextNormal += "{}\n".format(Text)
+    TextNormal = TextNormal.strip()
+    
     TextLabel = ttk.Label(FrameA, text = TextNormal, font = ("Courier", SmallSize))
     TextLabel.pack()
 
@@ -8864,6 +8925,15 @@ def MultiFlagList(WidgetFrame, String, FlagList, LabelText, FinalValue, Changed)
     FlagLabel.pack()
 
     def SetFlag(N, Var):
+        print(N)
+        if StringList is not None:
+            TextList[N+1] = StringList[N+1][Var.get()]
+            TextNormal = "" 
+            for Text in TextList:
+                TextNormal += "{}\n".format(Text)
+            TextNormal = TextNormal.strip()
+            TextLabel.configure(text = TextNormal)     
+
         FinalValue.set(FinalValue.get() | (1 << N))
 
         if Var.get() == 0:
@@ -8879,7 +8949,7 @@ def MultiFlagList(WidgetFrame, String, FlagList, LabelText, FinalValue, Changed)
             R = 1
             
         C = i % 4
-        ttk.Checkbutton(FrameC, text = FlagList[i], variable = FlagVars[i], command = lambda i = i: SetFlag(i, FlagVars[i])).grid(row = R, column = C, padx = 10, pady = 5, sticky = "w")
+        ttk.Checkbutton(FrameC, text = FlagList[i], variable = FlagVars[i], command = lambda i = i: SetFlag(i, FlagVars[i])).grid(row = R, column = C, padx = HPadding, pady = VSPadding, sticky = "w")
 
 #------------------------------------------------------------
 # Two Sets Of Flags
@@ -8932,7 +9002,7 @@ def TwoSetsOfFlags(WidgetFrame, String, FlagListA, FlagListB, LabelTextA, LabelT
             R = 1
             
         C = i % 4
-        ttk.Checkbutton(FrameC, text = FlagListA[i], variable = FlagVarsA[i], command = lambda i = i: SetFlagA(i, FlagVarsA[i])).grid(row = R, column = C, padx = 10, pady = 5, sticky = "w")
+        ttk.Checkbutton(FrameC, text = FlagListA[i], variable = FlagVarsA[i], command = lambda i = i: SetFlagA(i, FlagVarsA[i])).grid(row = R, column = C, padx = HPadding, pady = VSPadding, sticky = "w")
 
     FlagLabelB = ttk.Label(FrameD, text = LabelTextB, font = ("Courier", SmallSize))
     FlagLabelB.pack()
@@ -8953,7 +9023,7 @@ def TwoSetsOfFlags(WidgetFrame, String, FlagListA, FlagListB, LabelTextA, LabelT
             R = 1
             
         C = i % 4
-        ttk.Checkbutton(FrameE, text = FlagListB[i], variable = FlagVarsB[i], command = lambda i = i: SetFlagB(i, FlagVarsB[i])).grid(row = R, column = C, padx = 10, pady = 5, sticky = "w")
+        ttk.Checkbutton(FrameE, text = FlagListB[i], variable = FlagVarsB[i], command = lambda i = i: SetFlagB(i, FlagVarsB[i])).grid(row = R, column = C, padx = HPadding, pady = VSPadding, sticky = "w")
 
 #------------------------------------------------------------
 # Multi-Flag + Combobox
@@ -9006,7 +9076,7 @@ def MultiFlagOneBox(WidgetFrame, String, FlagList, FlagLabel, LabelText, BoxList
             R = 1
             
         C = i % 4
-        ttk.Checkbutton(FrameC, text = FlagList[i], variable = FlagVars[i], command = lambda i = i: SetFlag(i, FlagVars[i])).grid(row = R, column = C, padx = 10, pady = 5, sticky = "w")
+        ttk.Checkbutton(FrameC, text = FlagList[i], variable = FlagVars[i], command = lambda i = i: SetFlag(i, FlagVars[i])).grid(row = R, column = C, padx = HPadding, pady = VSPadding, sticky = "w")
 
     def SetVariable():
         for i, Name in enumerate(BoxList):
@@ -9063,7 +9133,7 @@ def OneFlagSwitchText(WidgetFrame, StringA, StringB, FlagName, FinalValue, Chang
     FrameA.pack()
     FrameB.pack()
     FinalValueLabel.pack(pady = (0,10))
-    TextLabel.pack(pady = 10)
+    TextLabel.pack(pady = VPadding)
     FlagLabel.pack()
     FlagButton.pack()
 
@@ -9183,9 +9253,12 @@ def CustomHelper(WidgetFrame, Args, FinalValue, Changed):
             AmountEntry(WidgetFrame, String, "Amount:", 1, 255, 3, FinalValue, Changed)
 
         case 3: # Whirlwind
-            StringA = "The Target will switch out to another Pokemon."
-            StringB = "The Target will switch out and pass along various effects."
-            OneFlagSwitchText(WidgetFrame, StringA, StringB, "Baton Pass?", FinalValue, Changed)
+            FlagList = ["Random?", "Baton Pass?", "Wild Target Ends Battle?"]
+            StringList = ["The Target will switch to another Pokemon.", # Base string
+                          ["The Pokemon will be chosen", "The Pokemon will be random"],
+                          ["Stat Stages will not be passed.", "Stat Stages will be passed."],
+                          ["A Wild User/Target will not end the battle", "A Wild User/Target will end the battle."]]
+            MultiFlagList(WidgetFrame, "", FlagList, "Options:", FinalValue, Changed, StringList)
 
         case 4: # Bug Bite
             StringA = "The Target's Berry will be removed and the User will eat it."
@@ -9403,28 +9476,35 @@ def MakeScriptArgHelperBox(Root, Title, Header, Text, Option = None, Args = None
     Top = tk.Toplevel(Root)
     Top.title(Title)
     Top.configure(bg = "Black")
+    Top.resizable(False, False)
+    Top.attributes('-topmost',True)
+    Top.attributes('-topmost',False)
+
+    # Put the new window on top left corner of the old one
+    x,y = (int(s) for s in Root.geometry().split("+")[1:])
+    Top.geometry(f"+{x}+{y}")
 
     HeaderTextFrame = tk.Frame(Top, bg = "Black")
-    HeaderTextFrame.pack(fill = "x", pady = 10)
+    HeaderTextFrame.pack(fill = "x", pady = VPadding)
 
     InfoTextFrame = tk.Frame(Top, bg = "Black")
-    InfoTextFrame.pack(fill = "x", pady = 10)
+    InfoTextFrame.pack(fill = "x", pady = VPadding)
 
     MenuTextFrame = tk.Frame(Top, bg = "Black")
-    MenuTextFrame.pack(fill = "x", pady = 10)
+    MenuTextFrame.pack(fill = "x", pady = VPadding)
 
     WidgetFrame = tk.Frame(Top, bg = "Black")
-    WidgetFrame.pack(fill = "both", pady = 10)
+    WidgetFrame.pack(fill = "both", pady = VPadding)
     
     OkayFrame = tk.Frame(Top, bg = "Black")
-    OkayFrame.pack(fill = "x", pady = 10)
+    OkayFrame.pack(fill = "x", pady = VPadding)
 
     ttk.Label(HeaderTextFrame, text = Header, font = ("Courier", int(SmallSize*1.5))).pack()
 
     N = 0
     for i, Line in enumerate(Text):
         N = i+1
-        ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = 5, pady = 1, sticky = "w")
+        ttk.Label(InfoTextFrame, text = Line, font = ("Courier", SmallSize)).grid(row = N, column = 0, padx = HSPadding, pady = 1, sticky = "w")
 
     DoLine = ttk.Label(MenuTextFrame, text = "-----", font = ("Courier", SmallSize))
     DoLine.pack()
@@ -9779,6 +9859,8 @@ Root = tk.Tk()
 Root.title("Akame's Custom Engine")
 Root.resizable(False, False)
 Root.configure(bg = "Black")
+Root.attributes('-topmost',True)
+Root.attributes('-topmost',False)
 
 s = ttk.Style()
 s.theme_use('alt')
@@ -9791,6 +9873,17 @@ def GetPath(File):
 
 if not OnAMac:
     Root.iconbitmap(GetPath("ACE.ico"))
+
+if Root.winfo_screenwidth() < 1300 or Root.winfo_screenheight() < 800:
+    SmallSize = 14
+    HPadding = 5
+    VPadding = 5
+    HBPadding = 10
+    VBPadding = 10
+    BulbaTop = 6
+    BulbaBottom = 6
+    TableTop = 3
+    TableBottom = 8
 
 # This is what the widgets look like when not disabled
 s.configure("TRadiobutton", background = "black", foreground = "white", indicatorcolor = "grey")
@@ -9814,13 +9907,13 @@ s.map("TButton", background = [("active", "white"), ("disabled", "black")], fore
 # Make Frames - These are the main frames
 # -------------------------------------------------------    
 TopLayerFrame = tk.Frame(Root, bg = "Black")
-TopLayerFrame.pack(side = "top", padx = 10, pady = 10)
+TopLayerFrame.pack(padx = HPadding, pady = VPadding)
 
 ButtonFrame = tk.Frame(Root, bg = "Black")
-ButtonFrame.pack(fill = "x", padx = 10, pady = 0)
+ButtonFrame.pack(padx = HPadding, pady = VSPadding)
 
 EditorFrame = tk.Frame(Root, bg = "Black")
-EditorFrame.pack(side = "left", padx = 10, pady = 10)
+EditorFrame.pack(padx = HPadding, pady = VPadding)
 
 #------------------------------------------------------------
 # Create Tkinter Variables
@@ -9865,13 +9958,14 @@ IconFrame = tk.Frame(TopLayerFrame, bg = "Black")
 TablePicFrame = tk.Frame(TopLayerFrame, bg = "Black")
 
 BulbasaurPic = tk.PhotoImage(file = GetPath("Bulbasaur.png"))
-BulbasaurPic = BulbasaurPic.zoom(6)
-BulbasaurPic = BulbasaurPic.subsample(5)
+BulbasaurPic = BulbasaurPic.zoom(BulbaTop)
+BulbasaurPic = BulbasaurPic.subsample(BulbaBottom)
 BulbasaurLabel = ttk.Label(BulbasaurFrame, image = BulbasaurPic)
 BulbasaurLabel.image = BulbasaurPic
 
 TablePic = tk.PhotoImage(file = GetPath("Table.png"))
-TablePic = TablePic.subsample(2)
+TablePic = TablePic.zoom(TableTop)
+TablePic = TablePic.subsample(TableBottom)
 TableLabel = ttk.Label(TablePicFrame, image = TablePic)
 TableLabel.image = TablePic
 
@@ -9887,6 +9981,26 @@ CurrentLabel = ttk.Label(MenuFrame, text = "{}".format(CurrentOpenFile))
 CopyrightLabel = ttk.Label(LabelFrame, text = "Program by AkameTheBulbasaur, v{}".format(VerNum), font = ("Arial", SmallSize - 2))
 
 MoveNumberLabel = ttk.Label(MenuFrame, text = "Move {} of {}".format(ConvertToThree(CurrentMoveNumber.get() + 1), ConvertToThree(len(Table))))
+
+#------------------------------------------------------------
+# Make the mute button
+#------------------------------------------------------------
+TopRowButtonFrame = tk.Frame(LabelFrame, bg = "Black")
+
+MuteButtonVar = tk.IntVar(value = 0)
+
+def MuteSounds():
+    global Mute
+
+    if not Mute:
+        PlayChime("error")
+    
+    Mute = not Mute
+
+    if not Mute:
+        PlayChime("success")
+
+MuteButton = ttk.Checkbutton(TopRowButtonFrame, text = "Mute", variable = MuteButtonVar, command = MuteSounds)
 
 #------------------------------------------------------------
 # Make the auto-save toggle
@@ -9910,7 +10024,7 @@ def AutoSaveInfo():
                      "Make sure to click the Save Table button",
                      "or your changes will be lost!"])
 
-AutoSaveButton = ttk.Checkbutton(LabelFrame, text = "Auto-Save", variable = AutoSaveVar, command = AutoSaveInfo)
+AutoSaveButton = ttk.Checkbutton(TopRowButtonFrame, text = "Auto-Save", variable = AutoSaveVar, command = AutoSaveInfo)
 
 #------------------------------------------------------------
 # Make The Shortcut Help Menu
@@ -10010,15 +10124,19 @@ def OpenTableFunctions():
         match Function.get():
             case "Randomise Move Names":
                 RandomiseMoveNames()
+                PlayChime("success")
 
             case "Load Custom Move Names":
                 LoadCustomMoveNames()
+                PlayChime("success")
                 
             case "Type-Based Move Kind":
                 SetMoveKind("Type")
+                PlayChime("success")
 
             case "Contact-Based Move Kind":
                 SetMoveKind("Contact")
+                PlayChime("success")
 
 TableFunctionButton = ttk.Button(TableFunctionFrame, text = "Table Functions", command = OpenTableFunctions)
 
@@ -11119,12 +11237,14 @@ def CreateNewFile():
                             ["This input is invalid!",
                              "The number of Moves must be a positive number."])
                 Length = ""
+                PlayChime("warning")
 
             elif TestLength.get() == 0:
                 MakeInfoBox(Root, "Error!", "Invalid input!",
                             ["This input is invalid!",
                              "The number of Moves cannot be zero."])
                 Length = ""
+                PlayChime("warning")
 
             else:
                 Length = TestLength.get()
@@ -11164,6 +11284,7 @@ def CreateNewFile():
             MakeInfoBox(Root, "Warning!", "Warning!",
                         ["The length of the name list is different than the length of the table.",
                          "The current number of Moves is {}.".format(len(Table))])
+            PlayChime("warning")
 
         MakeInfoBox(Root, "Success!", "The table was created!",
                 ["The table was created successfully.",
@@ -11173,6 +11294,7 @@ def CreateNewFile():
         EnableEverything()
         Refresh()
         SaveFile(Table, CurrentOpenFile, True)
+        PlayChime("success")
 
 NewFileButton = ttk.Button(ButtonFrame, text = "New Table", command = CreateNewFile)
 
@@ -11225,6 +11347,7 @@ def OpenFile():
             BackupFile = os.path.join(InitialFolder, BackupFileName)
             OriginalFile = os.path.join(InitialFolder, FileName)
             shutil.copy(OriginalFile, BackupFile)
+            PlayChime("info")
         
         global Table
         Table = []
@@ -11246,6 +11369,7 @@ def OpenFile():
                 if NameFile is not None:
                     InitialFolder = os.path.dirname(os.path.realpath(NameFile))
                     Table = ParsePointerTable(NameFile, Table, "Name")
+                    PlayChime("info")
 
             Sure = tk.BooleanVar()
             MakeYesNoBox(Root, "Open Table", "Open compiled Move Description Table?", Sure,
@@ -11258,6 +11382,7 @@ def OpenFile():
                 if DescFile is not None:
                     InitialFolder = os.path.dirname(os.path.realpath(DescFile))
                     Table = ParsePointerTable(DescFile, Table, "Description")
+                    PlayChime("info")
 
         else: # Parse from text, only needs one file
             FileStuff = NewFile.read().split("\n\n")
@@ -11272,6 +11397,7 @@ def OpenFile():
         EnableEverything()
         Refresh() 
         EnableEverything()
+        PlayChime("success")
         
     else:
         return
@@ -11359,6 +11485,7 @@ def SaveFile(Table, FileName, Silent = False):
     if not Silent:
         MakeInfoBox(Root, "Complete", "Table Saved!",
                     ["The current table was successfully saved!"])
+        PlayChime("info")
 
 SaveButton = ttk.Button(ButtonFrame, text = "Save Table", command = lambda: SaveFile(Table, CurrentOpenFile))
 
@@ -11383,12 +11510,14 @@ def SaveFileAs():
             NewFile.close()
             CurrentOpenFile = TempFile
             CurrentLabel.configure(text = "Open File: {}".format(os.path.basename(CurrentOpenFile)))
+            
         else:
             CurrentOpenFile = os.path.realpath(NewFile.name)
             InitialFolder = os.path.dirname(CurrentOpenFile)
             CurrentLabel.configure(text = "Open File: {}".format(os.path.basename(NewFile.name)))
             NewFile.close()
             SaveFile(Table, CurrentOpenFile)
+            PlayChime("success")
 
 SaveAsButton = ttk.Button(ButtonFrame, text = "Save Table As", command = SaveFileAs)
 
@@ -11531,6 +11660,7 @@ def CompileTable(Table):
             NewFile.close()
             MakeInfoBox(Root, "Success", "Compilation complete!",
                         ["The table was compiled to a file successfully!"])
+            PlayChime("success")
 
     else:
         return
@@ -11583,6 +11713,7 @@ def ConvertTable():
                            ["The old table file that you just opened was",
                             "moved to the same folder as the new table.",
                             "{}".format(NewFolder)])
+            PlayChime("info")
 
             CurrentFolder = NewFolder
 
@@ -11681,14 +11812,19 @@ def ConvertTable():
                 MakeInfoBox(Root, "Warning!", "Warning!",
                             ["The length of the name list is different than the length of the table.",
                              "The current number of Moves is {}.".format(len(NewTable))])
+                PlayChime("warning")
+            else:
+                PlayChime("info")
 
         SaveFile(NewTable, NewText, True)
 
         OpenNew = tk.BooleanVar()
+        PlayChime("success")
         MakeYesNoBox(Root, "Open File", "Open newly converted table?", OpenNew,
                         ["Conversion success!",
                          "Would you like to open the newly converted table",
                          "in the editor?"])
+        
 
         if OpenNew.get():
             global Table, CurrentOpenFile
@@ -11709,6 +11845,7 @@ def ConvertTable():
             EnableEverything()
             Refresh() 
             EnableEverything()
+            PlayChime("success")
           
 ConvertButton = ttk.Button(ButtonFrame, text = "Convert Table", command = ConvertTable)
 
@@ -11975,9 +12112,11 @@ def EnableEverything():
 BulbasaurFrame.pack(side = "left", padx = 50)
 BulbasaurLabel.pack()
 
-IconFrame.pack(side = "left", padx = 10)
-AutoSaveButton.pack(pady = 5)
-LabelFrame.pack(pady = 10)
+IconFrame.pack(side = "left", padx = HPadding)
+TopRowButtonFrame.pack(side = "top")
+MuteButton.pack(side = "left", padx = HSPadding, pady = VSPadding)
+AutoSaveButton.pack(side = "left", padx = HSPadding, pady = VSPadding)
+LabelFrame.pack(pady = VPadding)
 MainLabel.pack()
 CopyrightLabel.pack()
 
@@ -11985,11 +12124,11 @@ TablePicFrame.pack(side = "left", padx = 30)
 TableLabel.pack()
 
 MenuFrame.pack()
-CurrentLabel.pack(pady = 5)
+CurrentLabel.pack(pady = VSPadding)
 MoveFinderFrame.pack()
-ShowHelpButton.pack(side = "left", pady = 5)
-MoveFinder.pack(side = "left", pady = 5)
-MoveNumberLabel.pack(pady = 5)
+ShowHelpButton.pack(side = "left", pady = VSPadding)
+MoveFinder.pack(side = "left", pady = VSPadding)
+MoveNumberLabel.pack(pady = VSPadding)
 
 # Button Frame
 NewFileButton.grid(row = 0, column = 0, padx = ButtonHSpacing, pady = ButtonVSpacing, sticky = "w")
@@ -12005,83 +12144,83 @@ ForwardButton.grid(row = 1, column = 3, padx = ButtonHSpacing, sticky = "w")
 DeleteMoveButton.grid(row = 1, column = 4, padx = ButtonHSpacing, sticky = "w")
 
 # Editor Frame
-TableFunctionFrame.grid(row = 0, column = 0, padx = 15, pady = 5, sticky = "w")
+TableFunctionFrame.grid(row = 0, column = 0, padx = HBPadding, pady = VSPadding, sticky = "w")
 TableFunctionButton.pack(padx = 80)
 
-MoveNameFrame.grid(row = 0, column = 1, padx = 15, pady = 5, sticky = "w")
+MoveNameFrame.grid(row = 0, column = 1, padx = HBPadding, pady = VSPadding, sticky = "w")
 MoveNameHelpButton.pack(side = "left")
 MoveNameLabel.pack(side = "left", padx = (0,5))
 MoveNameEntry.pack(side = "left")
 
-AutoFillMoveFrame.grid(row = 0, column = 2, padx = 15, pady = 5, sticky = "w")
+AutoFillMoveFrame.grid(row = 0, column = 2, padx = HBPadding, pady = VSPadding, sticky = "w")
 AutoFillMoveButton.pack(padx = 20)
 
-MoveScriptFrame.grid(row = 1, column = 0, padx = 15, pady = 5, sticky = "w")
+MoveScriptFrame.grid(row = 1, column = 0, padx = HBPadding, pady = VSPadding, sticky = "w")
 MoveScriptHelpButton.pack(side = "left")
 MoveScriptLabel.pack(side = "left", padx = (0,5))
 MoveScriptEntry.pack(side = "left")
 
-BasePowerFrame.grid(row = 1, column = 1, padx = 15, pady = 5, sticky = "w")
+BasePowerFrame.grid(row = 1, column = 1, padx = HBPadding, pady = VSPadding, sticky = "w")
 BasePowerHelpButton.pack(side = "left")
 BasePowerLabel.pack(side = "left", padx = (0,5))
 BasePowerEntry.pack(side = "left")
 
-TypeFrame.grid(row = 1, column = 2, padx = 15, pady = 5, sticky = "w")
+TypeFrame.grid(row = 1, column = 2, padx = HBPadding, pady = VSPadding, sticky = "w")
 TypeHelpButton.pack(side = "left")
 TypeLabel.pack(side = "left", padx = (0,5))
 TypeEntry.pack(side = "left")
 
-AccuracyFrame.grid(row = 2, column = 0, padx = 15, pady = 5, sticky = "w")
+AccuracyFrame.grid(row = 2, column = 0, padx = HBPadding, pady = VSPadding, sticky = "w")
 AccuracyHelpButton.pack(side = "left")
 AccuracyLabel.pack(side = "left", padx = (0,5))
 AccuracyEntry.pack(side = "left")
 
-PowerPointFrame.grid(row = 2, column = 1, padx = 15, pady = 5, sticky = "w")
+PowerPointFrame.grid(row = 2, column = 1, padx = HBPadding, pady = VSPadding, sticky = "w")
 PowerPointHelpButton.pack(side = "left")
 PowerPointLabel.pack(side = "left", padx = (0,5))
 PowerPointEntry.pack(side = "left")
 
-EffectChanceFrame.grid(row = 2, column = 2, padx = 15, pady = 5, sticky = "w")
+EffectChanceFrame.grid(row = 2, column = 2, padx = HBPadding, pady = VSPadding, sticky = "w")
 EffectChanceHelpButton.pack(side = "left")
 EffectChanceLabel.pack(side = "left", padx = (0,5))
 EffectChanceEntry.pack(side = "left")
 
-RangeFrame.grid(row = 3, column = 0, padx = 15, pady = 5, sticky = "w")
+RangeFrame.grid(row = 3, column = 0, padx = HBPadding, pady = VSPadding, sticky = "w")
 RangeHelpButton.pack(side = "left")
 RangeLabel.pack(side = "left", padx = (0,5))
 RangeEntry.pack(side = "left")
 
-PriorityFrame.grid(row = 3, column = 2, padx = 15, pady = 5, sticky = "w")
+PriorityFrame.grid(row = 3, column = 2, padx = HBPadding, pady = VSPadding, sticky = "w")
 PriorityHelpButton.pack(side = "left")
 PriorityLabel.pack(side = "left", padx = (0,5))
 ParityButton.pack(side = "left")
 PriorityEntry.pack(side = "left")
 
-MoveKindFrame.grid(row = 3, column = 1, padx = 15, pady = 5, sticky = "w")
+MoveKindFrame.grid(row = 3, column = 1, padx = HBPadding, pady = VSPadding, sticky = "w")
 MoveKindHelpButton.pack(side = "left")
 MoveKindLabel.pack(side = "left", padx = (0,5))
 MoveKindEntry.pack(side = "left")
 
-DamageFormulaFrame.grid(row = 4, column = 0, padx = 15, pady = 5, sticky = "w")
+DamageFormulaFrame.grid(row = 4, column = 0, padx = HBPadding, pady = VSPadding, sticky = "w")
 DamageFormulaHelpButton.pack(side = "left")
 DamageFormulaLabel.pack(side = "left", padx = (0,5))
 DamageFormulaEntry.pack(side = "left")
 
-DamageArgumentFrame.grid(row = 4, column = 1, padx = 15, pady = 5, sticky = "w")
+DamageArgumentFrame.grid(row = 4, column = 1, padx = HBPadding, pady = VSPadding, sticky = "w")
 DamageArgumentHelpButton.pack(side = "left")
 DamageArgumentLabel.pack(side = "left", padx = (0,5))
 DamageArgumentEntry.pack(side = "left")
 
-ScriptArgFrame.grid(row = 4, column = 2, padx = 15, pady = 5, sticky = "w")
+ScriptArgFrame.grid(row = 4, column = 2, padx = HBPadding, pady = VSPadding, sticky = "w")
 ScriptArgHelpButton.pack(side = "left")
 ScriptArgLabel.pack(side = "left", padx = (0, 5))
 ScriptArgEntry.pack(side = "left")
 
-MoveFlagLabelFrame.grid(row = 5, column = 0, padx = 15, pady = (5,0), sticky = "w")
+MoveFlagLabelFrame.grid(row = 5, column = 0, padx = HBPadding, pady = (5,0), sticky = "w")
 MoveFlagHelpButton.pack(side = "left")
 MoveFlagLabel.pack(side = "left")
 
-MoveFlagFrame.grid(row = 6, column = 0, padx = 15, pady = 5, sticky = "w")
+MoveFlagFrame.grid(row = 6, column = 0, padx = HBPadding, pady = VSPadding, sticky = "w")
 SetAbilityFlag.grid(row = 0, column = 0, sticky = "w")
 SetSelfFlag.grid(row = 0, column = 1, sticky = "w")
 SetKingsRockFlag.grid(row = 1, column = 0, sticky = "w")
@@ -12091,11 +12230,11 @@ SetMagicCoatFlag.grid(row = 2, column = 1, sticky = "w")
 SetProtectFlag.grid(row = 3, column = 0, sticky = "w")
 SetDirectContactFlag.grid(row = 3, column = 1, sticky = "w")
 
-TableHexFrame.grid(row = 5, column = 1, padx = 15, pady = 5, sticky = "w")
+TableHexFrame.grid(row = 5, column = 1, padx = HBPadding, pady = VSPadding, sticky = "w")
 HexHelpButton.pack(side = "left")
 TableHexLabel.pack(side = "left")
 
-HexViewFrame.grid(row = 6, column = 1, padx = 15, pady = 5, sticky = "w")
+HexViewFrame.grid(row = 6, column = 1, padx = HBPadding, pady = VSPadding, sticky = "w")
 MoveScriptByte.grid(row = 0, column = 0, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
 BasePowerByte.grid(row = 0, column = 1, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
 TypeByte.grid(row = 0, column = 2, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
@@ -12110,11 +12249,11 @@ DamageFormulaByte.grid(row = 1, column = 3, padx = HexByteHSpace, pady = HexByte
 MoveKindByte.grid(row = 1, column = 4, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
 ScriptArgByte.grid(row = 1, column = 5, padx = HexByteHSpace, pady = HexByteVSpace, sticky = "w")
 
-DescriptionLabelFrame.grid(row = 5, column = 2, padx = 15, pady = 5, sticky = "w")
+DescriptionLabelFrame.grid(row = 5, column = 2, padx = HBPadding, pady = VSPadding, sticky = "w")
 DescriptionHelpButton.pack(side = "left")
 DescriptionLabel.pack(side = "left")
 
-TextBoxFrame.grid(row = 6, column = 2, padx = 15, pady = 5, sticky = "w")
+TextBoxFrame.grid(row = 6, column = 2, padx = HBPadding, pady = VSPadding, sticky = "w")
 DescriptionBox.pack()
 
 #------------------------------------------------------------
